@@ -8,6 +8,8 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
   @enforce_keys [:type, :bandwidth]
   defstruct @enforce_keys
 
+  # TODO: MUST support zero or more bandwidth specs
+
   @type t :: %__MODULE__{
           type: binary(),
           bandwidth: binary()

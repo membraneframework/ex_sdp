@@ -5,7 +5,7 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   https://tools.ietf.org/html/rfc4566#section-5.7
   """
   @enforce_keys [:network_type, :address_type, :address]
-  defstruct @enforce_keys ++ [:ttl, :count]
+  defstruct @enforce_keys
 
   alias Membrane.Protocol.SDP.ConnectionInformation.Address
 
