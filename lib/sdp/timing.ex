@@ -19,6 +19,8 @@ defmodule Membrane.Protocol.SDP.Timing do
       }
       ~> {:ok, &1}
     else
+      split: [""] -> {:error, :invalid_timing}
+      split: [_start] -> {:error, :missing_stop}
       split: _ -> {:error, :invalid_timing}
       parse_start: _ -> {:error, :time_nan}
       parse_stop: _ -> {:error, :time_nan}

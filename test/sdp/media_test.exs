@@ -8,14 +8,16 @@ defmodule Membrane.Protocol.SDP.MediaTest do
       assert {:ok, media} =
                "video 49170 RTP/AVP 31"
                |> Media.parse()
-               |> IO.inspect()
+
+      #  |> IO.inspect()
     end
 
     test "processes valid media description with multiple ports" do
       assert {:ok, media} =
                "video 49170/2 RTP/AVP 31"
                |> Media.parse()
-               |> IO.inspect()
+
+      #  |> IO.inspect()
     end
   end
 end
