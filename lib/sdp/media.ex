@@ -1,12 +1,12 @@
 defmodule Membrane.Protocol.SDP.Media do
   use Bunch
-  @enforce_keys [:type, :port, :protocol, :fmt]
+  @enforce_keys [:type, :ports, :protocol, :fmt]
   defstruct @enforce_keys ++
               [
                 # optional - represented by i
                 :title,
                 # optional - represented by c
-                :connection_information,
+                {:connection_information, []},
                 # optional - represented by b
                 :bandwidth,
                 # optional - represented by k
@@ -19,11 +19,11 @@ defmodule Membrane.Protocol.SDP.Media do
 
   @type t :: %__MODULE__{
           type: binary(),
-          port: :inet.port_number(),
+          ports: [:inet.port_number()],
           protocol: binary(),
           fmt: binary(),
           title: binary() | nil,
-          connection_information: ConnectionInformation.t() | nil,
+          connection_information: [ConnectionInformation.t()],
           bandwidth: Bandwidth.t() | nil,
           encryption: Encryption.t() | nil,
           attributes: [binary()]
@@ -32,10 +32,10 @@ defmodule Membrane.Protocol.SDP.Media do
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
-          int: {port_no, ""} when port_no in 0..65535 <- Integer.parse(port) do
+          int: {port_no, port_options} when port_no in 0..65535 <- Integer.parse(port) do
       %__MODULE__{
         type: type,
-        port: port_no,
+        ports: gen_ports(port_no, port_options),
         protocol: proto,
         fmt: fmt
       }
@@ -89,4 +89,23 @@ defmodule Membrane.Protocol.SDP.Media do
     |> Enum.reverse()
     ~> %__MODULE__{media | attributes: &1}
   end
+
+  defp gen_ports(port_no, port_options)
+
+  defp gen_ports(port_no, "/" <> port_count) do
+    port_count
+    |> Integer.parse()
+    ~> (
+      {port_count, ""} ->
+        port_no
+        |> Stream.unfold(fn port_no -> {port_no, port_no + 2} end)
+        |> Stream.take(port_count)
+        |> Enum.into([])
+
+      _ ->
+        {:error, :invalid_port_count}
+    )
+  end
+
+  defp gen_ports(port_no, _), do: [port_no]
 end
