@@ -21,29 +21,15 @@ defmodule Membrane.Protocol.SDP do
   }
 
   @spec parse(binary()) ::
-          {:error,
-           :duration_nan
-           | :einval
-           | :interval_nan
-           | :invalid_bandwidth
-           | :invalid_connection_information
-           | :invalid_media_spec
-           | :invalid_origin
-           | :invalid_repeat
-           | :invalid_timezone
-           | :invalid_timing
-           | :malformed_port_number
-           | :offset_nan
-           | {:not_supported_addr_type, binary()}}
-          | Membrane.Protocol.SDP.Session.t()
+          {:ok, Session.t()} | {:error, atom() | {:not_supported_addr_type, binary()}}
   def parse(binary) do
     binary
     |> String.split("\r\n")
-    |> do_parse()
+    |> do_parse(struct(Session, connection_information: [], attributes: []))
   end
 
-  defp do_parse(lines, spec \\ %Session{})
-  defp do_parse([""], spec), do: spec
+  defp do_parse(lines, spec)
+  defp do_parse([""], session), do: session |> flip_media() ~> {:ok, &1}
 
   defp do_parse(lines, spec) do
     case parse_line(lines, spec) do
@@ -51,7 +37,7 @@ defmodule Membrane.Protocol.SDP do
         report_error(lines, cause)
         error
 
-      {rest, %Session{} = session} ->
+      {rest, %{} = session} ->
         do_parse(rest, session)
     end
   end
@@ -85,7 +71,8 @@ defmodule Membrane.Protocol.SDP do
   defp parse_line(["c=" <> connection_data | rest], spec) do
     connection_data
     |> ConnectionInformation.parse()
-    ~>> ({:ok, connection_info} -> %Session{spec | connection: connection_info} ~> {rest, &1})
+    ~>> ({:ok, connection_info} ->
+           %Session{spec | connection_information: connection_info} ~> {rest, &1})
   end
 
   defp parse_line(["b=" <> bandwidth | rest], spec) do
@@ -119,7 +106,7 @@ defmodule Membrane.Protocol.SDP do
     ~> {rest, &1}
   end
 
-  defp parse_line(["a=" <> attribute | rest], %Session{attributes: attrs} = session) do
+  defp parse_line(["a=" <> attribute | rest], %{attributes: attrs} = session) do
     case String.split(attribute, ":", parts: 2) do
       [name, value] ->
         name = String.replace(name, "-", "-")
@@ -133,10 +120,10 @@ defmodule Membrane.Protocol.SDP do
     ~> {rest, &1}
   end
 
-  defp parse_line(["m=" <> media | rest], %Session{medias: medias} = session) do
-    with {:ok, media} <- Media.parse(media),
-         {:ok, {rest, media}} <- Media.parse_optional(rest, media) do
-      %Session{session | medias: [media | medias]}
+  defp parse_line(["m=" <> medium | rest], %{media: media} = session) do
+    with {:ok, medium} <- Media.parse(medium, session),
+         {:ok, {rest, medium}} <- Media.parse_optional(rest, medium) do
+      %Session{session | media: [medium | media]}
       ~> {rest, &1}
     end
   end
@@ -166,4 +153,7 @@ defmodule Membrane.Protocol.SDP do
     with cause: #{cause}
     """)
   end
+
+  defp flip_media(%{media: media} = session),
+    do: media |> Enum.reverse() ~> %{session | media: &1}
 end

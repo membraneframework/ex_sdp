@@ -1,15 +1,21 @@
 defmodule Membrane.Protocol.SDP.Session do
-  defstruct [
+  @enforce_keys [
     :version,
     :origin,
-    :session_name,
+    :session_name
+  ]
+
+  @optional_keys [
+    # optional
     :session_information,
+    # optional
     :uri,
     # optional
     :email,
     # optional
     :phone_number,
-    :connection,
+    # optional
+    :connection_information,
     # optional
     :bandwidth,
     # optional
@@ -23,8 +29,10 @@ defmodule Membrane.Protocol.SDP.Session do
     # optional
     :time_repeats,
     # optional
-    :medias
+    media: []
   ]
+
+  defstruct @enforce_keys ++ @optional_keys
 
   alias Membrane.Protocol.SDP.{
     ConnectionInformation,
@@ -32,25 +40,27 @@ defmodule Membrane.Protocol.SDP.Session do
     Encryption,
     Media,
     Timezone,
-    Timing
+    Timing,
+    Origin
   }
 
   @type t :: %__MODULE__{
           version: non_neg_integer(),
-          # TODO replace with struct
-          origin: binary(),
+          origin: Origin.t(),
           session_name: binary(),
-          session_information: binary(),
+          session_information: binary() | nil,
           uri: binary(),
           email: binary() | nil,
           phone_number: binary() | nil,
-          connection: ConnectionInformation.t(),
+          connection_information: ConnectionInformation.t(),
           bandwidth: Bandwidth.t(),
           time_zones_adjustments: [Timezone.t()],
           encryption: Encryption.t(),
           attributes: [binary() | {binary(), binary()}],
           timing: Timing.t(),
           time_repeats: binary(),
-          medias: [Media.t()]
+          media: [Media.t()]
         }
+
+  def fields(), do: @enforce_keys ++ @optional_keys
 end

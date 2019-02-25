@@ -15,7 +15,7 @@ defmodule Membrane.Protocol.SDP.Media do
                 {:attributes, []}
               ]
 
-  alias Membrane.Protocol.SDP.{Encryption, Bandwidth, ConnectionInformation}
+  alias Membrane.Protocol.SDP.{Encryption, Bandwidth, ConnectionInformation, Session}
 
   @type t :: %__MODULE__{
           type: binary(),
@@ -29,8 +29,9 @@ defmodule Membrane.Protocol.SDP.Media do
           attributes: [binary()]
         }
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
-  def parse(media) do
+  @spec parse(binary(), Session.t()) ::
+          {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
+  def parse(media, session) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
           int: {port_no, port_options} when port_no in 0..65535 <- Integer.parse(port) do
       %__MODULE__{
@@ -39,6 +40,7 @@ defmodule Membrane.Protocol.SDP.Media do
         protocol: proto,
         fmt: fmt
       }
+      |> apply_session(session)
       ~> {:ok, &1}
     else
       conn: _ -> {:error, :invalid_media_spec}
@@ -57,11 +59,11 @@ defmodule Membrane.Protocol.SDP.Media do
   def parse_optional(["i=" <> title | rest], media),
     do: parse_optional(rest, %__MODULE__{media | title: title})
 
-  def parse_optional(["c=" <> conn | rest], media) do
+  def parse_optional(["c=" <> conn | rest], %__MODULE__{connection_information: info} = media) do
     conn
     |> ConnectionInformation.parse()
     ~>> ({:ok, conn} ->
-           %__MODULE__{media | connection_information: conn}
+           %__MODULE__{media | connection_information: conn ++ info}
            ~> parse_optional(rest, &1))
   end
 
@@ -108,4 +110,17 @@ defmodule Membrane.Protocol.SDP.Media do
   end
 
   defp gen_ports(port_no, _), do: [port_no]
+
+  defp apply_session(media, session) do
+    session
+    |> Map.delete(:__struct__)
+    |> Enum.reduce(media, fn
+      {inherited_key, value}, acc
+      when inherited_key in [:connection_information, :encryption, :bandwidth] ->
+        Map.put(acc, inherited_key, value)
+
+      _, acc ->
+        acc
+    end)
+  end
 end
