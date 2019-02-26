@@ -26,7 +26,7 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
           }
   end
 
-  @type sdp_address :: IP6.t() | IP4.t()
+  @type sdp_address :: IP6.t() | IP4.t() | binary()
 
   @type t :: %__MODULE__{
           network_type: binary(),
@@ -34,25 +34,30 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
         }
 
   @spec parse(binary()) ::
-          {:error,
-           :einval | :invalid_address | :invalid_connection_information | :option_nan | :wrong_ttl}
+          {:error, :invalid_address | :invalid_connection_information | :option_nan | :wrong_ttl}
           | {:ok, [sdp_address]}
   def parse(connection_string) do
     with [nettype, addrtype, connection_address] <- String.split(connection_string, " "),
-         [address | optional] <- String.split(connection_address, "/"),
-         {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
-         {:ok, addresses} <- handle_address(address, addrtype, optional) do
-      addresses
-      |> Enum.map(fn address ->
-        %__MODULE__{
-          network_type: nettype,
-          address: address
-        }
-      end)
-      ~> {:ok, &1}
+         [address | optional] <- String.split(connection_address, "/") do
+      with {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
+           {:ok, addresses} <- handle_address(address, addrtype, optional) do
+        addresses
+        |> Enum.map(fn address ->
+          %__MODULE__{
+            network_type: nettype,
+            address: address
+          }
+        end)
+        ~> {:ok, &1}
+      else
+        {:error, :einval} ->
+          [%__MODULE__{network_type: nettype, address: address}] ~> {:ok, &1}
+
+        {:error, _} = error ->
+          error
+      end
     else
       list when is_list(list) -> {:error, :invalid_connection_information}
-      {:error, _} = error -> error
     end
   end
 

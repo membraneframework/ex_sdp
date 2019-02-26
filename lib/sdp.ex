@@ -33,8 +33,8 @@ defmodule Membrane.Protocol.SDP do
 
   defp do_parse(lines, spec) do
     case parse_line(lines, spec) do
-      {:error, cause} = error ->
-        report_error(lines, cause)
+      {:error, reason} = error ->
+        report_error(lines, reason)
         error
 
       {rest, %{} = session} ->
@@ -120,20 +120,23 @@ defmodule Membrane.Protocol.SDP do
     ~> {rest, &1}
   end
 
-  defp parse_line(["m=" <> medium | rest], %{media: media} = session) do
-    with {:ok, medium} <- Media.parse(medium, session),
+  defp parse_line(["m=" <> medium | rest], %Session{media: media} = session) do
+    with {:ok, medium} <- Media.parse(medium),
          {:ok, {rest, medium}} <- Media.parse_optional(rest, medium) do
-      %Session{session | media: [medium | media]}
+      medium
+      |> Media.apply_session(session)
+      ~> %Session{session | media: [&1 | media]}
       ~> {rest, &1}
     end
   end
 
-  defp report_error(["m=" <> _ = line | rest], cause) do
+  defp report_error(["m=" <> _ = line | rest], reason) do
     attributes =
       Enum.take_while(rest, fn
         "" -> false
-        line -> String.starts_with?(line, "m=")
+        line -> not String.starts_with?(line, "m=")
       end)
+      |> Enum.join("\n")
 
     Logger.error("""
     Error whil parsing media:
@@ -142,15 +145,15 @@ defmodule Membrane.Protocol.SDP do
     Attributes:
     #{attributes}
 
-    Caused by: #{cause}
+    with reason: #{reason}
     """)
   end
 
-  defp report_error([line | _], cause) do
+  defp report_error([line | _], reason) do
     Logger.error("""
     An error has occurred while parsing following SDP line:
     #{line}
-    with cause: #{cause}
+    with reason: #{reason}
     """)
   end
 

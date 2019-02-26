@@ -25,8 +25,13 @@ defmodule Membrane.Protocol.SDP.Origin do
     withl parse:
             [username, sess_id, sess_version, nettype, addrtype, unicast_address] <-
               String.split(origin, " "),
-          valid_addr_type: type when type in ["IP4", "IP6"] <- addrtype,
-          addr_parse: {:ok, address} <- :inet.parse_address(unicast_address |> to_charlist()) do
+          valid_addr_type: type when type in ["IP4", "IP6"] <- addrtype do
+      address =
+        case :inet.parse_address(unicast_address |> to_charlist()) do
+          {:ok, address} -> address
+          {:error, :einval} -> unicast_address
+        end
+
       %__MODULE__{
         username: username,
         session_id: sess_id,

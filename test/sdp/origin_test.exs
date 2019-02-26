@@ -26,8 +26,16 @@ defmodule Membrane.Protocol.SDP.OriginTest do
                Origin.parse("jdoe 2890844526 2890842807 IN NOTIP 10.47.16.5")
     end
 
-    test "returns an error if declaration contains non parsable ip" do
-      assert {:error, :einval} = Origin.parse("jdoe 2890844526 2890842807 IN IP4 10.280.16.5")
+    test "processes origin with fqdn" do
+      assert {:ok,
+              %Membrane.Protocol.SDP.Origin{
+                address_type: "IP4",
+                network_type: "IN",
+                session_id: "2890844526",
+                session_version: "2890842807",
+                unicast_address: "host.origin.name",
+                username: "jdoe"
+              }} = Origin.parse("jdoe 2890844526 2890842807 IN IP4 host.origin.name")
     end
   end
 end

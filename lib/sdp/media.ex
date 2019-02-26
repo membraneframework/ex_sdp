@@ -29,9 +29,8 @@ defmodule Membrane.Protocol.SDP.Media do
           attributes: [binary()]
         }
 
-  @spec parse(binary(), Session.t()) ::
-          {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
-  def parse(media, session) do
+  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
+  def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
           int: {port_no, port_options} when port_no in 0..65535 <- Integer.parse(port) do
       %__MODULE__{
@@ -40,7 +39,6 @@ defmodule Membrane.Protocol.SDP.Media do
         protocol: proto,
         fmt: fmt
       }
-      |> apply_session(session)
       ~> {:ok, &1}
     else
       conn: _ -> {:error, :invalid_media_spec}
@@ -86,6 +84,28 @@ defmodule Membrane.Protocol.SDP.Media do
     ~> parse_optional(rest, &1)
   end
 
+  @spec apply_session(__MODULE__.t(), Session.t()) :: __MODULE__.t()
+  def apply_session(media, session) do
+    session
+    |> Map.delete(:__struct__)
+    |> Enum.reduce(media |> Map.delete(:__struct__), fn
+      {inherited_key, value}, acc
+      when inherited_key in [:encryption, :bandwidth] ->
+        if acc[inherited_key] != nil,
+          do: acc,
+          else: Map.put(acc, inherited_key, value)
+
+      {:connection_information, value}, acc ->
+        if acc[:connection_information] != [],
+          do: acc,
+          else: Map.put(acc, :connection_information, value)
+
+      _, acc ->
+        acc
+    end)
+    ~> struct(__MODULE__, &1)
+  end
+
   defp finalize_optional_parsing(%__MODULE__{attributes: attrs} = media) do
     attrs
     |> Enum.reverse()
@@ -110,17 +130,4 @@ defmodule Membrane.Protocol.SDP.Media do
   end
 
   defp gen_ports(port_no, _), do: [port_no]
-
-  defp apply_session(media, session) do
-    session
-    |> Map.delete(:__struct__)
-    |> Enum.reduce(media, fn
-      {inherited_key, value}, acc
-      when inherited_key in [:connection_information, :encryption, :bandwidth] ->
-        Map.put(acc, inherited_key, value)
-
-      _, acc ->
-        acc
-    end)
-  end
 end
