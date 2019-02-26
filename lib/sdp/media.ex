@@ -8,7 +8,7 @@ defmodule Membrane.Protocol.SDP.Media do
                 # optional - represented by c
                 {:connection_information, []},
                 # optional - represented by b
-                :bandwidth,
+                {:bandwidth, []},
                 # optional - represented by k
                 :encryption,
                 # optional - represented by a
@@ -24,7 +24,7 @@ defmodule Membrane.Protocol.SDP.Media do
           fmt: binary(),
           title: binary() | nil,
           connection_information: [ConnectionInformation.t()],
-          bandwidth: Bandwidth.t() | nil,
+          bandwidth: [Bandwidth.t()],
           encryption: Encryption.t() | nil,
           attributes: [binary()]
         }
@@ -65,11 +65,11 @@ defmodule Membrane.Protocol.SDP.Media do
            ~> parse_optional(rest, &1))
   end
 
-  def parse_optional(["b=" <> bandwidth | rest], media) do
+  def parse_optional(["b=" <> bandwidth | rest], %__MODULE__{bandwidth: acc_bandwidth} = media) do
     bandwidth
     |> Bandwidth.parse()
     ~>> ({:ok, bandwidth} ->
-           %__MODULE__{media | bandwidth: bandwidth} ~> parse_optional(rest, &1))
+           %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]} ~> parse_optional(rest, &1))
   end
 
   def parse_optional(["k=" <> encryption | rest], media) do
@@ -90,15 +90,15 @@ defmodule Membrane.Protocol.SDP.Media do
     |> Map.delete(:__struct__)
     |> Enum.reduce(media |> Map.delete(:__struct__), fn
       {inherited_key, value}, acc
-      when inherited_key in [:encryption, :bandwidth] ->
+      when inherited_key in [:encryption] ->
         if acc[inherited_key] != nil,
           do: acc,
           else: Map.put(acc, inherited_key, value)
 
-      {:connection_information, value}, acc ->
-        if acc[:connection_information] != [],
+      {inherited_key, value}, acc when inherited_key in [:connection_information, :bandwidth] ->
+        if acc[inherited_key] != [],
           do: acc,
-          else: Map.put(acc, :connection_information, value)
+          else: Map.put(acc, inherited_key, value)
 
       _, acc ->
         acc

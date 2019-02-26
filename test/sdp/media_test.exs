@@ -115,7 +115,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         "video 49170 RTP/AVP 31"
         |> Media.parse()
 
-      bandwidth = %Bandwidth{bandwidth: "128", type: "X-YZ"}
+      bandwidth = [%Bandwidth{bandwidth: "128", type: "X-YZ"}]
 
       connection_information = [
         %Membrane.Protocol.SDP.ConnectionInformation{
@@ -185,7 +185,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         |> String.split("\n")
 
       assert %Membrane.Protocol.SDP.Media{
-               bandwidth: %Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "YZ"},
+               bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "YZ"}],
                connection_information: [
                  %Membrane.Protocol.SDP.ConnectionInformation{
                    address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{

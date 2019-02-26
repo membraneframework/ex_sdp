@@ -44,7 +44,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                media: [
                  %Membrane.Protocol.SDP.Media{
                    attributes: [],
-                   bandwidth: nil,
+                   bandwidth: [],
                    connection_information: [
                      %Membrane.Protocol.SDP.ConnectionInformation{
                        address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
@@ -116,7 +116,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
 
       assert %Membrane.Protocol.SDP.Session{
                attributes: [],
-               bandwidth: nil,
+               bandwidth: [],
                connection_information: [
                  %Membrane.Protocol.SDP.ConnectionInformation{
                    address: "host.atlanta.example.com",
@@ -128,7 +128,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                media: [
                  %Membrane.Protocol.SDP.Media{
                    attributes: ["rtpmap:0 PCMU/8000", "rtpmap:8 PCMA/8000", "rtpmap:97 iLBC/8000"],
-                   bandwidth: nil,
+                   bandwidth: [],
                    connection_information: [
                      %Membrane.Protocol.SDP.ConnectionInformation{
                        address: "host.atlanta.example.com",
@@ -144,7 +144,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  },
                  %Membrane.Protocol.SDP.Media{
                    attributes: ["rtpmap:31 H261/90000", "rtpmap:32 MPV/90000"],
-                   bandwidth: nil,
+                   bandwidth: [],
                    connection_information: [
                      %Membrane.Protocol.SDP.ConnectionInformation{
                        address: "host.atlanta.example.com",
@@ -170,8 +170,8 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                phone_number: nil,
                session_information: nil,
                session_name: "",
-               time_repeats: nil,
-               time_zones_adjustments: nil,
+               time_repeats: [],
+               time_zones_adjustments: [],
                timing: %Membrane.Protocol.SDP.Timing{start_time: 0, stop_time: 0},
                uri: nil,
                version: "0"
@@ -196,7 +196,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
 
       assert %Membrane.Protocol.SDP.Session{
                attributes: [],
-               bandwidth: nil,
+               bandwidth: [],
                connection_information: [
                  %Membrane.Protocol.SDP.ConnectionInformation{
                    address: "host.biloxi.example.com",
@@ -208,7 +208,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                media: [
                  %Membrane.Protocol.SDP.Media{
                    attributes: ["rtpmap:0 PCMU/8000"],
-                   bandwidth: nil,
+                   bandwidth: [],
                    connection_information: [
                      %Membrane.Protocol.SDP.ConnectionInformation{
                        address: "host.biloxi.example.com",
@@ -224,7 +224,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  },
                  %Membrane.Protocol.SDP.Media{
                    attributes: ["rtpmap:32 MPV/90000"],
-                   bandwidth: nil,
+                   bandwidth: [],
                    connection_information: [
                      %Membrane.Protocol.SDP.ConnectionInformation{
                        address: "host.biloxi.example.com",
@@ -250,8 +250,8 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                phone_number: nil,
                session_information: nil,
                session_name: "",
-               time_repeats: nil,
-               time_zones_adjustments: nil,
+               time_repeats: [],
+               time_zones_adjustments: [],
                timing: %Membrane.Protocol.SDP.Timing{start_time: 0, stop_time: 0},
                uri: nil,
                version: "0"

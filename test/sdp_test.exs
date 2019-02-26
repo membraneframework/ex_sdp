@@ -23,6 +23,7 @@ defmodule Membrane.Protocol.SDPTest do
              b=X-YZ:128
              t=2873397496 2873404696
              r=604800 3600 0 90000
+             r=7d 1h 0 25h
              z=2882844526 -1h 2898848070 0
              k=rsa:key
              a=recvonly
@@ -35,7 +36,104 @@ defmodule Membrane.Protocol.SDPTest do
              """
              |> String.replace("\n", "\r\n")
              |> SDP.parse()
-             |> IO.inspect()
+
+    assert result == %Membrane.Protocol.SDP.Session{
+             attributes: [{"key", "value"}, "recvonly"],
+             bandwidth: [
+               %Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "X-YZ"},
+               %Membrane.Protocol.SDP.Bandwidth{bandwidth: "256", type: "YZ"}
+             ],
+             connection_information: [
+               %Membrane.Protocol.SDP.ConnectionInformation{
+                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                   ttl: 127,
+                   value: {224, 2, 17, 12}
+                 },
+                 network_type: "IN"
+               }
+             ],
+             email: "j.doe@example.com (Jane Doe)",
+             encryption: "rsa:key",
+             media: [
+               %Membrane.Protocol.SDP.Media{
+                 attributes: [],
+                 bandwidth: [
+                   %Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "X-YZ"},
+                   %Membrane.Protocol.SDP.Bandwidth{bandwidth: "256", type: "YZ"}
+                 ],
+                 connection_information: [
+                   %Membrane.Protocol.SDP.ConnectionInformation{
+                     address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                       ttl: 127,
+                       value: {224, 2, 17, 12}
+                     },
+                     network_type: "IN"
+                   }
+                 ],
+                 encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: "prompt"},
+                 fmt: "0",
+                 ports: [49170],
+                 protocol: "RTP/AVP",
+                 title: "Sample media title",
+                 type: "audio"
+               },
+               %Membrane.Protocol.SDP.Media{
+                 attributes: ["rtpmap:99 h263-1998/90000"],
+                 bandwidth: [
+                   %Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "X-YZ"},
+                   %Membrane.Protocol.SDP.Bandwidth{bandwidth: "256", type: "YZ"}
+                 ],
+                 connection_information: [
+                   %Membrane.Protocol.SDP.ConnectionInformation{
+                     address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                       ttl: 127,
+                       value: {224, 2, 17, 12}
+                     },
+                     network_type: "IN"
+                   }
+                 ],
+                 encryption: "rsa:key",
+                 fmt: "99",
+                 ports: [51372],
+                 protocol: "RTP/AVP",
+                 title: nil,
+                 type: "video"
+               }
+             ],
+             origin: %Membrane.Protocol.SDP.Origin{
+               address_type: "IP4",
+               network_type: "IN",
+               session_id: "2890844526",
+               session_version: "2890842807",
+               unicast_address: {10, 47, 16, 5},
+               username: "jdoe"
+             },
+             phone_number: "111 111 111",
+             session_information: "A Seminar on the session description protocol",
+             session_name: "Very fancy session name",
+             time_repeats: [
+               %Membrane.Protocol.SDP.RepeatTimes{
+                 active_duration: 3600,
+                 offsets: [0, 90000],
+                 repeat_interval: 604_800
+               },
+               %Membrane.Protocol.SDP.RepeatTimes{
+                 active_duration: 3600,
+                 offsets: [0, 90000],
+                 repeat_interval: 604_800
+               }
+             ],
+             time_zones_adjustments: [
+               %Membrane.Protocol.SDP.Timezone{adjustment_time: 2_882_844_526, offset: "-1h"},
+               %Membrane.Protocol.SDP.Timezone{adjustment_time: 2_898_848_070, offset: "0"}
+             ],
+             timing: %Membrane.Protocol.SDP.Timing{
+               start_time: 2_873_397_496,
+               stop_time: 2_873_404_696
+             },
+             uri: "http://www.example.com/seminars/sdp.pdf",
+             version: "0"
+           }
   end
 
   describe "Logger logs errors" do

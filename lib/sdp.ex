@@ -23,9 +23,17 @@ defmodule Membrane.Protocol.SDP do
   @spec parse(binary()) ::
           {:ok, Session.t()} | {:error, atom() | {:not_supported_addr_type, binary()}}
   def parse(binary) do
+    initial_value =
+      Session.fields()
+      |> Map.new(fn
+        {k, v} -> {k, v}
+        k -> {k, nil}
+      end)
+      ~> struct(Session, &1)
+
     binary
     |> String.split("\r\n")
-    |> do_parse(struct(Session, connection_information: [], attributes: []))
+    |> do_parse(initial_value)
   end
 
   defp do_parse(lines, spec)
@@ -75,10 +83,11 @@ defmodule Membrane.Protocol.SDP do
            %Session{spec | connection_information: connection_info} ~> {rest, &1})
   end
 
-  defp parse_line(["b=" <> bandwidth | rest], spec) do
+  defp parse_line(["b=" <> bandwidth | rest], %Session{bandwidth: acc_bandwidth} = spec) do
     bandwidth
     |> Bandwidth.parse()
-    ~>> ({:ok, bandwidth} -> %Session{spec | bandwidth: bandwidth} ~> {rest, &1})
+    ~>> ({:ok, bandwidth} ->
+           %Session{spec | bandwidth: [bandwidth | acc_bandwidth]} ~> {rest, &1})
   end
 
   defp parse_line(["t=" <> timing | rest], spec) do
@@ -87,10 +96,10 @@ defmodule Membrane.Protocol.SDP do
     ~>> ({:ok, timing} -> %Session{spec | timing: timing} ~> {rest, &1})
   end
 
-  defp parse_line(["r=" <> repeat | rest], spec) do
+  defp parse_line(["r=" <> repeat | rest], %Session{time_repeats: time_repeats} = spec) do
     repeat
     |> RepeatTimes.parse()
-    ~>> ({:ok, repeats} -> %Session{spec | time_repeats: repeats} ~> {rest, &1})
+    ~>> ({:ok, repeats} -> %Session{spec | time_repeats: [repeats | time_repeats]} ~> {rest, &1})
   end
 
   defp parse_line(["z=" <> timezones | rest], spec) do

@@ -15,21 +15,21 @@ defmodule Membrane.Protocol.SDP.Session do
     # optional
     :phone_number,
     # optional
-    :connection_information,
+    {:connection_information, []},
     # optional
-    :bandwidth,
+    {:bandwidth, []},
     # optional
-    :time_zones_adjustments,
+    {:time_zones_adjustments, []},
     # optional
     :encryption,
     # optional
-    :attributes,
+    {:attributes, []},
     # optional
     :timing,
     # optional
-    :time_repeats,
+    {:time_repeats, []},
     # optional
-    media: []
+    {:media, []}
   ]
 
   defstruct @enforce_keys ++ @optional_keys
@@ -41,7 +41,8 @@ defmodule Membrane.Protocol.SDP.Session do
     Media,
     Timezone,
     Timing,
-    Origin
+    Origin,
+    RepeatTimes
   }
 
   @type t :: %__MODULE__{
@@ -53,12 +54,12 @@ defmodule Membrane.Protocol.SDP.Session do
           email: binary() | nil,
           phone_number: binary() | nil,
           connection_information: ConnectionInformation.t(),
-          bandwidth: Bandwidth.t(),
+          bandwidth: [Bandwidth.t()],
           time_zones_adjustments: [Timezone.t()],
           encryption: Encryption.t(),
           attributes: [binary() | {binary(), binary()}],
           timing: Timing.t(),
-          time_repeats: binary(),
+          time_repeats: [RepeatTimes.t()],
           media: [Media.t()]
         }
 
