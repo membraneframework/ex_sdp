@@ -2,8 +2,20 @@ defmodule Membrane.Protocol.SDPTest do
   use ExUnit.Case
   import ExUnit.CaptureLog
 
-  alias Membrane.Support.SpecHelper
   alias Membrane.Protocol.SDP
+
+  alias Membrane.Protocol.SDP.{
+    Media,
+    Session,
+    ConnectionInformation,
+    Bandwidth,
+    Encryption,
+    Origin,
+    RepeatTimes,
+    Timezone,
+    Timing,
+    Media
+  }
 
   @error_color_prefix "\e[31m"
   @back_to_normal "\e[0m"
@@ -37,15 +49,15 @@ defmodule Membrane.Protocol.SDPTest do
              |> String.replace("\n", "\r\n")
              |> SDP.parse()
 
-    assert result == %Membrane.Protocol.SDP.Session{
+    assert result == %Session{
              attributes: [{"key", "value"}, "recvonly"],
              bandwidth: [
-               %Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "X-YZ"},
-               %Membrane.Protocol.SDP.Bandwidth{bandwidth: "256", type: "YZ"}
+               %Bandwidth{bandwidth: "128", type: "X-YZ"},
+               %Bandwidth{bandwidth: "256", type: "YZ"}
              ],
              connection_information: [
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP4{
                    ttl: 127,
                    value: {224, 2, 17, 12}
                  },
@@ -55,37 +67,37 @@ defmodule Membrane.Protocol.SDPTest do
              email: "j.doe@example.com (Jane Doe)",
              encryption: "rsa:key",
              media: [
-               %Membrane.Protocol.SDP.Media{
+               %Media{
                  attributes: [],
                  bandwidth: [
-                   %Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "X-YZ"},
-                   %Membrane.Protocol.SDP.Bandwidth{bandwidth: "256", type: "YZ"}
+                   %Bandwidth{bandwidth: "128", type: "X-YZ"},
+                   %Bandwidth{bandwidth: "256", type: "YZ"}
                  ],
                  connection_information: [
-                   %Membrane.Protocol.SDP.ConnectionInformation{
-                     address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                   %ConnectionInformation{
+                     address: %ConnectionInformation.IP4{
                        ttl: 127,
                        value: {224, 2, 17, 12}
                      },
                      network_type: "IN"
                    }
                  ],
-                 encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: "prompt"},
+                 encryption: %Encryption{key: nil, method: "prompt"},
                  fmt: "0",
                  ports: [49170],
                  protocol: "RTP/AVP",
                  title: "Sample media title",
                  type: "audio"
                },
-               %Membrane.Protocol.SDP.Media{
+               %Media{
                  attributes: ["rtpmap:99 h263-1998/90000"],
                  bandwidth: [
-                   %Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "X-YZ"},
-                   %Membrane.Protocol.SDP.Bandwidth{bandwidth: "256", type: "YZ"}
+                   %Bandwidth{bandwidth: "128", type: "X-YZ"},
+                   %Bandwidth{bandwidth: "256", type: "YZ"}
                  ],
                  connection_information: [
-                   %Membrane.Protocol.SDP.ConnectionInformation{
-                     address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                   %ConnectionInformation{
+                     address: %ConnectionInformation.IP4{
                        ttl: 127,
                        value: {224, 2, 17, 12}
                      },
@@ -100,7 +112,7 @@ defmodule Membrane.Protocol.SDPTest do
                  type: "video"
                }
              ],
-             origin: %Membrane.Protocol.SDP.Origin{
+             origin: %Origin{
                address_type: "IP4",
                network_type: "IN",
                session_id: "2890844526",
@@ -112,22 +124,22 @@ defmodule Membrane.Protocol.SDPTest do
              session_information: "A Seminar on the session description protocol",
              session_name: "Very fancy session name",
              time_repeats: [
-               %Membrane.Protocol.SDP.RepeatTimes{
+               %RepeatTimes{
                  active_duration: 3600,
                  offsets: [0, 90000],
                  repeat_interval: 604_800
                },
-               %Membrane.Protocol.SDP.RepeatTimes{
+               %RepeatTimes{
                  active_duration: 3600,
                  offsets: [0, 90000],
                  repeat_interval: 604_800
                }
              ],
              time_zones_adjustments: [
-               %Membrane.Protocol.SDP.Timezone{adjustment_time: 2_882_844_526, offset: "-1h"},
+               %Timezone{adjustment_time: 2_882_844_526, offset: "-1h"},
                %Membrane.Protocol.SDP.Timezone{adjustment_time: 2_898_848_070, offset: "0"}
              ],
-             timing: %Membrane.Protocol.SDP.Timing{
+             timing: %Timing{
                start_time: 2_873_397_496,
                stop_time: 2_873_404_696
              },
@@ -146,7 +158,7 @@ defmodule Membrane.Protocol.SDPTest do
                    a=rtpmap:99 h263-1998/90000
                    c=invalid data
                    """
-                   |> SpecHelper.from_binary()
+                   |> String.replace("\n", "\r\n")
                    |> SDP.parse()
         end)
 
@@ -169,7 +181,7 @@ defmodule Membrane.Protocol.SDPTest do
         capture_log(fn ->
           assert {:error, _} =
                    "o=jdoe 2890844526 2890842807 IN"
-                   |> SpecHelper.from_binary()
+                   |> String.replace("\n", "\r\n")
                    |> SDP.parse()
         end)
 

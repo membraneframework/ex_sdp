@@ -28,7 +28,7 @@ defmodule Membrane.Protocol.SDP.OriginTest do
 
     test "processes origin with fqdn" do
       assert {:ok,
-              %Membrane.Protocol.SDP.Origin{
+              %Origin{
                 address_type: "IP4",
                 network_type: "IN",
                 session_id: "2890844526",

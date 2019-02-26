@@ -8,22 +8,22 @@ defmodule Membrane.Protocol.SDP.ConnectionInformationTest do
       assert {:ok, connections} = ConnectionInformation.parse("IN IP4 224.2.1.1/127/3")
 
       assert connections == [
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP4{
                    ttl: 127,
                    value: {224, 2, 1, 1}
                  },
                  network_type: "IN"
                },
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP4{
                    ttl: 127,
                    value: {224, 2, 1, 2}
                  },
                  network_type: "IN"
                },
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP4{
                    ttl: 127,
                    value: {224, 2, 1, 3}
                  },
@@ -36,8 +36,8 @@ defmodule Membrane.Protocol.SDP.ConnectionInformationTest do
       assert {:ok, connections} = ConnectionInformation.parse("IN IP4 224.2.1.1/127")
 
       assert connections == [
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP4{
                    ttl: 127,
                    value: {224, 2, 1, 1}
                  },
@@ -50,8 +50,8 @@ defmodule Membrane.Protocol.SDP.ConnectionInformationTest do
       assert {:ok, connections} = ConnectionInformation.parse("IN IP4 224.2.1.1")
 
       assert connections == [
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP4{
                    ttl: nil,
                    value: {224, 2, 1, 1}
                  },
@@ -66,20 +66,20 @@ defmodule Membrane.Protocol.SDP.ConnectionInformationTest do
       assert {:ok, connections} = ConnectionInformation.parse("IN IP6 FF15::101/3")
 
       assert connections == [
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP6{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP6{
                    value: {65301, 0, 0, 0, 0, 0, 0, 257}
                  },
                  network_type: "IN"
                },
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP6{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP6{
                    value: {65301, 0, 0, 0, 0, 0, 0, 258}
                  },
                  network_type: "IN"
                },
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP6{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP6{
                    value: {65301, 0, 0, 0, 0, 0, 0, 259}
                  },
                  network_type: "IN"
@@ -91,8 +91,8 @@ defmodule Membrane.Protocol.SDP.ConnectionInformationTest do
       assert {:ok, connections} = ConnectionInformation.parse("IN IP6 FF15::103")
 
       assert connections == [
-               %Membrane.Protocol.SDP.ConnectionInformation{
-                 address: %Membrane.Protocol.SDP.ConnectionInformation.IP6{
+               %ConnectionInformation{
+                 address: %ConnectionInformation.IP6{
                    value: {65301, 0, 0, 0, 0, 0, 0, 259}
                  },
                  network_type: "IN"

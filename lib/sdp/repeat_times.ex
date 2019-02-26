@@ -1,4 +1,10 @@
 defmodule Membrane.Protocol.SDP.RepeatTimes do
+  @moduledoc """
+  This module represents field of SDP that specifies
+  repeat times for a session.
+
+  For more details please see [RFC4566 Section 5.10](https://tools.ietf.org/html/rfc4566#section-5.10).
+  """
   use Bunch
 
   @enforce_keys [:repeat_interval, :active_duration, :offsets]
@@ -20,91 +26,94 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
   @valid_keys @unit_mappings |> Map.keys()
 
   @spec parse(binary()) ::
-          {:ok, t()} | {:error, :duration_nan | :interval_nan | :invalid_repeat | :offset_nan}
+          {:ok, t()}
+          | {:error,
+             :duration_nan
+             | :interval_nan
+             | :no_offsets
+             | :malformed_repeat
+             | {:invalid_offset | :invalid_unit, binary()}}
   def parse(repeat) do
     case String.split(repeat, " ") do
       [interval, duration | offsets] = as_list ->
         if compact?(as_list) do
           parse_compact(as_list)
         else
-          parse_absolute(interval, duration, offsets)
+          parse_explicit(interval, duration, offsets)
         end
-        ~> {:ok, &1}
 
       _ ->
-        {:error, :invalid_repeat}
+        {:error, :malformed_repeat}
     end
   end
 
   defp compact?(parts) do
-    parts
-    |> Enum.all?(fn time ->
-      time == "0" or Enum.any?(@valid_keys, fn unit -> String.ends_with?(time, unit) end)
+    Enum.any?(parts, fn time ->
+      Enum.any?(@valid_keys, fn unit -> String.ends_with?(time, unit) end)
     end)
   end
 
-  defp parse_absolute(interval, duration, offsets) do
-    withl parse_interval: {interval, ""} <- Integer.parse(interval),
-          parse_duration: {duration, ""} <- Integer.parse(duration),
-          parse_offsets: {:ok, offsets} <- parse_offsets(offsets) do
+  defp parse_explicit(_interval, _duration, []), do: {:error, :no_offsets}
+
+  defp parse_explicit(interval, duration, offsets) do
+    with {interval, ""} <- Integer.parse(interval),
+         {duration, ""} <- Integer.parse(duration),
+         {:ok, offsets} <- process_offsets(offsets) do
       %__MODULE__{
         repeat_interval: interval,
         active_duration: duration,
         offsets: offsets
       }
+      ~> {:ok, &1}
     else
-      parse_interval: _ -> {:error, :interval_nan}
-      parse_duration: _ -> {:error, :duration_nan}
-      parse_offsets: {:error, _} = error -> error
+      {:error, _} = error -> error
+      _ -> {:error, :malformed_repeat}
     end
   end
-
-  defp parse_offsets([]), do: {:error, :no_offsets}
-  defp parse_offsets(offsets), do: process_offsets(offsets)
 
   defp process_offsets(offsets, acc \\ [])
   defp process_offsets([], acc), do: {:ok, Enum.reverse(acc)}
 
   defp process_offsets([offset | rest], acc) do
     case Integer.parse(offset) do
-      {offset, ""} -> process_offsets(rest, [offset | acc])
-      :error -> {:error, {:invalid_offset, offset}}
+      {offset, ""} when offset >= 0 -> process_offsets(rest, [offset | acc])
+      {_, _} -> {:error, {:invalid_offset, offset}}
     end
   end
 
   defp parse_compact(list) do
     list
     |> decode_compact()
-    ~>> (result when is_list(result) ->
-           result
-           |> Enum.reverse()
-           |> case do
-             [interval, duration | offsets] ->
-               %__MODULE__{
-                 repeat_interval: interval,
-                 active_duration: duration,
-                 offsets: offsets
-               }
-
-             _ ->
-               {:error, :malformed_repeat}
-           end)
+    ~>> (result when is_list(result) -> result |> Enum.reverse() |> build_compact())
   end
 
   defp decode_compact(list) do
-    Enum.reduce_while(list, [], fn elem, acc ->
-      case Integer.parse(elem) do
-        {value, unit} when unit in @valid_keys ->
-          time = value * @unit_mappings[unit]
-          {:cont, [time | acc]}
+    Enum.reduce_while(list, [], fn
+      "0", acc ->
+        {:cont, [0 | acc]}
 
-        {0, ""} ->
-          {:cont, [0 | acc]}
+      elem, acc ->
+        case Integer.parse(elem) do
+          {value, unit} when unit in @valid_keys ->
+            time = value * @unit_mappings[unit]
+            {:cont, [time | acc]}
 
-        _ ->
-          {:error, :invalid_format}
-          ~> {:halt, &1}
-      end
+          {_, invalid_unit} ->
+            {:error, {:invalid_unit, invalid_unit}}
+            ~> {:halt, &1}
+        end
     end)
+  end
+
+  defp build_compact(list)
+  defp build_compact([_, _]), do: {:error, :no_offsets}
+
+  defp build_compact([interval, duration | offsets]) do
+    %__MODULE__{
+      repeat_interval: interval,
+      active_duration: duration,
+      offsets: offsets
+    }
+    ~> {:ok, &1}
   end
 end

@@ -1,9 +1,9 @@
 defmodule Membrane.Protocol.SDP.ConnectionInformation do
-  use Bunch
-
   @moduledoc """
   https://tools.ietf.org/html/rfc4566#section-5.7
   """
+  use Bunch
+
   @enforce_keys [:network_type, :address]
   defstruct @enforce_keys
 
@@ -39,33 +39,37 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   def parse(connection_string) do
     with [nettype, addrtype, connection_address] <- String.split(connection_string, " "),
          [address | optional] <- String.split(connection_address, "/") do
-      with {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
-           {:ok, addresses} <- handle_address(address, addrtype, optional) do
-        addresses
-        |> Enum.map(fn address ->
-          %__MODULE__{
-            network_type: nettype,
-            address: address
-          }
-        end)
-        ~> {:ok, &1}
-      else
-        {:error, :einval} ->
-          [%__MODULE__{network_type: nettype, address: address}] ~> {:ok, &1}
-
-        {:error, _} = error ->
-          error
-      end
+      parse_address(address, nettype, addrtype, optional)
     else
       list when is_list(list) -> {:error, :invalid_connection_information}
     end
   end
 
-  # This is not optimized for single address
+  defp parse_address(address, nettype, addrtype, optional) do
+    with {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
+         {:ok, addresses} <- handle_address(address, addrtype, optional) do
+      addresses
+      |> Enum.map(fn address ->
+        %__MODULE__{
+          network_type: nettype,
+          address: address
+        }
+      end)
+      ~> {:ok, &1}
+    else
+      {:error, :einval} ->
+        [%__MODULE__{network_type: nettype, address: address}] ~> {:ok, &1}
+
+      {:error, _} = error ->
+        error
+    end
+  end
 
   defp handle_address(address, type, options)
   defp handle_address(address, "IP4", []), do: {:ok, [%IP4{value: address}]}
-  defp handle_address(address, "IP4", [ttl]), do: handle_address(address, "IP4", [ttl, "1"])
+
+  defp handle_address(address, "IP4", [ttl]),
+    do: ttl |> parse_ttl() ~>> ({:ok, ttl} -> [%IP4{value: address, ttl: ttl}] ~> {:ok, &1})
 
   defp handle_address(address, "IP4", [ttl, count]) do
     with {:ok, ttl} <- parse_numeric_option(ttl),
@@ -80,7 +84,7 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
     end
   end
 
-  defp handle_address(address, "IP6", []), do: handle_address(address, "IP6", ["1"])
+  defp handle_address(address, "IP6", []), do: [%IP6{value: address}] ~> {:ok, &1}
 
   defp handle_address(address, "IP6", [count]) do
     with {:ok, count} <- parse_numeric_option(count),
@@ -92,6 +96,12 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   end
 
   defp handle_address(_, _, _), do: {:error, :invalid_address}
+
+  defp parse_ttl(ttl) do
+    ttl
+    |> parse_numeric_option()
+    ~>> ({:ok, ttl} when ttl not in 0..255 -> {:error, :wrong_ttl})
+  end
 
   defp parse_numeric_option(option) do
     option

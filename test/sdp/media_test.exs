@@ -2,7 +2,15 @@ defmodule Membrane.Protocol.SDP.MediaTest do
   use ExUnit.Case
   use Bunch
 
-  alias Membrane.Protocol.SDP.{Media, Encryption, Bandwidth, Session}
+  alias Membrane.Protocol.SDP.{
+    Media,
+    Encryption,
+    Bandwidth,
+    Session,
+    ConnectionInformation,
+    Origin,
+    Timing
+  }
 
   describe "Media parser" do
     test "processes valid media description" do
@@ -67,8 +75,8 @@ defmodule Membrane.Protocol.SDP.MediaTest do
     bandwidth = %Bandwidth{bandwidth: "128", type: "X-YZ"}
 
     connection_information = [
-      %Membrane.Protocol.SDP.ConnectionInformation{
-        address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+      %ConnectionInformation{
+        address: %ConnectionInformation.IP4{
           ttl: 127,
           value: {224, 2, 17, 12}
         },
@@ -80,7 +88,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
     session = %Session{
       connection_information: connection_information,
-      origin: %Membrane.Protocol.SDP.Origin{
+      origin: %Origin{
         address_type: "IP4",
         network_type: "IN",
         session_id: "2890844526",
@@ -88,7 +96,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         unicast_address: {10, 47, 16, 5},
         username: "jdoe"
       },
-      timing: %Membrane.Protocol.SDP.Timing{
+      timing: %Timing{
         start_time: 2_873_397_496,
         stop_time: 2_873_404_696
       },
@@ -118,8 +126,8 @@ defmodule Membrane.Protocol.SDP.MediaTest do
       bandwidth = [%Bandwidth{bandwidth: "128", type: "X-YZ"}]
 
       connection_information = [
-        %Membrane.Protocol.SDP.ConnectionInformation{
-          address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+        %ConnectionInformation{
+          address: %ConnectionInformation.IP4{
             ttl: 127,
             value: {224, 2, 17, 12}
           },
@@ -131,7 +139,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       session = %Session{
         connection_information: connection_information,
-        origin: %Membrane.Protocol.SDP.Origin{
+        origin: %Origin{
           address_type: "IP4",
           network_type: "IN",
           session_id: "2890844526",
@@ -139,7 +147,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
           unicast_address: {10, 47, 16, 5},
           username: "jdoe"
         },
-        timing: %Membrane.Protocol.SDP.Timing{
+        timing: %Timing{
           start_time: 2_873_397_496,
           stop_time: 2_873_404_696
         },
@@ -184,11 +192,11 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         """
         |> String.split("\n")
 
-      assert %Membrane.Protocol.SDP.Media{
+      assert %Media{
                bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "YZ"}],
                connection_information: [
-                 %Membrane.Protocol.SDP.ConnectionInformation{
-                   address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                 %ConnectionInformation{
+                   address: %ConnectionInformation.IP4{
                      ttl: 220,
                      value: {144, 2, 17, 12}
                    },

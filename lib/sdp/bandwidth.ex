@@ -1,14 +1,14 @@
 defmodule Membrane.Protocol.SDP.Bandwidth do
-  use Bunch
-
   @moduledoc """
-  https://tools.ietf.org/html/rfc4566#section-5.8
+  This module represents bandwidth, field of SDP that
+  denotes the proposed bandwidth to be used by the session or media.
+
+  For more details please see [RFC4566 Section 5.8](https://tools.ietf.org/html/rfc4566#section-5.8).
   """
+  use Bunch
 
   @enforce_keys [:type, :bandwidth]
   defstruct @enforce_keys
-
-  # TODO: MUST support zero or more bandwidth specs
 
   @type t :: %__MODULE__{
           type: binary(),

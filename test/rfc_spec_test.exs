@@ -6,8 +6,15 @@ defmodule Membrane.Protocol.SDP.RFCTest do
   """
   use ExUnit.Case
 
-  alias Membrane.Support.SpecHelper
   alias Membrane.Protocol.SDP
+
+  alias Membrane.Protocol.SDP.{
+    ConnectionInformation,
+    Session,
+    Timing,
+    Origin,
+    Media
+  }
 
   describe "SDP parser processes SDP specs from RFC" do
     test "Parses single media spec with flag attributes" do
@@ -26,14 +33,14 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                m=video 51372 RTP/AVP 99
                a=rtpmap:99 h263-1998/90000
                """
-               |> SpecHelper.from_binary()
+               |> String.replace("\n", "\r\n")
                |> SDP.parse()
 
-      assert session_spec == %Membrane.Protocol.SDP.Session{
+      assert session_spec == %Session{
                attributes: ["recvonly"],
                connection_information: [
-                 %Membrane.Protocol.SDP.ConnectionInformation{
-                   address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                 %ConnectionInformation{
+                   address: %ConnectionInformation.IP4{
                      ttl: 127,
                      value: {224, 2, 17, 12}
                    },
@@ -42,12 +49,12 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                ],
                email: "j.doe@example.com (Jane Doe)",
                media: [
-                 %Membrane.Protocol.SDP.Media{
+                 %Media{
                    attributes: [],
                    bandwidth: [],
                    connection_information: [
-                     %Membrane.Protocol.SDP.ConnectionInformation{
-                       address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                     %ConnectionInformation{
+                       address: %ConnectionInformation.IP4{
                          ttl: 127,
                          value: {224, 2, 17, 12}
                        },
@@ -59,11 +66,11 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    protocol: "RTP/AVP",
                    type: "audio"
                  },
-                 %Membrane.Protocol.SDP.Media{
+                 %Media{
                    attributes: ["rtpmap:99 h263-1998/90000"],
                    connection_information: [
-                     %Membrane.Protocol.SDP.ConnectionInformation{
-                       address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
+                     %ConnectionInformation{
+                       address: %ConnectionInformation.IP4{
                          ttl: 127,
                          value: {224, 2, 17, 12}
                        },
@@ -76,7 +83,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    type: "video"
                  }
                ],
-               origin: %Membrane.Protocol.SDP.Origin{
+               origin: %Origin{
                  address_type: "IP4",
                  network_type: "IN",
                  session_id: "2890844526",
@@ -86,7 +93,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                },
                session_information: "A Seminar on the session description protocol",
                session_name: "SDP Seminar",
-               timing: %Membrane.Protocol.SDP.Timing{
+               timing: %Timing{
                  start_time: 2_873_397_496,
                  stop_time: 2_873_404_696
                },
@@ -114,11 +121,11 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                |> String.replace("\n", "\r\n")
                |> SDP.parse()
 
-      assert %Membrane.Protocol.SDP.Session{
+      assert %Session{
                attributes: [],
                bandwidth: [],
                connection_information: [
-                 %Membrane.Protocol.SDP.ConnectionInformation{
+                 %ConnectionInformation{
                    address: "host.atlanta.example.com",
                    network_type: "IN"
                  }
@@ -126,11 +133,11 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                email: nil,
                encryption: nil,
                media: [
-                 %Membrane.Protocol.SDP.Media{
+                 %Media{
                    attributes: ["rtpmap:0 PCMU/8000", "rtpmap:8 PCMA/8000", "rtpmap:97 iLBC/8000"],
                    bandwidth: [],
                    connection_information: [
-                     %Membrane.Protocol.SDP.ConnectionInformation{
+                     %ConnectionInformation{
                        address: "host.atlanta.example.com",
                        network_type: "IN"
                      }
@@ -142,11 +149,11 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    title: nil,
                    type: "audio"
                  },
-                 %Membrane.Protocol.SDP.Media{
+                 %Media{
                    attributes: ["rtpmap:31 H261/90000", "rtpmap:32 MPV/90000"],
                    bandwidth: [],
                    connection_information: [
-                     %Membrane.Protocol.SDP.ConnectionInformation{
+                     %ConnectionInformation{
                        address: "host.atlanta.example.com",
                        network_type: "IN"
                      }
@@ -159,7 +166,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    type: "video"
                  }
                ],
-               origin: %Membrane.Protocol.SDP.Origin{
+               origin: %Origin{
                  address_type: "IP4",
                  network_type: "IN",
                  session_id: "2890844526",
@@ -172,7 +179,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                session_name: "",
                time_repeats: [],
                time_zones_adjustments: [],
-               timing: %Membrane.Protocol.SDP.Timing{start_time: 0, stop_time: 0},
+               timing: %Timing{start_time: 0, stop_time: 0},
                uri: nil,
                version: "0"
              } == result
@@ -194,11 +201,11 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                |> String.replace("\n", "\r\n")
                |> SDP.parse()
 
-      assert %Membrane.Protocol.SDP.Session{
+      assert %Session{
                attributes: [],
                bandwidth: [],
                connection_information: [
-                 %Membrane.Protocol.SDP.ConnectionInformation{
+                 %ConnectionInformation{
                    address: "host.biloxi.example.com",
                    network_type: "IN"
                  }
@@ -206,11 +213,11 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                email: nil,
                encryption: nil,
                media: [
-                 %Membrane.Protocol.SDP.Media{
+                 %Media{
                    attributes: ["rtpmap:0 PCMU/8000"],
                    bandwidth: [],
                    connection_information: [
-                     %Membrane.Protocol.SDP.ConnectionInformation{
+                     %ConnectionInformation{
                        address: "host.biloxi.example.com",
                        network_type: "IN"
                      }
@@ -222,11 +229,11 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    title: nil,
                    type: "audio"
                  },
-                 %Membrane.Protocol.SDP.Media{
+                 %Media{
                    attributes: ["rtpmap:32 MPV/90000"],
                    bandwidth: [],
                    connection_information: [
-                     %Membrane.Protocol.SDP.ConnectionInformation{
+                     %ConnectionInformation{
                        address: "host.biloxi.example.com",
                        network_type: "IN"
                      }
@@ -239,7 +246,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    type: "video"
                  }
                ],
-               origin: %Membrane.Protocol.SDP.Origin{
+               origin: %Origin{
                  address_type: "IP4",
                  network_type: "IN",
                  session_id: "2808844564",
@@ -252,7 +259,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                session_name: "",
                time_repeats: [],
                time_zones_adjustments: [],
-               timing: %Membrane.Protocol.SDP.Timing{start_time: 0, stop_time: 0},
+               timing: %Timing{start_time: 0, stop_time: 0},
                uri: nil,
                version: "0"
              } = result
