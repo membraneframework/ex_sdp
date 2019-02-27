@@ -1,4 +1,4 @@
-# MembraneSdp
+# Membrane Protocol SDP
 
 **TODO: Add description**
 

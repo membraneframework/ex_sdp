@@ -1,5 +1,18 @@
 defmodule Membrane.Protocol.SDP.ConnectionInformation do
   @moduledoc """
+  This module represents Connection Information.
+  Connection can be represented by either:
+   - IPv4 address
+   - IPv6 address
+   - FQDN
+
+  In case of IPv4 and IPv6 addresses there can be more than one
+  parsed from single SDP field.
+
+  Sessions using an IPv4 multicast connection address MUST also have
+  a time to live (TTL) value present in addition to the multicast
+  address.
+
   https://tools.ietf.org/html/rfc4566#section-5.7
   """
   use Bunch

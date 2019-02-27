@@ -13,8 +13,12 @@ defmodule Membrane.Protocol.SDP.TimezoneTest do
              ]
     end
 
-    test "returns an error if timezone correction is not valid" do
+    test "returns an error if base time does not have corresponding timezone" do
       assert {:error, :invalid_timezone} = Timezone.parse("2882844526 -1h 2898848070")
+    end
+
+    test "returns an error if one of base times is not valid" do
+      assert {:error, :invalid_timezone} = Timezone.parse("2882844526 -1h 28988ds4a8dd0a70 1h")
     end
   end
 end

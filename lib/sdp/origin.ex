@@ -1,4 +1,8 @@
 defmodule Membrane.Protocol.SDP.Origin do
+  @moduledoc """
+  This module represents Origin field of SDP that represents
+  originator of the session.
+  """
   use Bunch
 
   defstruct [

@@ -1,4 +1,7 @@
 defmodule Membrane.Protocol.SDP.Media do
+  @moduledoc """
+  This module represents Media field of SDP.
+  """
   use Bunch
   @enforce_keys [:type, :ports, :protocol, :fmt]
   defstruct @enforce_keys ++
