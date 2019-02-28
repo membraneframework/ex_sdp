@@ -35,21 +35,19 @@ defmodule Membrane.Protocol.SDP.ConnectionInformationTest do
     test "parses valid connection with ttl" do
       assert {:ok, connections} = ConnectionInformation.parse("IN IP4 224.2.1.1/127")
 
-      assert connections == [
-               %ConnectionInformation{
-                 address: %ConnectionInformation.IP4{
-                   ttl: 127,
-                   value: {224, 2, 1, 1}
-                 },
-                 network_type: "IN"
-               }
-             ]
+      assert connections == %ConnectionInformation{
+               address: %ConnectionInformation.IP4{
+                 ttl: 127,
+                 value: {224, 2, 1, 1}
+               },
+               network_type: "IN"
+             }
     end
 
     test "parses valid connection " do
       assert {:ok, connections} = ConnectionInformation.parse("IN IP4 224.2.1.1")
 
-      assert connections == [
+      assert connections ==
                %ConnectionInformation{
                  address: %ConnectionInformation.IP4{
                    ttl: nil,
@@ -57,7 +55,6 @@ defmodule Membrane.Protocol.SDP.ConnectionInformationTest do
                  },
                  network_type: "IN"
                }
-             ]
     end
   end
 
@@ -90,14 +87,13 @@ defmodule Membrane.Protocol.SDP.ConnectionInformationTest do
     test "parses valid connection" do
       assert {:ok, connections} = ConnectionInformation.parse("IN IP6 FF15::103")
 
-      assert connections == [
+      assert connections ==
                %ConnectionInformation{
                  address: %ConnectionInformation.IP6{
                    value: {65301, 0, 0, 0, 0, 0, 0, 259}
                  },
                  network_type: "IN"
                }
-             ]
     end
   end
 

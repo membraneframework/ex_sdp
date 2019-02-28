@@ -55,15 +55,13 @@ defmodule Membrane.Protocol.SDPTest do
                %Bandwidth{bandwidth: "128", type: "X-YZ"},
                %Bandwidth{bandwidth: "256", type: "YZ"}
              ],
-             connection_information: [
-               %ConnectionInformation{
-                 address: %ConnectionInformation.IP4{
-                   ttl: 127,
-                   value: {224, 2, 17, 12}
-                 },
-                 network_type: "IN"
-               }
-             ],
+             connection_information: %ConnectionInformation{
+               address: %ConnectionInformation.IP4{
+                 ttl: 127,
+                 value: {224, 2, 17, 12}
+               },
+               network_type: "IN"
+             },
              email: "j.doe@example.com (Jane Doe)",
              encryption: "rsa:key",
              media: [
@@ -73,15 +71,13 @@ defmodule Membrane.Protocol.SDPTest do
                    %Bandwidth{bandwidth: "128", type: "X-YZ"},
                    %Bandwidth{bandwidth: "256", type: "YZ"}
                  ],
-                 connection_information: [
-                   %ConnectionInformation{
-                     address: %ConnectionInformation.IP4{
-                       ttl: 127,
-                       value: {224, 2, 17, 12}
-                     },
-                     network_type: "IN"
-                   }
-                 ],
+                 connection_information: %ConnectionInformation{
+                   address: %ConnectionInformation.IP4{
+                     ttl: 127,
+                     value: {224, 2, 17, 12}
+                   },
+                   network_type: "IN"
+                 },
                  encryption: %Encryption{key: nil, method: "prompt"},
                  fmt: "0",
                  ports: [49170],
@@ -95,15 +91,13 @@ defmodule Membrane.Protocol.SDPTest do
                    %Bandwidth{bandwidth: "128", type: "X-YZ"},
                    %Bandwidth{bandwidth: "256", type: "YZ"}
                  ],
-                 connection_information: [
-                   %ConnectionInformation{
-                     address: %ConnectionInformation.IP4{
-                       ttl: 127,
-                       value: {224, 2, 17, 12}
-                     },
-                     network_type: "IN"
-                   }
-                 ],
+                 connection_information: %ConnectionInformation{
+                   address: %ConnectionInformation.IP4{
+                     ttl: 127,
+                     value: {224, 2, 17, 12}
+                   },
+                   network_type: "IN"
+                 },
                  encryption: "rsa:key",
                  fmt: "99",
                  ports: [51372],

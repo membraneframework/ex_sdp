@@ -1,13 +1,10 @@
 defmodule Membrane.Protocol.SDP do
+  @moduledoc """
+  This module is responsible for parsing SDP multimedia session.
+  """
   use Bunch
   require Logger
 
-  @moduledoc """
-
-   The set of type letters is deliberately small and not intended to be
-   extensible -- an SDP parser MUST completely ignore any session
-   description that contains a type letter that it does not understand.
-  """
   alias Membrane.Protocol.SDP.{
     ConnectionInformation,
     Bandwidth,
@@ -20,6 +17,11 @@ defmodule Membrane.Protocol.SDP do
     RepeatTimes
   }
 
+  @doc """
+  Parses SDP Multimedia Session.
+
+  Requires lines to be `\\r\\n` separated.
+  """
   @spec parse(binary()) ::
           {:ok, Session.t()} | {:error, atom() | {:not_supported_addr_type, binary()}}
   def parse(binary) do

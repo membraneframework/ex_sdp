@@ -38,29 +38,25 @@ defmodule Membrane.Protocol.SDP.RFCTest do
 
       assert session_spec == %Session{
                attributes: ["recvonly"],
-               connection_information: [
-                 %ConnectionInformation{
-                   address: %ConnectionInformation.IP4{
-                     ttl: 127,
-                     value: {224, 2, 17, 12}
-                   },
-                   network_type: "IN"
-                 }
-               ],
+               connection_information: %ConnectionInformation{
+                 address: %ConnectionInformation.IP4{
+                   ttl: 127,
+                   value: {224, 2, 17, 12}
+                 },
+                 network_type: "IN"
+               },
                email: "j.doe@example.com (Jane Doe)",
                media: [
                  %Media{
                    attributes: [],
                    bandwidth: [],
-                   connection_information: [
-                     %ConnectionInformation{
-                       address: %ConnectionInformation.IP4{
-                         ttl: 127,
-                         value: {224, 2, 17, 12}
-                       },
-                       network_type: "IN"
-                     }
-                   ],
+                   connection_information: %ConnectionInformation{
+                     address: %ConnectionInformation.IP4{
+                       ttl: 127,
+                       value: {224, 2, 17, 12}
+                     },
+                     network_type: "IN"
+                   },
                    fmt: "0",
                    ports: [49170],
                    protocol: "RTP/AVP",
@@ -68,15 +64,13 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  },
                  %Media{
                    attributes: ["rtpmap:99 h263-1998/90000"],
-                   connection_information: [
-                     %ConnectionInformation{
-                       address: %ConnectionInformation.IP4{
-                         ttl: 127,
-                         value: {224, 2, 17, 12}
-                       },
-                       network_type: "IN"
-                     }
-                   ],
+                   connection_information: %ConnectionInformation{
+                     address: %ConnectionInformation.IP4{
+                       ttl: 127,
+                       value: {224, 2, 17, 12}
+                     },
+                     network_type: "IN"
+                   },
                    fmt: "99",
                    ports: [51372],
                    protocol: "RTP/AVP",
@@ -124,24 +118,20 @@ defmodule Membrane.Protocol.SDP.RFCTest do
       assert %Session{
                attributes: [],
                bandwidth: [],
-               connection_information: [
-                 %ConnectionInformation{
-                   address: "host.atlanta.example.com",
-                   network_type: "IN"
-                 }
-               ],
+               connection_information: %ConnectionInformation{
+                 address: "host.atlanta.example.com",
+                 network_type: "IN"
+               },
                email: nil,
                encryption: nil,
                media: [
                  %Media{
                    attributes: ["rtpmap:0 PCMU/8000", "rtpmap:8 PCMA/8000", "rtpmap:97 iLBC/8000"],
                    bandwidth: [],
-                   connection_information: [
-                     %ConnectionInformation{
-                       address: "host.atlanta.example.com",
-                       network_type: "IN"
-                     }
-                   ],
+                   connection_information: %ConnectionInformation{
+                     address: "host.atlanta.example.com",
+                     network_type: "IN"
+                   },
                    encryption: nil,
                    fmt: "0 8 97",
                    ports: [49170],
@@ -152,12 +142,10 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  %Media{
                    attributes: ["rtpmap:31 H261/90000", "rtpmap:32 MPV/90000"],
                    bandwidth: [],
-                   connection_information: [
-                     %ConnectionInformation{
-                       address: "host.atlanta.example.com",
-                       network_type: "IN"
-                     }
-                   ],
+                   connection_information: %ConnectionInformation{
+                     address: "host.atlanta.example.com",
+                     network_type: "IN"
+                   },
                    encryption: nil,
                    fmt: "31 32",
                    ports: [51372],
@@ -204,24 +192,20 @@ defmodule Membrane.Protocol.SDP.RFCTest do
       assert %Session{
                attributes: [],
                bandwidth: [],
-               connection_information: [
-                 %ConnectionInformation{
-                   address: "host.biloxi.example.com",
-                   network_type: "IN"
-                 }
-               ],
+               connection_information: %ConnectionInformation{
+                 address: "host.biloxi.example.com",
+                 network_type: "IN"
+               },
                email: nil,
                encryption: nil,
                media: [
                  %Media{
                    attributes: ["rtpmap:0 PCMU/8000"],
                    bandwidth: [],
-                   connection_information: [
-                     %ConnectionInformation{
-                       address: "host.biloxi.example.com",
-                       network_type: "IN"
-                     }
-                   ],
+                   connection_information: %ConnectionInformation{
+                     address: "host.biloxi.example.com",
+                     network_type: "IN"
+                   },
                    encryption: nil,
                    fmt: "0",
                    ports: [49174],
@@ -232,12 +216,10 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  %Media{
                    attributes: ["rtpmap:32 MPV/90000"],
                    bandwidth: [],
-                   connection_information: [
-                     %ConnectionInformation{
-                       address: "host.biloxi.example.com",
-                       network_type: "IN"
-                     }
-                   ],
+                   connection_information: %ConnectionInformation{
+                     address: "host.biloxi.example.com",
+                     network_type: "IN"
+                   },
                    encryption: nil,
                    fmt: "32",
                    ports: [49170],

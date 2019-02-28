@@ -2,6 +2,8 @@ defmodule Membrane.Protocol.SDP.Timezone do
   @moduledoc """
   This module represents SDP Timezone Correction used
   for translating base time for rebroadcasts.
+
+  For more details please see [RFC4566 Section 5.11](https://tools.ietf.org/html/rfc4566#section-5.11)
   """
   use Bunch
   @enforce_keys [:adjustment_time, :offset]

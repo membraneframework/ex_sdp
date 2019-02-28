@@ -6,14 +6,14 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
    - IPv6 address
    - FQDN
 
-  In case of IPv4 and IPv6 addresses there can be more than one
-  parsed from single SDP field.
+  In case of IPv4 and IPv6 multicast addresses there can be more than one
+  parsed from single SDP field if it is described using slash notation.
 
   Sessions using an IPv4 multicast connection address MUST also have
   a time to live (TTL) value present in addition to the multicast
   address.
 
-  https://tools.ietf.org/html/rfc4566#section-5.7
+  For more details please see [RFC4566 Section 5.7]|(https://tools.ietf.org/html/rfc4566#section-5.7
   """
   use Bunch
 
@@ -21,6 +21,7 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   defstruct @enforce_keys
 
   defmodule IP4 do
+    @moduledoc false
     @enforce_keys [:value]
     defstruct @enforce_keys ++ [:ttl]
 
@@ -31,6 +32,7 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   end
 
   defmodule IP6 do
+    @moduledoc false
     @enforce_keys [:value]
     defstruct @enforce_keys
 
@@ -48,7 +50,7 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
 
   @spec parse(binary()) ::
           {:error, :invalid_address | :invalid_connection_information | :option_nan | :wrong_ttl}
-          | {:ok, [sdp_address]}
+          | {:ok, [sdp_address] | sdp_address}
   def parse(connection_string) do
     with [nettype, addrtype, connection_address] <- String.split(connection_string, " "),
          [address | optional] <- String.split(connection_address, "/") do
@@ -62,16 +64,11 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
     with {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
          {:ok, addresses} <- handle_address(address, addrtype, optional) do
       addresses
-      |> Enum.map(fn address ->
-        %__MODULE__{
-          network_type: nettype,
-          address: address
-        }
-      end)
+      |> wrap_result(nettype)
       ~> {:ok, &1}
     else
       {:error, :einval} ->
-        [%__MODULE__{network_type: nettype, address: address}] ~> {:ok, &1}
+        %__MODULE__{network_type: nettype, address: address} ~> {:ok, &1}
 
       {:error, _} = error ->
         error
@@ -79,10 +76,10 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   end
 
   defp handle_address(address, type, options)
-  defp handle_address(address, "IP4", []), do: {:ok, [%IP4{value: address}]}
+  defp handle_address(address, "IP4", []), do: {:ok, %IP4{value: address}}
 
   defp handle_address(address, "IP4", [ttl]),
-    do: ttl |> parse_ttl() ~>> ({:ok, ttl} -> [%IP4{value: address, ttl: ttl}] ~> {:ok, &1})
+    do: ttl |> parse_ttl() ~>> ({:ok, ttl} -> %IP4{value: address, ttl: ttl} ~> {:ok, &1})
 
   defp handle_address(address, "IP4", [ttl, count]) do
     with {:ok, ttl} <- parse_numeric_option(ttl),
@@ -97,7 +94,7 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
     end
   end
 
-  defp handle_address(address, "IP6", []), do: [%IP6{value: address}] ~> {:ok, &1}
+  defp handle_address(address, "IP6", []), do: %IP6{value: address} ~> {:ok, &1}
 
   defp handle_address(address, "IP6", [count]) do
     with {:ok, count} <- parse_numeric_option(count),
@@ -150,4 +147,21 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   defp max_octet_value(size)
   defp max_octet_value(8), do: 65535
   defp max_octet_value(4), do: 255
+
+  defp wrap_result([_ | _] = addresses, nettype) do
+    addresses
+    |> Enum.map(fn address ->
+      %__MODULE__{
+        network_type: nettype,
+        address: address
+      }
+    end)
+  end
+
+  defp wrap_result(address, nettype) do
+    %__MODULE__{
+      address: address,
+      network_type: nettype
+    }
+  end
 end

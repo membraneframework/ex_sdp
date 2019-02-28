@@ -1,14 +1,18 @@
 defmodule Membrane.Protocol.SDP.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :membrane_protocol_sdp,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      docs: docs(),
+      package: package()
     ]
   end
 
@@ -21,10 +25,34 @@ defmodule Membrane.Protocol.SDP.MixProject do
     ]
   end
 
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md"],
+      source_ref: "v#{@version}"
+    ]
+  end
+
+  defp package do
+    [
+      maintainers: ["Membrane Team"],
+      licenses: ["Apache 2.0"],
+      links: %{
+        "GitHub" => link(),
+        "Membrane Framework Homepage" => "https://membraneframework.org"
+      }
+    ]
+  end
+
+  defp link do
+    "https://github.com/membraneframework/membrane-protocol-sdp"
+  end
+
   defp deps do
     [
       {:bunch, "~> 0.3"},
-      {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end
 end

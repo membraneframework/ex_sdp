@@ -1,6 +1,8 @@
 defmodule Membrane.Protocol.SDP.Media do
   @moduledoc """
   This module represents Media field of SDP.
+
+  For more details please see [RFC4566 Section 5.14](https://tools.ietf.org/html/rfc4566#section-5.14)
   """
   use Bunch
   @enforce_keys [:type, :ports, :protocol, :fmt]
@@ -64,7 +66,9 @@ defmodule Membrane.Protocol.SDP.Media do
     conn
     |> ConnectionInformation.parse()
     ~>> ({:ok, conn} ->
-           %__MODULE__{media | connection_information: conn ++ info}
+           conn
+           |> Bunch.listify()
+           ~> %__MODULE__{media | connection_information: &1 ++ info}
            ~> parse_optional(rest, &1))
   end
 
@@ -93,7 +97,7 @@ defmodule Membrane.Protocol.SDP.Media do
     |> Map.delete(:__struct__)
     |> Enum.reduce(media |> Map.delete(:__struct__), fn
       {inherited_key, value}, acc
-      when inherited_key in [:encryption] ->
+      when inherited_key == :encryption ->
         if acc[inherited_key] != nil,
           do: acc,
           else: Map.put(acc, inherited_key, value)

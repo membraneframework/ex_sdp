@@ -1,7 +1,17 @@
 defmodule Membrane.Protocol.SDP.RepeatTimes do
   @moduledoc """
   This module represents field of SDP that specifies
-  repeat times for a session.
+  rebroadcasts of a session. Works directly in conjunction
+  with timing `t` parameter.
+
+   - active_duration - how long session will last
+   - repeat_interval - interval of session rebroadcast
+   - offsets - offset between scheduled rebroadcast
+
+  If `start_time` of `t` is set to today 3pm, `active_duration` is set
+  to `3h`, `repeat_interval` is set to `14d` and `offsets` are `0 4d`
+  then session will be rebroadcasted today at 3pm and on Thursday 3pm
+  every two week until `end_time` of param `t`.
 
   For more details please see [RFC4566 Section 5.10](https://tools.ietf.org/html/rfc4566#section-5.10).
   """
