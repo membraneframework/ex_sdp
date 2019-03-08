@@ -8,15 +8,10 @@ defmodule Membrane.Protocol.SDP.Media do
   @enforce_keys [:type, :ports, :protocol, :fmt]
   defstruct @enforce_keys ++
               [
-                # optional - represented by i
                 :title,
-                # optional - represented by c
                 {:connection_information, []},
-                # optional - represented by b
                 {:bandwidth, []},
-                # optional - represented by k
                 :encryption,
-                # optional - represented by a
                 {:attributes, []}
               ]
 
