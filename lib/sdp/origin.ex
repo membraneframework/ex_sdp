@@ -9,50 +9,37 @@ defmodule Membrane.Protocol.SDP.Origin do
   """
   use Bunch
 
+  alias Membrane.Protocol.SDP.ConnectionInformation
+
   defstruct [
     :username,
     :session_id,
     :session_version,
-    :network_type,
-    :address_type,
-    :unicast_address
+    :address
   ]
 
   @type t :: %__MODULE__{
           username: binary(),
           session_id: binary(),
           session_version: binary(),
-          network_type: binary(),
-          address_type: binary(),
-          unicast_address: :inet.ip_address()
+          address: ConnectionInformation.t()
         }
 
-  @spec parse(binary()) ::
-          {:ok, t()} | {:error, :einval | :invalid_origin | {:not_supported_addr_type, binary()}}
+  @spec parse(binary()) :: {:ok, t()} | {:error, :einval | :invalid_origin}
   def parse(origin) do
-    withl parse:
-            [username, sess_id, sess_version, nettype, addrtype, unicast_address] <-
-              String.split(origin, " "),
-          valid_addr_type: type when type in ["IP4", "IP6"] <- addrtype do
-      address =
-        case :inet.parse_address(unicast_address |> to_charlist()) do
-          {:ok, address} -> address
-          {:error, :einval} -> unicast_address
-        end
-
+    with [username, sess_id, sess_version, conn_info] <- String.split(origin, " ", parts: 4),
+         {:ok, conn_info} <- ConnectionInformation.parse(conn_info) do
       %__MODULE__{
         username: username,
         session_id: sess_id,
         session_version: sess_version,
-        network_type: nettype,
-        address_type: addrtype,
-        unicast_address: address
+        address: conn_info
       }
       ~> {:ok, &1}
     else
-      parse: _ -> {:error, :invalid_origin}
-      valid_addr_type: type -> {:error, {:not_supported_addr_type, type}}
-      addr_parse: {:error, _} = error -> error
+      {:error, :invalid_connection_information} -> {:error, :invalid_origin}
+      {:error, _} = error -> error
+      _ -> {:error, :invalid_origin}
     end
   end
 end

@@ -2,17 +2,21 @@ defmodule Membrane.Protocol.SDP.OriginTest do
   use ExUnit.Case
 
   alias Membrane.Protocol.SDP.Origin
+  alias Membrane.Protocol.SDP.ConnectionInformation
 
   describe "Origin parser" do
     test "processes valid origin declaration" do
       assert {:ok, origin} = Origin.parse("jdoe 2890844526 2890842807 IN IP4 10.47.16.5")
 
       assert origin == %Origin{
-               address_type: "IP4",
-               network_type: "IN",
                session_id: "2890844526",
+               address: %ConnectionInformation{
+                 network_type: "IN",
+                 address: %ConnectionInformation.IP4{
+                   value: {10, 47, 16, 5}
+                 }
+               },
                session_version: "2890842807",
-               unicast_address: {10, 47, 16, 5},
                username: "jdoe"
              }
     end
@@ -22,18 +26,19 @@ defmodule Membrane.Protocol.SDP.OriginTest do
     end
 
     test "returns an error if declaration contains not supported address type" do
-      assert {:error, {:not_supported_addr_type, "NOTIP"}} =
+      assert {:error, :invalid_address} =
                Origin.parse("jdoe 2890844526 2890842807 IN NOTIP 10.47.16.5")
     end
 
     test "processes origin with fqdn" do
       assert {:ok,
               %Origin{
-                address_type: "IP4",
-                network_type: "IN",
+                address: %ConnectionInformation{
+                  network_type: "IN",
+                  address: "host.origin.name"
+                },
                 session_id: "2890844526",
                 session_version: "2890842807",
-                unicast_address: "host.origin.name",
                 username: "jdoe"
               }} = Origin.parse("jdoe 2890844526 2890842807 IN IP4 host.origin.name")
     end

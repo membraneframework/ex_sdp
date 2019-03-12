@@ -52,8 +52,8 @@ defmodule Membrane.Protocol.SDPTest do
     assert result == %Session{
              attributes: [{"key", "value"}, "recvonly"],
              bandwidth: [
-               %Bandwidth{bandwidth: "128", type: "X-YZ"},
-               %Bandwidth{bandwidth: "256", type: "YZ"}
+               %Bandwidth{bandwidth: 128, type: "X-YZ"},
+               %Bandwidth{bandwidth: 256, type: "YZ"}
              ],
              connection_information: %ConnectionInformation{
                address: %ConnectionInformation.IP4{
@@ -63,13 +63,13 @@ defmodule Membrane.Protocol.SDPTest do
                network_type: "IN"
              },
              email: "j.doe@example.com (Jane Doe)",
-             encryption: "rsa:key",
+             encryption: %Encryption{key: "key", method: "rsa"},
              media: [
                %Media{
                  attributes: [],
                  bandwidth: [
-                   %Bandwidth{bandwidth: "128", type: "X-YZ"},
-                   %Bandwidth{bandwidth: "256", type: "YZ"}
+                   %Bandwidth{bandwidth: 128, type: "X-YZ"},
+                   %Bandwidth{bandwidth: 256, type: "YZ"}
                  ],
                  connection_information: %ConnectionInformation{
                    address: %ConnectionInformation.IP4{
@@ -88,8 +88,8 @@ defmodule Membrane.Protocol.SDPTest do
                %Media{
                  attributes: ["rtpmap:99 h263-1998/90000"],
                  bandwidth: [
-                   %Bandwidth{bandwidth: "128", type: "X-YZ"},
-                   %Bandwidth{bandwidth: "256", type: "YZ"}
+                   %Bandwidth{bandwidth: 128, type: "X-YZ"},
+                   %Bandwidth{bandwidth: 256, type: "YZ"}
                  ],
                  connection_information: %ConnectionInformation{
                    address: %ConnectionInformation.IP4{
@@ -98,7 +98,7 @@ defmodule Membrane.Protocol.SDPTest do
                    },
                    network_type: "IN"
                  },
-                 encryption: "rsa:key",
+                 encryption: %Encryption{key: "key", method: "rsa"},
                  fmt: "99",
                  ports: [51372],
                  protocol: "RTP/AVP",
@@ -107,11 +107,14 @@ defmodule Membrane.Protocol.SDPTest do
                }
              ],
              origin: %Origin{
-               address_type: "IP4",
-               network_type: "IN",
+               address: %ConnectionInformation{
+                 network_type: "IN",
+                 address: %ConnectionInformation.IP4{
+                   value: {10, 47, 16, 5}
+                 }
+               },
                session_id: "2890844526",
                session_version: "2890842807",
-               unicast_address: {10, 47, 16, 5},
                username: "jdoe"
              },
              phone_number: "111 111 111",

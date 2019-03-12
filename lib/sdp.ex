@@ -113,7 +113,7 @@ defmodule Membrane.Protocol.SDP do
   defp parse_line(["k=" <> encryption | rest], spec) do
     encryption
     |> Encryption.parse()
-    ~> %Session{spec | encryption: encryption}
+    ~> %Session{spec | encryption: &1}
     ~> {rest, &1}
   end
 

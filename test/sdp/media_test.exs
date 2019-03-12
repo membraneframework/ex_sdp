@@ -72,7 +72,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
   end
 
   test "media inherits session properties" do
-    bandwidth = %Bandwidth{bandwidth: "128", type: "X-YZ"}
+    bandwidth = %Bandwidth{bandwidth: 128, type: "X-YZ"}
 
     connection_information = [
       %ConnectionInformation{
@@ -89,12 +89,13 @@ defmodule Membrane.Protocol.SDP.MediaTest do
     session = %Session{
       connection_information: connection_information,
       origin: %Origin{
-        address_type: "IP4",
-        network_type: "IN",
         session_id: "2890844526",
-        session_version: "2890842807",
-        unicast_address: {10, 47, 16, 5},
-        username: "jdoe"
+        address: %ConnectionInformation{
+          network_type: "IN",
+          address: %ConnectionInformation.IP4{
+            value: {10, 47, 16, 5}
+          }
+        }
       },
       timing: %Timing{
         start_time: 2_873_397_496,
@@ -123,7 +124,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         "video 49170 RTP/AVP 31"
         |> Media.parse()
 
-      bandwidth = [%Bandwidth{bandwidth: "128", type: "X-YZ"}]
+      bandwidth = [%Bandwidth{bandwidth: 128, type: "X-YZ"}]
 
       connection_information = [
         %ConnectionInformation{
@@ -140,12 +141,13 @@ defmodule Membrane.Protocol.SDP.MediaTest do
       session = %Session{
         connection_information: connection_information,
         origin: %Origin{
-          address_type: "IP4",
-          network_type: "IN",
           session_id: "2890844526",
-          session_version: "2890842807",
-          unicast_address: {10, 47, 16, 5},
-          username: "jdoe"
+          address: %ConnectionInformation{
+            network_type: "IN",
+            address: %ConnectionInformation.IP4{
+              value: {10, 47, 16, 5}
+            }
+          }
         },
         timing: %Timing{
           start_time: 2_873_397_496,
@@ -193,7 +195,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         |> String.split("\n")
 
       assert %Media{
-               bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: "128", type: "YZ"}],
+               bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "YZ"}],
                connection_information: [
                  %ConnectionInformation{
                    address: %ConnectionInformation.IP4{

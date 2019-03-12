@@ -78,11 +78,14 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  }
                ],
                origin: %Origin{
-                 address_type: "IP4",
-                 network_type: "IN",
+                 address: %ConnectionInformation{
+                   address: %ConnectionInformation.IP4{
+                     value: {10, 47, 16, 5}
+                   },
+                   network_type: "IN"
+                 },
                  session_id: "2890844526",
                  session_version: "2890842807",
-                 unicast_address: {10, 47, 16, 5},
                  username: "jdoe"
                },
                session_information: "A Seminar on the session description protocol",
@@ -155,11 +158,12 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  }
                ],
                origin: %Origin{
-                 address_type: "IP4",
-                 network_type: "IN",
+                 address: %ConnectionInformation{
+                   network_type: "IN",
+                   address: "host.atlanta.example.com"
+                 },
                  session_id: "2890844526",
                  session_version: "2890844526",
-                 unicast_address: "host.atlanta.example.com",
                  username: "alice"
                },
                phone_number: nil,
@@ -229,12 +233,13 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  }
                ],
                origin: %Origin{
-                 address_type: "IP4",
-                 network_type: "IN",
+                 username: "bob",
                  session_id: "2808844564",
                  session_version: "2808844564",
-                 unicast_address: "host.biloxi.example.com",
-                 username: "bob"
+                 address: %ConnectionInformation{
+                   network_type: "IN",
+                   address: "host.biloxi.example.com"
+                 }
                },
                phone_number: nil,
                session_information: nil,

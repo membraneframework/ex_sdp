@@ -21,12 +21,19 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
       [type, bandwidth] ->
         %__MODULE__{
           type: type,
-          bandwidth: bandwidth
+          bandwidth: parse_bandwidth(bandwidth)
         }
         ~> {:ok, &1}
 
       _ ->
         {:error, :invalid_bandwidth}
+    end
+  end
+
+  defp parse_bandwidth(bandwidth) do
+    case Integer.parse(bandwidth) do
+      {value, ""} -> value
+      _ -> bandwidth
     end
   end
 end

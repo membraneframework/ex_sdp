@@ -50,7 +50,7 @@ defmodule Membrane.Protocol.SDP.MixProject do
 
   defp deps do
     [
-      {:bunch, "~> 0.3"},
+      {:bunch, "~> 1.0"},
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]

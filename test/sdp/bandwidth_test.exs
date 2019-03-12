@@ -6,7 +6,7 @@ defmodule Membrane.Protocol.SDP.BandwidthTest do
   describe "Bandwidth parses" do
     test "valid property" do
       assert {:ok, result} = Bandwidth.parse("CW:128")
-      assert %Bandwidth{type: "CW", bandwidth: "128"}
+      assert %Bandwidth{type: "CW", bandwidth: 128} == result
     end
 
     test "returns error when property is invalid" do
