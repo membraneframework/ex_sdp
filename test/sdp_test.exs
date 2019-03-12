@@ -37,7 +37,7 @@ defmodule Membrane.Protocol.SDPTest do
              r=604800 3600 0 90000
              r=7d 1h 0 25h
              z=2882844526 -1h 2898848070 0
-             k=rsa:key
+             k=clear:key
              a=recvonly
              a=key:value
              m=audio 49170 RTP/AVP 0
@@ -63,7 +63,7 @@ defmodule Membrane.Protocol.SDPTest do
                network_type: "IN"
              },
              email: "j.doe@example.com (Jane Doe)",
-             encryption: %Encryption{key: "key", method: "rsa"},
+             encryption: %Encryption{key: "key", method: :clear},
              media: [
                %Media{
                  attributes: [],
@@ -78,7 +78,7 @@ defmodule Membrane.Protocol.SDPTest do
                    },
                    network_type: "IN"
                  },
-                 encryption: %Encryption{key: nil, method: "prompt"},
+                 encryption: %Encryption{key: nil, method: :prompt},
                  fmt: "0",
                  ports: [49170],
                  protocol: "RTP/AVP",
@@ -98,7 +98,7 @@ defmodule Membrane.Protocol.SDPTest do
                    },
                    network_type: "IN"
                  },
-                 encryption: %Encryption{key: "key", method: "rsa"},
+                 encryption: %Encryption{key: "key", method: :clear},
                  fmt: "99",
                  ports: [51372],
                  protocol: "RTP/AVP",

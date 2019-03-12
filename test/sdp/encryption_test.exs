@@ -5,11 +5,11 @@ defmodule Membrane.Protocol.SDP.EncryptionTest do
 
   describe "Encryption parser" do
     test "processes valid method only string" do
-      assert %Encryption{method: "prompt"} == Encryption.parse("prompt")
+      assert %Encryption{method: :prompt} == Encryption.parse("prompt")
     end
 
     test "processes valid method and uri string" do
-      assert %Encryption{method: "uri", key: "http://link.to.key"} ==
+      assert %Encryption{method: :uri, key: "http://link.to.key"} ==
                Encryption.parse("uri:http://link.to.key")
     end
 
@@ -26,7 +26,7 @@ defmodule Membrane.Protocol.SDP.EncryptionTest do
         """
         |> String.trim()
 
-      assert %Encryption{method: "base64", key: result_key} =
+      assert %Encryption{method: :base64, key: result_key} =
                ("base64:" <> key)
                |> Encryption.parse()
 

@@ -22,5 +22,17 @@ defmodule Membrane.Protocol.SDP.Encryption do
       [method] -> %__MODULE__{method: method}
       [method, key] -> %__MODULE__{method: method, key: key}
     end
+    |> parse_method()
   end
+
+  defp parse_method(%__MODULE__{method: method} = encryption),
+    do: %__MODULE__{encryption | method: method_to_atom(method)}
+
+  defp method_to_atom(method)
+
+  defp method_to_atom("prompt"), do: :prompt
+  defp method_to_atom("clear"), do: :clear
+  defp method_to_atom("base64"), do: :base64
+  defp method_to_atom("uri"), do: :uri
+  defp method_to_atom(other), do: other
 end

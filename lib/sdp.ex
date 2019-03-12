@@ -58,9 +58,9 @@ defmodule Membrane.Protocol.SDP do
     do: %Session{spec | version: version} ~> {rest, &1}
 
   defp parse_line(["o=" <> origin | rest], spec) do
-    origin
-    |> Origin.parse()
-    ~>> ({:ok, origin} -> %Session{spec | origin: origin} ~> {rest, &1})
+    with {:ok, origin} <- Origin.parse(origin) do
+      %Session{spec | origin: origin} ~> {rest, &1}
+    end
   end
 
   defp parse_line(["s=" <> session_name | rest], spec),
@@ -79,35 +79,33 @@ defmodule Membrane.Protocol.SDP do
     do: %Session{spec | phone_number: phone_number} ~> {rest, &1}
 
   defp parse_line(["c=" <> connection_data | rest], spec) do
-    connection_data
-    |> ConnectionInformation.parse()
-    ~>> ({:ok, connection_info} ->
-           %Session{spec | connection_information: connection_info} ~> {rest, &1})
+    with {:ok, connection_info} <- ConnectionInformation.parse(connection_data) do
+      %Session{spec | connection_information: connection_info} ~> {rest, &1}
+    end
   end
 
   defp parse_line(["b=" <> bandwidth | rest], %Session{bandwidth: acc_bandwidth} = spec) do
-    bandwidth
-    |> Bandwidth.parse()
-    ~>> ({:ok, bandwidth} ->
-           %Session{spec | bandwidth: [bandwidth | acc_bandwidth]} ~> {rest, &1})
+    with {:ok, bandwidth} <- Bandwidth.parse(bandwidth) do
+      %Session{spec | bandwidth: [bandwidth | acc_bandwidth]} ~> {rest, &1}
+    end
   end
 
   defp parse_line(["t=" <> timing | rest], spec) do
-    timing
-    |> Timing.parse()
-    ~>> ({:ok, timing} -> %Session{spec | timing: timing} ~> {rest, &1})
+    with {:ok, timing} <- Timing.parse(timing) do
+      %Session{spec | timing: timing} ~> {rest, &1}
+    end
   end
 
   defp parse_line(["r=" <> repeat | rest], %Session{time_repeats: time_repeats} = spec) do
-    repeat
-    |> RepeatTimes.parse()
-    ~>> ({:ok, repeats} -> %Session{spec | time_repeats: [repeats | time_repeats]} ~> {rest, &1})
+    with {:ok, repeats} <- RepeatTimes.parse(repeat) do
+      %Session{spec | time_repeats: [repeats | time_repeats]} ~> {rest, &1}
+    end
   end
 
   defp parse_line(["z=" <> timezones | rest], spec) do
-    timezones
-    |> Timezone.parse()
-    ~>> ({:ok, timezones} -> %Session{spec | time_zones_adjustments: timezones} ~> {rest, &1})
+    with {:ok, timezones} <- Timezone.parse(timezones) do
+      %Session{spec | time_zones_adjustments: timezones} ~> {rest, &1}
+    end
   end
 
   defp parse_line(["k=" <> encryption | rest], spec) do

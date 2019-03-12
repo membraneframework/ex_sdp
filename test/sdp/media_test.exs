@@ -59,7 +59,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
       {:ok, {[""], medium}} =
         media
         |> Media.parse()
-        ~>> ({:ok, medium} -> Media.parse_optional(attributes, medium))
+        ~> ({:ok, medium} -> Media.parse_optional(attributes, medium))
 
       assert %Media{
                attributes: ^parsed_attributes,
@@ -69,53 +69,6 @@ defmodule Membrane.Protocol.SDP.MediaTest do
                type: "m=audio"
              } = medium
     end
-  end
-
-  test "media inherits session properties" do
-    bandwidth = %Bandwidth{bandwidth: 128, type: "X-YZ"}
-
-    connection_information = [
-      %ConnectionInformation{
-        address: %ConnectionInformation.IP4{
-          ttl: 127,
-          value: {224, 2, 17, 12}
-        },
-        network_type: "IN"
-      }
-    ]
-
-    encryption = %Encryption{method: "RSA"}
-
-    session = %Session{
-      connection_information: connection_information,
-      origin: %Origin{
-        session_id: "2890844526",
-        address: %ConnectionInformation{
-          network_type: "IN",
-          address: %ConnectionInformation.IP4{
-            value: {10, 47, 16, 5}
-          }
-        }
-      },
-      timing: %Timing{
-        start_time: 2_873_397_496,
-        stop_time: 2_873_404_696
-      },
-      encryption: encryption,
-      bandwidth: bandwidth,
-      session_name: "123",
-      version: "0"
-    }
-
-    assert {:ok, media} =
-             "video 49170 RTP/AVP 31"
-             |> Media.parse()
-
-    assert %Media{
-             bandwidth: bandwidth,
-             connection_information: connection_information,
-             encryption: encryption
-           } = Media.apply_session(media, session)
   end
 
   describe "Session property inheritance mechanism" do
@@ -136,7 +89,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         }
       ]
 
-      encryption = %Encryption{method: "RSA"}
+      encryption = %Encryption{method: :clear}
 
       session = %Session{
         connection_information: connection_information,
@@ -205,11 +158,11 @@ defmodule Membrane.Protocol.SDP.MediaTest do
                    network_type: "IN"
                  }
                ],
-               encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: "prompt"}
+               encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: :prompt}
              } =
                options
                |> Media.parse_optional(media)
-               ~>> ({:ok, {_, medium}} -> Media.apply_session(medium, session))
+               ~> ({:ok, {_, medium}} -> Media.apply_session(medium, session))
     end
   end
 end

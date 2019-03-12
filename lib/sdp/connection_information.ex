@@ -78,8 +78,12 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   defp handle_address(address, type, options)
   defp handle_address(address, "IP4", []), do: {:ok, %IP4{value: address}}
 
-  defp handle_address(address, "IP4", [ttl]),
-    do: ttl |> parse_ttl() ~>> ({:ok, ttl} -> %IP4{value: address, ttl: ttl} ~> {:ok, &1})
+  defp handle_address(address, "IP4", [ttl]) do
+    with {:ok, ttl} <- parse_ttl(ttl) do
+      %IP4{value: address, ttl: ttl}
+      ~> {:ok, &1}
+    end
+  end
 
   defp handle_address(address, "IP4", [ttl, count]) do
     with {:ok, ttl} <- parse_numeric_option(ttl),
@@ -126,9 +130,9 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
   defp unfold_addresses(_, 0, acc), do: {:ok, Enum.reverse(acc)}
 
   defp unfold_addresses(address, count, acc) do
-    address
-    |> increment_ip()
-    ~>> ({:ok, next_ip} -> unfold_addresses(next_ip, count - 1, [address | acc]))
+    with {:ok, next_ip} <- increment_ip(address) do
+      unfold_addresses(next_ip, count - 1, [address | acc])
+    end
   end
 
   defp increment_ip(ip) do

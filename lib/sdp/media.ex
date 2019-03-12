@@ -58,20 +58,19 @@ defmodule Membrane.Protocol.SDP.Media do
     do: parse_optional(rest, %__MODULE__{media | title: title})
 
   def parse_optional(["c=" <> conn | rest], %__MODULE__{connection_information: info} = media) do
-    conn
-    |> ConnectionInformation.parse()
-    ~>> ({:ok, conn} ->
-           conn
-           |> Bunch.listify()
-           ~> %__MODULE__{media | connection_information: &1 ++ info}
-           ~> parse_optional(rest, &1))
+    with {:ok, conn} <- ConnectionInformation.parse(conn) do
+      conn
+      |> Bunch.listify()
+      ~> %__MODULE__{media | connection_information: &1 ++ info}
+      ~> parse_optional(rest, &1)
+    end
   end
 
   def parse_optional(["b=" <> bandwidth | rest], %__MODULE__{bandwidth: acc_bandwidth} = media) do
-    bandwidth
-    |> Bandwidth.parse()
-    ~>> ({:ok, bandwidth} ->
-           %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]} ~> parse_optional(rest, &1))
+    with {:ok, bandwidth} <- Bandwidth.parse(bandwidth) do
+      %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]}
+      ~> parse_optional(rest, &1)
+    end
   end
 
   def parse_optional(["k=" <> encryption | rest], media) do
