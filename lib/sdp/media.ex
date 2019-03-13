@@ -9,21 +9,21 @@ defmodule Membrane.Protocol.SDP.Media do
   defstruct @enforce_keys ++
               [
                 :title,
-                {:connection_information, []},
+                {:connection_data, []},
                 {:bandwidth, []},
                 :encryption,
                 {:attributes, []}
               ]
 
-  alias Membrane.Protocol.SDP.{Encryption, Bandwidth, ConnectionInformation, Session}
+  alias Membrane.Protocol.SDP.{Attribute, Bandwidth, ConnectionData, Encryption, Session}
 
   @type t :: %__MODULE__{
           type: binary(),
           ports: [:inet.port_number()],
           protocol: binary(),
-          fmt: binary(),
+          fmt: binary() | [0..127],
           title: binary() | nil,
-          connection_information: [ConnectionInformation.t()],
+          connection_data: [ConnectionData.t()],
           bandwidth: [Bandwidth.t()],
           encryption: Encryption.t() | nil,
           attributes: [binary()]
@@ -32,7 +32,8 @@ defmodule Membrane.Protocol.SDP.Media do
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
-          int: {port_no, port_options} when port_no in 0..65535 <- Integer.parse(port) do
+          int: {port_no, port_options} when port_no in 0..65535 <- Integer.parse(port),
+          fmt: {:ok, fmt} <- parse_fmt(fmt, proto) do
       %__MODULE__{
         type: type,
         ports: gen_ports(port_no, port_options),
@@ -43,6 +44,7 @@ defmodule Membrane.Protocol.SDP.Media do
     else
       conn: _ -> {:error, :invalid_media_spec}
       int: _ -> {:error, :malformed_port_number}
+      fmt: error -> error
     end
   end
 
@@ -57,11 +59,11 @@ defmodule Membrane.Protocol.SDP.Media do
   def parse_optional(["i=" <> title | rest], media),
     do: parse_optional(rest, %__MODULE__{media | title: title})
 
-  def parse_optional(["c=" <> conn | rest], %__MODULE__{connection_information: info} = media) do
-    with {:ok, conn} <- ConnectionInformation.parse(conn) do
+  def parse_optional(["c=" <> conn | rest], %__MODULE__{connection_data: info} = media) do
+    with {:ok, conn} <- ConnectionData.parse(conn) do
       conn
       |> Bunch.listify()
-      ~> %__MODULE__{media | connection_information: &1 ++ info}
+      ~> %__MODULE__{media | connection_data: &1 ++ info}
       ~> parse_optional(rest, &1)
     end
   end
@@ -81,8 +83,10 @@ defmodule Membrane.Protocol.SDP.Media do
   end
 
   def parse_optional(["a=" <> attribute | rest], %__MODULE__{attributes: attrs} = media) do
-    %__MODULE__{media | attributes: [attribute | attrs]}
-    ~> parse_optional(rest, &1)
+    with {:ok, attribute} <- Attribute.parse(attribute) do
+      %__MODULE__{media | attributes: [attribute | attrs]}
+      ~> parse_optional(rest, &1)
+    end
   end
 
   @spec apply_session(__MODULE__.t(), Session.t()) :: __MODULE__.t()
@@ -96,7 +100,7 @@ defmodule Membrane.Protocol.SDP.Media do
           do: acc,
           else: Map.put(acc, inherited_key, value)
 
-      {inherited_key, value}, acc when inherited_key in [:connection_information, :bandwidth] ->
+      {inherited_key, value}, acc when inherited_key in [:connection_data, :bandwidth] ->
         if acc[inherited_key] != [],
           do: acc,
           else: Map.put(acc, inherited_key, value)
@@ -131,4 +135,19 @@ defmodule Membrane.Protocol.SDP.Media do
   end
 
   defp gen_ports(port_no, _), do: [port_no]
+
+  defp parse_fmt(fmt, proto)
+
+  defp parse_fmt(fmt, proto) when proto == "RTP/AVP" or proto == "RTP/SAVP" do
+    fmt
+    |> String.split(" ")
+    |> Bunch.Enum.try_map(fn single_fmt ->
+      case Integer.parse(single_fmt) do
+        {parsed_fmt, ""} -> {:ok, parsed_fmt}
+        _ -> {:error, :invalid_fmt}
+      end
+    end)
+  end
+
+  defp parse_fmt(fmt, _), do: fmt
 end

@@ -1,4 +1,4 @@
-defmodule Membrane.Protocol.SDP.ConnectionInformation do
+defmodule Membrane.Protocol.SDP.ConnectionData do
   @moduledoc """
   This module represents Connection Information.
   Connection can be represented by either:
@@ -49,14 +49,14 @@ defmodule Membrane.Protocol.SDP.ConnectionInformation do
         }
 
   @spec parse(binary()) ::
-          {:error, :invalid_address | :invalid_connection_information | :option_nan | :wrong_ttl}
+          {:error, :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl}
           | {:ok, [sdp_address] | sdp_address}
   def parse(connection_string) do
     with [nettype, addrtype, connection_address] <- String.split(connection_string, " "),
          [address | optional] <- String.split(connection_address, "/") do
       parse_address(address, nettype, addrtype, optional)
     else
-      list when is_list(list) -> {:error, :invalid_connection_information}
+      list when is_list(list) -> {:error, :invalid_connection_data}
     end
   end
 

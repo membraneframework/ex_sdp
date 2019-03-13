@@ -6,15 +6,16 @@ defmodule Membrane.Protocol.SDP do
   require Logger
 
   alias Membrane.Protocol.SDP.{
-    ConnectionInformation,
+    Attribute,
     Bandwidth,
+    ConnectionData,
     Encryption,
     Media,
     Origin,
+    RepeatTimes,
     Session,
     Timezone,
-    Timing,
-    RepeatTimes
+    Timing
   }
 
   @doc """
@@ -79,8 +80,8 @@ defmodule Membrane.Protocol.SDP do
     do: %Session{spec | phone_number: phone_number} ~> {rest, &1}
 
   defp parse_line(["c=" <> connection_data | rest], spec) do
-    with {:ok, connection_info} <- ConnectionInformation.parse(connection_data) do
-      %Session{spec | connection_information: connection_info} ~> {rest, &1}
+    with {:ok, connection_info} <- ConnectionData.parse(connection_data) do
+      %Session{spec | connection_data: connection_info} ~> {rest, &1}
     end
   end
 
@@ -116,17 +117,10 @@ defmodule Membrane.Protocol.SDP do
   end
 
   defp parse_line(["a=" <> attribute | rest], %{attributes: attrs} = session) do
-    case String.split(attribute, ":", parts: 2) do
-      [name, value] ->
-        name = String.replace(name, "-", "-")
-
-        {name, value}
-
-      [flag] ->
-        flag
+    with {:ok, attribute} <- Attribute.parse(attribute) do
+      %Session{session | attributes: [attribute | attrs]}
+      ~> {rest, &1}
     end
-    ~> %Session{session | attributes: [&1 | attrs]}
-    ~> {rest, &1}
   end
 
   defp parse_line(["m=" <> medium | rest], %Session{media: media} = session) do
@@ -148,7 +142,7 @@ defmodule Membrane.Protocol.SDP do
       |> Enum.join("\n")
 
     Logger.error("""
-    Error whil parsing media:
+    Error while parsing media:
     #{line}
 
     Attributes:

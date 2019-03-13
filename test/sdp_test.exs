@@ -5,22 +5,22 @@ defmodule Membrane.Protocol.SDPTest do
   alias Membrane.Protocol.SDP
 
   alias Membrane.Protocol.SDP.{
-    Media,
-    Session,
-    ConnectionInformation,
+    Attribute,
     Bandwidth,
+    ConnectionData,
     Encryption,
+    Media,
     Origin,
     RepeatTimes,
+    Session,
     Timezone,
-    Timing,
-    Media
+    Timing
   }
 
   @error_color_prefix "\e[31m"
   @back_to_normal "\e[0m"
 
-  test "SDP parser parses artificially long and complex session description" do
+  test "SDP parser parses long and complex session description" do
     assert {:ok, result} =
              """
              v=0
@@ -50,13 +50,13 @@ defmodule Membrane.Protocol.SDPTest do
              |> SDP.parse()
 
     assert result == %Session{
-             attributes: [{"key", "value"}, "recvonly"],
+             attributes: [{"key", "value"}, :recvonly],
              bandwidth: [
                %Bandwidth{bandwidth: 128, type: "X-YZ"},
                %Bandwidth{bandwidth: 256, type: "YZ"}
              ],
-             connection_information: %ConnectionInformation{
-               address: %ConnectionInformation.IP4{
+             connection_data: %ConnectionData{
+               address: %ConnectionData.IP4{
                  ttl: 127,
                  value: {224, 2, 17, 12}
                },
@@ -71,35 +71,43 @@ defmodule Membrane.Protocol.SDPTest do
                    %Bandwidth{bandwidth: 128, type: "X-YZ"},
                    %Bandwidth{bandwidth: 256, type: "YZ"}
                  ],
-                 connection_information: %ConnectionInformation{
-                   address: %ConnectionInformation.IP4{
+                 connection_data: %ConnectionData{
+                   address: %ConnectionData.IP4{
                      ttl: 127,
                      value: {224, 2, 17, 12}
                    },
                    network_type: "IN"
                  },
                  encryption: %Encryption{key: nil, method: :prompt},
-                 fmt: "0",
+                 fmt: [0],
                  ports: [49170],
                  protocol: "RTP/AVP",
                  title: "Sample media title",
                  type: "audio"
                },
                %Media{
-                 attributes: ["rtpmap:99 h263-1998/90000"],
+                 attributes: [
+                   {:rtpmap,
+                    %Attribute.RTPMapping{
+                      clock_rate: 90000,
+                      encoding: "h263-1998",
+                      params: [],
+                      payload_type: 99
+                    }}
+                 ],
                  bandwidth: [
                    %Bandwidth{bandwidth: 128, type: "X-YZ"},
                    %Bandwidth{bandwidth: 256, type: "YZ"}
                  ],
-                 connection_information: %ConnectionInformation{
-                   address: %ConnectionInformation.IP4{
+                 connection_data: %ConnectionData{
+                   address: %ConnectionData.IP4{
                      ttl: 127,
                      value: {224, 2, 17, 12}
                    },
                    network_type: "IN"
                  },
                  encryption: %Encryption{key: "key", method: :clear},
-                 fmt: "99",
+                 fmt: [99],
                  ports: [51372],
                  protocol: "RTP/AVP",
                  title: nil,
@@ -107,9 +115,9 @@ defmodule Membrane.Protocol.SDPTest do
                }
              ],
              origin: %Origin{
-               address: %ConnectionInformation{
+               address: %ConnectionData{
                  network_type: "IN",
-                 address: %ConnectionInformation.IP4{
+                 address: %ConnectionData.IP4{
                    value: {10, 47, 16, 5}
                  }
                },
@@ -160,14 +168,14 @@ defmodule Membrane.Protocol.SDPTest do
         end)
 
       assert logs =~ """
-             Error whil parsing media:
+             Error while parsing media:
              m=video 51372 RTP/AVP 99
 
              Attributes:
              a=rtpmap:99 h263-1998/90000
              c=invalid data
 
-             with reason: invalid_connection_information
+             with reason: invalid_connection_data
              """
 
       assert error_log?(logs)

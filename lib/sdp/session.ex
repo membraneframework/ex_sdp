@@ -10,7 +10,7 @@ defmodule Membrane.Protocol.SDP.Session do
     :uri,
     :email,
     :phone_number,
-    {:connection_information, []},
+    {:connection_data, []},
     {:bandwidth, []},
     {:time_zones_adjustments, []},
     :encryption,
@@ -23,7 +23,7 @@ defmodule Membrane.Protocol.SDP.Session do
   defstruct @enforce_keys ++ @optional_keys
 
   alias Membrane.Protocol.SDP.{
-    ConnectionInformation,
+    ConnectionData,
     Bandwidth,
     Encryption,
     Media,
@@ -41,7 +41,7 @@ defmodule Membrane.Protocol.SDP.Session do
           uri: binary(),
           email: binary() | nil,
           phone_number: binary() | nil,
-          connection_information: ConnectionInformation.t(),
+          connection_data: ConnectionData.t(),
           bandwidth: [Bandwidth.t()],
           time_zones_adjustments: [Timezone.t()],
           encryption: Encryption.t(),

@@ -3,12 +3,13 @@ defmodule Membrane.Protocol.SDP.MediaTest do
   use Bunch
 
   alias Membrane.Protocol.SDP.{
-    Media,
-    Encryption,
+    Attribute,
     Bandwidth,
-    Session,
-    ConnectionInformation,
+    ConnectionData,
+    Encryption,
+    Media,
     Origin,
+    Session,
     Timing
   }
 
@@ -19,7 +20,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
                |> Media.parse()
 
       assert %Media{
-               fmt: "31",
+               fmt: [31],
                ports: [49170],
                protocol: "RTP/AVP",
                type: "video"
@@ -32,7 +33,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
                |> Media.parse()
 
       assert %Media{
-               fmt: "31",
+               fmt: [31],
                ports: [49170, 49172],
                protocol: "RTP/AVP",
                type: "video"
@@ -51,9 +52,24 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         |> String.split("\n")
 
       parsed_attributes = [
-        "rtpmap:96 L8/8000",
-        "rtpmap:97 L16/8000",
-        "rtpmap:98 L16/11025/2"
+        rtpmap: %Attribute.RTPMapping{
+          clock_rate: 8000,
+          encoding: "L8",
+          params: [],
+          payload_type: 96
+        },
+        rtpmap: %Attribute.RTPMapping{
+          clock_rate: 8000,
+          encoding: "L16",
+          params: [],
+          payload_type: 97
+        },
+        rtpmap: %Attribute.RTPMapping{
+          clock_rate: 11025,
+          encoding: "L16",
+          params: ["2"],
+          payload_type: 98
+        }
       ]
 
       {:ok, {[""], medium}} =
@@ -63,7 +79,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       assert %Media{
                attributes: ^parsed_attributes,
-               fmt: "96 97 98",
+               fmt: [96, 97, 98],
                ports: [49230],
                protocol: "RTP/AVP",
                type: "m=audio"
@@ -79,9 +95,9 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       bandwidth = [%Bandwidth{bandwidth: 128, type: "X-YZ"}]
 
-      connection_information = [
-        %ConnectionInformation{
-          address: %ConnectionInformation.IP4{
+      connection_data = [
+        %ConnectionData{
+          address: %ConnectionData.IP4{
             ttl: 127,
             value: {224, 2, 17, 12}
           },
@@ -92,12 +108,12 @@ defmodule Membrane.Protocol.SDP.MediaTest do
       encryption = %Encryption{method: :clear}
 
       session = %Session{
-        connection_information: connection_information,
+        connection_data: connection_data,
         origin: %Origin{
           session_id: "2890844526",
-          address: %ConnectionInformation{
+          address: %ConnectionData{
             network_type: "IN",
-            address: %ConnectionInformation.IP4{
+            address: %ConnectionData.IP4{
               value: {10, 47, 16, 5}
             }
           }
@@ -115,7 +131,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
       [
         session: session,
         encryption: encryption,
-        connection_information: connection_information,
+        connection_data: connection_data,
         bandwidth: bandwidth,
         media: media
       ]
@@ -124,13 +140,13 @@ defmodule Membrane.Protocol.SDP.MediaTest do
     test "media inherits session properties", %{
       session: session,
       encryption: encryption,
-      connection_information: connection_information,
+      connection_data: connection_data,
       bandwidth: bandwidth,
       media: media
     } do
       assert %Media{
                bandwidth: ^bandwidth,
-               connection_information: ^connection_information,
+               connection_data: ^connection_data,
                encryption: ^encryption
              } = Media.apply_session(media, session)
     end
@@ -149,9 +165,9 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       assert %Media{
                bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "YZ"}],
-               connection_information: [
-                 %ConnectionInformation{
-                   address: %ConnectionInformation.IP4{
+               connection_data: [
+                 %ConnectionData{
+                   address: %ConnectionData.IP4{
                      ttl: 220,
                      value: {144, 2, 17, 12}
                    },

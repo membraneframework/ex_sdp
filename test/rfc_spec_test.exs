@@ -9,14 +9,16 @@ defmodule Membrane.Protocol.SDP.RFCTest do
   alias Membrane.Protocol.SDP
 
   alias Membrane.Protocol.SDP.{
-    ConnectionInformation,
-    Session,
-    Timing,
+    Attribute,
+    ConnectionData,
+    Media,
     Origin,
-    Media
+    Session,
+    Timing
   }
 
   describe "SDP parser processes SDP specs from RFC" do
+    @tag integration: true
     test "Parses single media spec with flag attributes" do
       assert {:ok, session_spec} =
                """
@@ -37,9 +39,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                |> SDP.parse()
 
       assert session_spec == %Session{
-               attributes: ["recvonly"],
-               connection_information: %ConnectionInformation{
-                 address: %ConnectionInformation.IP4{
+               attributes: [:recvonly],
+               connection_data: %ConnectionData{
+                 address: %ConnectionData.IP4{
                    ttl: 127,
                    value: {224, 2, 17, 12}
                  },
@@ -50,36 +52,43 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  %Media{
                    attributes: [],
                    bandwidth: [],
-                   connection_information: %ConnectionInformation{
-                     address: %ConnectionInformation.IP4{
+                   connection_data: %ConnectionData{
+                     address: %ConnectionData.IP4{
                        ttl: 127,
                        value: {224, 2, 17, 12}
                      },
                      network_type: "IN"
                    },
-                   fmt: "0",
+                   fmt: [0],
                    ports: [49170],
                    protocol: "RTP/AVP",
                    type: "audio"
                  },
                  %Media{
-                   attributes: ["rtpmap:99 h263-1998/90000"],
-                   connection_information: %ConnectionInformation{
-                     address: %ConnectionInformation.IP4{
+                   attributes: [
+                     rtpmap: %Attribute.RTPMapping{
+                       clock_rate: 90000,
+                       encoding: "h263-1998",
+                       params: [],
+                       payload_type: 99
+                     }
+                   ],
+                   connection_data: %ConnectionData{
+                     address: %ConnectionData.IP4{
                        ttl: 127,
                        value: {224, 2, 17, 12}
                      },
                      network_type: "IN"
                    },
-                   fmt: "99",
+                   fmt: [99],
                    ports: [51372],
                    protocol: "RTP/AVP",
                    type: "video"
                  }
                ],
                origin: %Origin{
-                 address: %ConnectionInformation{
-                   address: %ConnectionInformation.IP4{
+                 address: %ConnectionData{
+                   address: %ConnectionData.IP4{
                      value: {10, 47, 16, 5}
                    },
                    network_type: "IN"
@@ -99,6 +108,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
              }
     end
 
+    @tag integration: true
     test "parses audio and video offer" do
       assert {:ok, result} =
                """
@@ -121,7 +131,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
       assert %Session{
                attributes: [],
                bandwidth: [],
-               connection_information: %ConnectionInformation{
+               connection_data: %ConnectionData{
                  address: "host.atlanta.example.com",
                  network_type: "IN"
                },
@@ -129,28 +139,60 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                encryption: nil,
                media: [
                  %Media{
-                   attributes: ["rtpmap:0 PCMU/8000", "rtpmap:8 PCMA/8000", "rtpmap:97 iLBC/8000"],
+                   attributes: [
+                     rtpmap: %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMU",
+                       params: [],
+                       payload_type: 0
+                     },
+                     rtpmap: %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMA",
+                       params: [],
+                       payload_type: 8
+                     },
+                     rtpmap: %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "iLBC",
+                       params: [],
+                       payload_type: 97
+                     }
+                   ],
                    bandwidth: [],
-                   connection_information: %ConnectionInformation{
+                   connection_data: %ConnectionData{
                      address: "host.atlanta.example.com",
                      network_type: "IN"
                    },
                    encryption: nil,
-                   fmt: "0 8 97",
+                   fmt: [0, 8, 97],
                    ports: [49170],
                    protocol: "RTP/AVP",
                    title: nil,
                    type: "audio"
                  },
                  %Media{
-                   attributes: ["rtpmap:31 H261/90000", "rtpmap:32 MPV/90000"],
+                   attributes: [
+                     rtpmap: %Attribute.RTPMapping{
+                       clock_rate: 90000,
+                       encoding: "H261",
+                       params: [],
+                       payload_type: 31
+                     },
+                     rtpmap: %Attribute.RTPMapping{
+                       clock_rate: 90000,
+                       encoding: "MPV",
+                       params: [],
+                       payload_type: 32
+                     }
+                   ],
                    bandwidth: [],
-                   connection_information: %ConnectionInformation{
+                   connection_data: %ConnectionData{
                      address: "host.atlanta.example.com",
                      network_type: "IN"
                    },
                    encryption: nil,
-                   fmt: "31 32",
+                   fmt: [31, 32],
                    ports: [51372],
                    protocol: "RTP/AVP",
                    title: nil,
@@ -158,7 +200,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  }
                ],
                origin: %Origin{
-                 address: %ConnectionInformation{
+                 address: %ConnectionData{
                    network_type: "IN",
                    address: "host.atlanta.example.com"
                  },
@@ -177,6 +219,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
              } == result
     end
 
+    @tag integration: true
     test "parses audio and video answer" do
       assert {:ok, result} =
                """
@@ -196,7 +239,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
       assert %Session{
                attributes: [],
                bandwidth: [],
-               connection_information: %ConnectionInformation{
+               connection_data: %ConnectionData{
                  address: "host.biloxi.example.com",
                  network_type: "IN"
                },
@@ -204,28 +247,42 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                encryption: nil,
                media: [
                  %Media{
-                   attributes: ["rtpmap:0 PCMU/8000"],
+                   attributes: [
+                     rtpmap: %Membrane.Protocol.SDP.Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMU",
+                       params: [],
+                       payload_type: 0
+                     }
+                   ],
                    bandwidth: [],
-                   connection_information: %ConnectionInformation{
+                   connection_data: %ConnectionData{
                      address: "host.biloxi.example.com",
                      network_type: "IN"
                    },
                    encryption: nil,
-                   fmt: "0",
+                   fmt: [0],
                    ports: [49174],
                    protocol: "RTP/AVP",
                    title: nil,
                    type: "audio"
                  },
                  %Media{
-                   attributes: ["rtpmap:32 MPV/90000"],
+                   attributes: [
+                     rtpmap: %Attribute.RTPMapping{
+                       clock_rate: 90000,
+                       encoding: "MPV",
+                       params: [],
+                       payload_type: 32
+                     }
+                   ],
                    bandwidth: [],
-                   connection_information: %ConnectionInformation{
+                   connection_data: %ConnectionData{
                      address: "host.biloxi.example.com",
                      network_type: "IN"
                    },
                    encryption: nil,
-                   fmt: "32",
+                   fmt: [32],
                    ports: [49170],
                    protocol: "RTP/AVP",
                    title: nil,
@@ -236,7 +293,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  username: "bob",
                  session_id: "2808844564",
                  session_version: "2808844564",
-                 address: %ConnectionInformation{
+                 address: %ConnectionData{
                    network_type: "IN",
                    address: "host.biloxi.example.com"
                  }

@@ -2,7 +2,7 @@ defmodule Membrane.Protocol.SDP.OriginTest do
   use ExUnit.Case
 
   alias Membrane.Protocol.SDP.Origin
-  alias Membrane.Protocol.SDP.ConnectionInformation
+  alias Membrane.Protocol.SDP.ConnectionData
 
   describe "Origin parser" do
     test "processes valid origin declaration" do
@@ -10,9 +10,9 @@ defmodule Membrane.Protocol.SDP.OriginTest do
 
       assert origin == %Origin{
                session_id: "2890844526",
-               address: %ConnectionInformation{
+               address: %ConnectionData{
                  network_type: "IN",
-                 address: %ConnectionInformation.IP4{
+                 address: %ConnectionData.IP4{
                    value: {10, 47, 16, 5}
                  }
                },
@@ -33,7 +33,7 @@ defmodule Membrane.Protocol.SDP.OriginTest do
     test "processes origin with fqdn" do
       assert {:ok,
               %Origin{
-                address: %ConnectionInformation{
+                address: %ConnectionData{
                   network_type: "IN",
                   address: "host.origin.name"
                 },
