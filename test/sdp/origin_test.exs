@@ -10,11 +10,8 @@ defmodule Membrane.Protocol.SDP.OriginTest do
 
       assert origin == %Origin{
                session_id: "2890844526",
-               address: %ConnectionData{
-                 network_type: "IN",
-                 address: %ConnectionData.IP4{
-                   value: {10, 47, 16, 5}
-                 }
+               address: %ConnectionData.IP4{
+                 value: {10, 47, 16, 5}
                },
                session_version: "2890842807",
                username: "jdoe"
@@ -33,10 +30,7 @@ defmodule Membrane.Protocol.SDP.OriginTest do
     test "processes origin with fqdn" do
       assert {:ok,
               %Origin{
-                address: %ConnectionData{
-                  network_type: "IN",
-                  address: "host.origin.name"
-                },
+                address: "host.origin.name",
                 session_id: "2890844526",
                 session_version: "2890842807",
                 username: "jdoe"

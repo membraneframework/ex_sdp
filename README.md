@@ -21,7 +21,6 @@ The docs can be found at [https://hexdocs.pm/membrane_sdp](https://hexdocs.pm/me
 Parser parses string with `\r\n` terminated lines.
 
 ```elixir
-alias Membrane.Protocol.SDP
 """
 v=0
 o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
@@ -47,23 +46,20 @@ m=video 51372 RTP/AVP 99
 a=rtpmap:99 h263-1998/90000
 """
 |> String.replace("\n", "\r\n")
-|> SDP.parse()
+|> Membrane.Protocol.SDP.parse()
 
 # =>
 
 {:ok,
  %Membrane.Protocol.SDP.Session{
-   attributes: [{"key", "value"}, "recvonly"],
+   attributes: [{"key", "value"}, :recvonly],
    bandwidth: [
      %Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "X-YZ"},
      %Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: "YZ"}
    ],
-   connection_information: %Membrane.Protocol.SDP.ConnectionInformation{
-     address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
-       ttl: 127,
-       value: {224, 2, 17, 12}
-     },
-     network_type: "IN"
+   connection_data: %Membrane.Protocol.SDP.ConnectionData.IP4{
+     ttl: 127,
+     value: {224, 2, 17, 12}
    },
    email: "j.doe@example.com (Jane Doe)",
    encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: "rsa"},
@@ -74,35 +70,36 @@ a=rtpmap:99 h263-1998/90000
          %Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "X-YZ"},
          %Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: "YZ"}
        ],
-       connection_information: %Membrane.Protocol.SDP.ConnectionInformation{
-         address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
-           ttl: 127,
-           value: {224, 2, 17, 12}
-         },
-         network_type: "IN"
+       connection_data: %Membrane.Protocol.SDP.ConnectionData.IP4{
+         ttl: 127,
+         value: {224, 2, 17, 12}
        },
-       encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: "prompt"},
-       fmt: "0",
+       encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: :prompt},
+       fmt: [0],
        ports: [49170],
        protocol: "RTP/AVP",
        title: "Sample media title",
        type: "audio"
      },
      %Membrane.Protocol.SDP.Media{
-       attributes: ["rtpmap:99 h263-1998/90000"],
+       attributes: [
+         rtpmap: %Membrane.Protocol.SDP.Attribute.RTPMapping{
+           clock_rate: 90000,
+           encoding: "h263-1998",
+           params: [],
+           payload_type: 99
+         }
+       ],
        bandwidth: [
          %Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "X-YZ"},
          %Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: "YZ"}
        ],
-       connection_information: %Membrane.Protocol.SDP.ConnectionInformation{
-         address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
-           ttl: 127,
-           value: {224, 2, 17, 12}
-         },
-         network_type: "IN"
+       connection_data: %Membrane.Protocol.SDP.ConnectionData.IP4{
+         ttl: 127,
+         value: {224, 2, 17, 12}
        },
        encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: "rsa"},
-       fmt: "99",
+       fmt: 'c',
        ports: [51372],
        protocol: "RTP/AVP",
        title: nil,
@@ -110,12 +107,9 @@ a=rtpmap:99 h263-1998/90000
      }
    ],
    origin: %Membrane.Protocol.SDP.Origin{
-     address: %Membrane.Protocol.SDP.ConnectionInformation{
-       address: %Membrane.Protocol.SDP.ConnectionInformation.IP4{
-         ttl: nil,
-         value: {10, 47, 16, 5}
-       },
-       network_type: "IN"
+     address: %Membrane.Protocol.SDP.ConnectionData.IP4{
+       ttl: nil,
+       value: {10, 47, 16, 5}
      },
      session_id: "2890844526",
      session_version: "2890842807",

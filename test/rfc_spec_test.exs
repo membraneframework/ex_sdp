@@ -40,24 +40,18 @@ defmodule Membrane.Protocol.SDP.RFCTest do
 
       assert session_spec == %Session{
                attributes: [:recvonly],
-               connection_data: %ConnectionData{
-                 address: %ConnectionData.IP4{
-                   ttl: 127,
-                   value: {224, 2, 17, 12}
-                 },
-                 network_type: "IN"
+               connection_data: %ConnectionData.IP4{
+                 ttl: 127,
+                 value: {224, 2, 17, 12}
                },
                email: "j.doe@example.com (Jane Doe)",
                media: [
                  %Media{
                    attributes: [],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     address: %ConnectionData.IP4{
-                       ttl: 127,
-                       value: {224, 2, 17, 12}
-                     },
-                     network_type: "IN"
+                   connection_data: %ConnectionData.IP4{
+                     ttl: 127,
+                     value: {224, 2, 17, 12}
                    },
                    fmt: [0],
                    ports: [49_170],
@@ -73,12 +67,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                        payload_type: 99
                      }
                    ],
-                   connection_data: %ConnectionData{
-                     address: %ConnectionData.IP4{
-                       ttl: 127,
-                       value: {224, 2, 17, 12}
-                     },
-                     network_type: "IN"
+                   connection_data: %ConnectionData.IP4{
+                     ttl: 127,
+                     value: {224, 2, 17, 12}
                    },
                    fmt: [99],
                    ports: [51_372],
@@ -87,11 +78,8 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  }
                ],
                origin: %Origin{
-                 address: %ConnectionData{
-                   address: %ConnectionData.IP4{
-                     value: {10, 47, 16, 5}
-                   },
-                   network_type: "IN"
+                 address: %ConnectionData.IP4{
+                   value: {10, 47, 16, 5}
                  },
                  session_id: "2890844526",
                  session_version: "2890842807",
@@ -131,10 +119,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
       assert %Session{
                attributes: [],
                bandwidth: [],
-               connection_data: %ConnectionData{
-                 address: "host.atlanta.example.com",
-                 network_type: "IN"
-               },
+               connection_data: "host.atlanta.example.com",
                email: nil,
                encryption: nil,
                media: [
@@ -160,10 +145,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     address: "host.atlanta.example.com",
-                     network_type: "IN"
-                   },
+                   connection_data: "host.atlanta.example.com",
                    encryption: nil,
                    fmt: [0, 8, 97],
                    ports: [49_170],
@@ -187,10 +169,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     address: "host.atlanta.example.com",
-                     network_type: "IN"
-                   },
+                   connection_data: "host.atlanta.example.com",
                    encryption: nil,
                    fmt: [31, 32],
                    ports: [51_372],
@@ -200,10 +179,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  }
                ],
                origin: %Origin{
-                 address: %ConnectionData{
-                   network_type: "IN",
-                   address: "host.atlanta.example.com"
-                 },
+                 address: "host.atlanta.example.com",
                  session_id: "2890844526",
                  session_version: "2890844526",
                  username: "alice"
@@ -239,10 +215,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
       assert %Session{
                attributes: [],
                bandwidth: [],
-               connection_data: %ConnectionData{
-                 address: "host.biloxi.example.com",
-                 network_type: "IN"
-               },
+               connection_data: "host.biloxi.example.com",
                email: nil,
                encryption: nil,
                media: [
@@ -256,10 +229,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     address: "host.biloxi.example.com",
-                     network_type: "IN"
-                   },
+                   connection_data: "host.biloxi.example.com",
                    encryption: nil,
                    fmt: [0],
                    ports: [49_174],
@@ -277,10 +247,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     address: "host.biloxi.example.com",
-                     network_type: "IN"
-                   },
+                   connection_data: "host.biloxi.example.com",
                    encryption: nil,
                    fmt: [32],
                    ports: [49_170],
@@ -293,10 +260,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  username: "bob",
                  session_id: "2808844564",
                  session_version: "2808844564",
-                 address: %ConnectionData{
-                   network_type: "IN",
-                   address: "host.biloxi.example.com"
-                 }
+                 address: "host.biloxi.example.com"
                },
                phone_number: nil,
                session_information: nil,

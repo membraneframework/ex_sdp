@@ -55,12 +55,9 @@ defmodule Membrane.Protocol.SDPTest do
                %Bandwidth{bandwidth: 128, type: "X-YZ"},
                %Bandwidth{bandwidth: 256, type: "YZ"}
              ],
-             connection_data: %ConnectionData{
-               address: %ConnectionData.IP4{
-                 ttl: 127,
-                 value: {224, 2, 17, 12}
-               },
-               network_type: "IN"
+             connection_data: %ConnectionData.IP4{
+               ttl: 127,
+               value: {224, 2, 17, 12}
              },
              email: "j.doe@example.com (Jane Doe)",
              encryption: %Encryption{key: "key", method: :clear},
@@ -71,12 +68,9 @@ defmodule Membrane.Protocol.SDPTest do
                    %Bandwidth{bandwidth: 128, type: "X-YZ"},
                    %Bandwidth{bandwidth: 256, type: "YZ"}
                  ],
-                 connection_data: %ConnectionData{
-                   address: %ConnectionData.IP4{
-                     ttl: 127,
-                     value: {224, 2, 17, 12}
-                   },
-                   network_type: "IN"
+                 connection_data: %ConnectionData.IP4{
+                   ttl: 127,
+                   value: {224, 2, 17, 12}
                  },
                  encryption: %Encryption{key: nil, method: :prompt},
                  fmt: [0],
@@ -99,12 +93,9 @@ defmodule Membrane.Protocol.SDPTest do
                    %Bandwidth{bandwidth: 128, type: "X-YZ"},
                    %Bandwidth{bandwidth: 256, type: "YZ"}
                  ],
-                 connection_data: %ConnectionData{
-                   address: %ConnectionData.IP4{
-                     ttl: 127,
-                     value: {224, 2, 17, 12}
-                   },
-                   network_type: "IN"
+                 connection_data: %ConnectionData.IP4{
+                   ttl: 127,
+                   value: {224, 2, 17, 12}
                  },
                  encryption: %Encryption{key: "key", method: :clear},
                  fmt: [99],
@@ -115,11 +106,8 @@ defmodule Membrane.Protocol.SDPTest do
                }
              ],
              origin: %Origin{
-               address: %ConnectionData{
-                 network_type: "IN",
-                 address: %ConnectionData.IP4{
-                   value: {10, 47, 16, 5}
-                 }
+               address: %ConnectionData.IP4{
+                 value: {10, 47, 16, 5}
                },
                session_id: "2890844526",
                session_version: "2890842807",

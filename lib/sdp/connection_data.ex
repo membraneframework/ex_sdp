@@ -43,32 +43,26 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
 
   @type sdp_address :: IP6.t() | IP4.t() | binary()
 
-  @type t :: %__MODULE__{
-          network_type: binary(),
-          address: sdp_address()
-        }
-
   @type reason :: :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl
 
-  @spec parse(binary()) :: {:ok, [t] | t()} | {:error, reason}
+  @spec parse(binary()) :: {:ok, [sdp_address()] | sdp_address()} | {:error, reason}
   def parse(connection_string) do
-    with [nettype, addrtype, connection_address] <- String.split(connection_string, " "),
+    with [_nettype, addrtype, connection_address] <- String.split(connection_string, " "),
          [address | optional] <- String.split(connection_address, "/") do
-      parse_address(address, nettype, addrtype, optional)
+      parse_address(address, addrtype, optional)
     else
       list when is_list(list) -> {:error, :invalid_connection_data}
     end
   end
 
-  defp parse_address(address, nettype, addrtype, optional) do
+  defp parse_address(address, addrtype, optional) do
     with {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
          {:ok, addresses} <- handle_address(address, addrtype, optional) do
       addresses
-      |> wrap_result(nettype)
       ~> {:ok, &1}
     else
       {:error, :einval} ->
-        %__MODULE__{network_type: nettype, address: address} ~> {:ok, &1}
+        address ~> {:ok, &1}
 
       {:error, _} = error ->
         error
@@ -151,21 +145,4 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   defp max_octet_value(size)
   defp max_octet_value(8), do: 65_535
   defp max_octet_value(4), do: 255
-
-  defp wrap_result([_ | _] = addresses, nettype) do
-    addresses
-    |> Enum.map(fn address ->
-      %__MODULE__{
-        network_type: nettype,
-        address: address
-      }
-    end)
-  end
-
-  defp wrap_result(address, nettype) do
-    %__MODULE__{
-      address: address,
-      network_type: nettype
-    }
-  end
 end

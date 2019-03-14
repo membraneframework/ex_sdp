@@ -166,12 +166,9 @@ defmodule Membrane.Protocol.SDP.MediaTest do
       assert %Media{
                bandwidth: [%Bandwidth{bandwidth: 128, type: "YZ"}],
                connection_data: [
-                 %ConnectionData{
-                   address: %ConnectionData.IP4{
-                     ttl: 220,
-                     value: {144, 2, 17, 12}
-                   },
-                   network_type: "IN"
+                 %ConnectionData.IP4{
+                   ttl: 220,
+                   value: {144, 2, 17, 12}
                  }
                ],
                encryption: %Encryption{key: nil, method: :prompt}
