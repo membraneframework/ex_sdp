@@ -60,14 +60,14 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      network_type: "IN"
                    },
                    fmt: [0],
-                   ports: [49170],
+                   ports: [49_170],
                    protocol: "RTP/AVP",
                    type: "audio"
                  },
                  %Media{
                    attributes: [
                      rtpmap: %Attribute.RTPMapping{
-                       clock_rate: 90000,
+                       clock_rate: 90_000,
                        encoding: "h263-1998",
                        params: [],
                        payload_type: 99
@@ -81,7 +81,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      network_type: "IN"
                    },
                    fmt: [99],
-                   ports: [51372],
+                   ports: [51_372],
                    protocol: "RTP/AVP",
                    type: "video"
                  }
@@ -166,7 +166,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    },
                    encryption: nil,
                    fmt: [0, 8, 97],
-                   ports: [49170],
+                   ports: [49_170],
                    protocol: "RTP/AVP",
                    title: nil,
                    type: "audio"
@@ -174,13 +174,13 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  %Media{
                    attributes: [
                      rtpmap: %Attribute.RTPMapping{
-                       clock_rate: 90000,
+                       clock_rate: 90_000,
                        encoding: "H261",
                        params: [],
                        payload_type: 31
                      },
                      rtpmap: %Attribute.RTPMapping{
-                       clock_rate: 90000,
+                       clock_rate: 90_000,
                        encoding: "MPV",
                        params: [],
                        payload_type: 32
@@ -193,7 +193,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    },
                    encryption: nil,
                    fmt: [31, 32],
-                   ports: [51372],
+                   ports: [51_372],
                    protocol: "RTP/AVP",
                    title: nil,
                    type: "video"
@@ -248,7 +248,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                media: [
                  %Media{
                    attributes: [
-                     rtpmap: %Membrane.Protocol.SDP.Attribute.RTPMapping{
+                     rtpmap: %Attribute.RTPMapping{
                        clock_rate: 8000,
                        encoding: "PCMU",
                        params: [],
@@ -262,7 +262,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    },
                    encryption: nil,
                    fmt: [0],
-                   ports: [49174],
+                   ports: [49_174],
                    protocol: "RTP/AVP",
                    title: nil,
                    type: "audio"
@@ -270,7 +270,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  %Media{
                    attributes: [
                      rtpmap: %Attribute.RTPMapping{
-                       clock_rate: 90000,
+                       clock_rate: 90_000,
                        encoding: "MPV",
                        params: [],
                        payload_type: 32
@@ -283,7 +283,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    },
                    encryption: nil,
                    fmt: [32],
-                   ports: [49170],
+                   ports: [49_170],
                    protocol: "RTP/AVP",
                    title: nil,
                    type: "video"

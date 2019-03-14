@@ -59,7 +59,7 @@ defmodule Membrane.Protocol.SDP do
     do: %Session{spec | version: version} ~> {rest, &1}
 
   defp parse_line(["o=" <> origin | rest], spec) do
-    with {:ok, origin} <- Origin.parse(origin) do
+    with {:ok, %Origin{} = origin} <- Origin.parse(origin) do
       %Session{spec | origin: origin} ~> {rest, &1}
     end
   end
@@ -135,7 +135,8 @@ defmodule Membrane.Protocol.SDP do
 
   defp report_error(["m=" <> _ = line | rest], reason) do
     attributes =
-      Enum.take_while(rest, fn
+      rest
+      |> Enum.take_while(fn
         "" -> false
         line -> not String.starts_with?(line, "m=")
       end)

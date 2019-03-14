@@ -8,6 +8,10 @@ defmodule Membrane.Protocol.SDP.EncryptionTest do
       assert %Encryption{method: :prompt} == Encryption.parse("prompt")
     end
 
+    test "processes valid unknown method" do
+      assert %Encryption{method: "ask"} == Encryption.parse("ask")
+    end
+
     test "processes valid method and uri string" do
       assert %Encryption{method: :uri, key: "http://link.to.key"} ==
                Encryption.parse("uri:http://link.to.key")

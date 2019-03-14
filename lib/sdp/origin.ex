@@ -26,11 +26,10 @@ defmodule Membrane.Protocol.SDP.Origin do
         }
 
   @spec parse(binary()) ::
-          {:ok, Origin.t()}
-          | {:error, :invalid_address | :invalid_origin | :option_nan | :wrong_ttl}
+          {:ok, t()} | {:error, :invalid_address | :invalid_origin | :option_nan | :wrong_ttl}
   def parse(origin) do
     with [username, sess_id, sess_version, conn_info] <- String.split(origin, " ", parts: 4),
-         {:ok, conn_info} <- ConnectionData.parse(conn_info) do
+         {:ok, %ConnectionData{} = conn_info} <- ConnectionData.parse(conn_info) do
       %__MODULE__{
         username: username,
         session_id: sess_id,

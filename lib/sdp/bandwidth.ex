@@ -12,28 +12,27 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
 
   @type t :: %__MODULE__{
           type: binary(),
-          bandwidth: binary()
+          bandwidth: non_neg_integer()
         }
 
   @spec parse(binary()) :: {:error, :invalid_bandwidth} | {:ok, t()}
   def parse(bandwidth) do
-    case String.split(bandwidth, ":") do
-      [type, bandwidth] ->
-        %__MODULE__{
-          type: type,
-          bandwidth: parse_bandwidth(bandwidth)
-        }
-        ~> {:ok, &1}
-
+    with [type, bandwidth] <- String.split(bandwidth, ":"),
+         {:ok, bandwidth} <- parse_bandwidth(bandwidth) do
+      %__MODULE__{
+        type: type,
+        bandwidth: bandwidth
+      }
+      ~> {:ok, &1}
+    else
       _ ->
         {:error, :invalid_bandwidth}
     end
   end
 
   defp parse_bandwidth(bandwidth) do
-    case Integer.parse(bandwidth) do
-      {value, ""} -> value
-      _ -> bandwidth
-    end
+    bandwidth
+    |> Integer.parse()
+    ~>> ({value, ""} -> {:ok, value})
   end
 end

@@ -1,4 +1,7 @@
 defmodule Membrane.Protocol.SDP.Attribute do
+  @moduledoc """
+  This module is responsible for parsing SDP Attributes.
+  """
   use Bunch
 
   alias __MODULE__.RTPMapping
@@ -12,11 +15,18 @@ defmodule Membrane.Protocol.SDP.Attribute do
     "type",
     "charset",
     "sdplang",
-    "lang",
-    "framerate"
+    "lang"
   ]
   @numeric ["ptime", "maxptime", "quality"]
 
+  @doc """
+  Parses SPD Attribute.
+
+  Value attributes formatted as `name:value` shall be parsed as `{name, value}`
+  other will be treated as property (flag) attributes.
+  Known attributes' names will be converted into atoms.
+  """
+  @spec parse(binary()) :: {:ok, atom() | tuple()} | {:error, atom()}
   def parse(line) do
     line
     |> String.split(":", parts: 2)
@@ -40,6 +50,12 @@ defmodule Membrane.Protocol.SDP.Attribute do
     ~>> ({:ok, result} -> {:ok, {:rtpmap, result}})
   end
 
+  defp handle_known_attribute({"framerate", framerate}) do
+    with {:ok, framerate} <- parse_framerate(framerate) do
+      {:ok, {:framerate, framerate}}
+    end
+  end
+
   defp handle_known_attribute(flag) when is_binary(flag) and flag in @valid_flags do
     String.to_atom(flag)
     ~> {:ok, &1}
@@ -61,4 +77,23 @@ defmodule Membrane.Protocol.SDP.Attribute do
   end
 
   defp handle_known_attribute(other), do: other ~> {:ok, &1}
+
+  def parse_framerate(framerate) do
+    case Float.parse(framerate) do
+      {float_framerate, ""} ->
+        {:ok, float_framerate}
+
+      _ ->
+        parse_compound_framerate(framerate)
+    end
+  end
+
+  defp parse_compound_framerate(framerate) do
+    with {left, "/" <> right} <- Integer.parse(framerate),
+         {right, ""} <- Integer.parse(right) do
+      {:ok, {left, right}}
+    else
+      _ -> {:error, :invalid_framerate}
+    end
+  end
 end

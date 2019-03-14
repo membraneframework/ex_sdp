@@ -1,4 +1,10 @@
 defmodule Membrane.Protocol.SDP.Session do
+  @moduledoc """
+  This module represents SDP Session.
+
+  It fields directly correspond to those defined in
+  [RFC4566](https://tools.ietf.org/html/rfc4566#section-5)
+  """
   @enforce_keys [
     :version,
     :origin,

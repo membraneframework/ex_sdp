@@ -32,7 +32,7 @@ defmodule Membrane.Protocol.SDP.Media do
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
-          int: {port_no, port_options} when port_no in 0..65535 <- Integer.parse(port),
+          int: {port_no, port_options} when port_no in 0..65_535 <- Integer.parse(port),
           fmt: {:ok, fmt} <- parse_fmt(fmt, proto) do
       %__MODULE__{
         type: type,
@@ -149,5 +149,5 @@ defmodule Membrane.Protocol.SDP.Media do
     end)
   end
 
-  defp parse_fmt(fmt, _), do: fmt
+  defp parse_fmt(fmt, _), do: {:ok, fmt}
 end

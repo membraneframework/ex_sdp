@@ -27,7 +27,7 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
         }
 
   @unit_mappings %{
-    "d" => 86400,
+    "d" => 86_400,
     "h" => 3600,
     "m" => 60,
     "s" => 1

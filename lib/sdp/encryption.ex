@@ -18,7 +18,9 @@ defmodule Membrane.Protocol.SDP.Encryption do
 
   @spec parse(binary()) :: t()
   def parse(definition) do
-    case String.split(definition, ":", parts: 2) do
+    definition
+    |> String.split(":", parts: 2)
+    |> case do
       [method] -> %__MODULE__{method: method}
       [method, key] -> %__MODULE__{method: method, key: key}
     end

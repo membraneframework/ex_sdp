@@ -6,7 +6,7 @@ defmodule Membrane.Protocol.SDP.RepeatTimesTest do
     test "process a valid compact declaration" do
       assert {:ok, result} = RepeatTimes.parse("6d 6h 10s 90m")
 
-      assert %Membrane.Protocol.SDP.RepeatTimes{
+      assert %RepeatTimes{
                active_duration: 21_600,
                offsets: [10, 5_400],
                repeat_interval: 518_400
@@ -30,9 +30,9 @@ defmodule Membrane.Protocol.SDP.RepeatTimesTest do
     test "process a valid declaration" do
       assert {:ok, result} = RepeatTimes.parse("604800 3600 0 90000")
 
-      assert %Membrane.Protocol.SDP.RepeatTimes{
+      assert %RepeatTimes{
                active_duration: 3600,
-               offsets: [0, 90000],
+               offsets: [0, 90_000],
                repeat_interval: 604_800
              } = result
     end

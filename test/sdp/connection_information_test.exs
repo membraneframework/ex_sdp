@@ -65,19 +65,19 @@ defmodule Membrane.Protocol.SDP.ConnectionDataTest do
       assert connections == [
                %ConnectionData{
                  address: %ConnectionData.IP6{
-                   value: {65301, 0, 0, 0, 0, 0, 0, 257}
+                   value: {65_301, 0, 0, 0, 0, 0, 0, 257}
                  },
                  network_type: "IN"
                },
                %ConnectionData{
                  address: %ConnectionData.IP6{
-                   value: {65301, 0, 0, 0, 0, 0, 0, 258}
+                   value: {65_301, 0, 0, 0, 0, 0, 0, 258}
                  },
                  network_type: "IN"
                },
                %ConnectionData{
                  address: %ConnectionData.IP6{
-                   value: {65301, 0, 0, 0, 0, 0, 0, 259}
+                   value: {65_301, 0, 0, 0, 0, 0, 0, 259}
                  },
                  network_type: "IN"
                }
@@ -90,7 +90,7 @@ defmodule Membrane.Protocol.SDP.ConnectionDataTest do
       assert connections ==
                %ConnectionData{
                  address: %ConnectionData.IP6{
-                   value: {65301, 0, 0, 0, 0, 0, 0, 259}
+                   value: {65_301, 0, 0, 0, 0, 0, 0, 259}
                  },
                  network_type: "IN"
                }

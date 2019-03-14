@@ -1,4 +1,7 @@
 defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
+  @moduledoc """
+  This module represents RTP mapping.
+  """
   use Bunch
 
   @enforce_keys [:payload_type, :encoding, :clock_rate, :params]
@@ -11,6 +14,7 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
           params: [any()]
         }
 
+  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_attribute}
   def parse(mapping) do
     with [ptype, encoding | _] <- String.split(mapping, " "),
          [encoding_name, clock_rate | params] <- String.split(encoding, "/"),
@@ -24,8 +28,8 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
       }
       ~> {:ok, &1}
     else
-      {:error, _} = error -> error
-      _ -> {:error, :invalid_attribute}
+      _ ->
+        {:error, :invalid_attribute}
     end
   end
 end

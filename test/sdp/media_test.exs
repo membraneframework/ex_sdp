@@ -21,7 +21,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       assert %Media{
                fmt: [31],
-               ports: [49170],
+               ports: [49_170],
                protocol: "RTP/AVP",
                type: "video"
              } = media
@@ -34,7 +34,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       assert %Media{
                fmt: [31],
-               ports: [49170, 49172],
+               ports: [49_170, 49_172],
                protocol: "RTP/AVP",
                type: "video"
              } = media
@@ -65,7 +65,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
           payload_type: 97
         },
         rtpmap: %Attribute.RTPMapping{
-          clock_rate: 11025,
+          clock_rate: 11_025,
           encoding: "L16",
           params: ["2"],
           payload_type: 98
@@ -80,7 +80,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
       assert %Media{
                attributes: ^parsed_attributes,
                fmt: [96, 97, 98],
-               ports: [49230],
+               ports: [49_230],
                protocol: "RTP/AVP",
                type: "m=audio"
              } = medium
@@ -164,7 +164,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         |> String.split("\n")
 
       assert %Media{
-               bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "YZ"}],
+               bandwidth: [%Bandwidth{bandwidth: 128, type: "YZ"}],
                connection_data: [
                  %ConnectionData{
                    address: %ConnectionData.IP4{
@@ -174,11 +174,27 @@ defmodule Membrane.Protocol.SDP.MediaTest do
                    network_type: "IN"
                  }
                ],
-               encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: :prompt}
+               encryption: %Encryption{key: nil, method: :prompt}
              } =
                options
                |> Media.parse_optional(media)
                ~> ({:ok, {_, medium}} -> Media.apply_session(medium, session))
+    end
+  end
+
+  describe "FMT parser" do
+    test "parses FMT RTP/AVP mapping" do
+      assert {:ok, media} = Media.parse("audio 49170 RTP/AVP 0 98 99")
+      assert %Media{fmt: [0, 98, 99], protocol: "RTP/AVP"} = media
+    end
+
+    test "parses non RTP/AVP FMT" do
+      assert {:ok, media} = Media.parse("audio 49170 NON/AVP 0 98 99")
+      assert %Media{fmt: "0 98 99", protocol: "NON/AVP"} = media
+    end
+
+    test "returns an error if one of payload types fails integer parsing" do
+      assert {:error, :invalid_fmt} = Media.parse("audio 49170 RTP/AVP 0 9d8 99")
     end
   end
 end

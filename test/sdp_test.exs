@@ -80,7 +80,7 @@ defmodule Membrane.Protocol.SDPTest do
                  },
                  encryption: %Encryption{key: nil, method: :prompt},
                  fmt: [0],
-                 ports: [49170],
+                 ports: [49_170],
                  protocol: "RTP/AVP",
                  title: "Sample media title",
                  type: "audio"
@@ -89,7 +89,7 @@ defmodule Membrane.Protocol.SDPTest do
                  attributes: [
                    {:rtpmap,
                     %Attribute.RTPMapping{
-                      clock_rate: 90000,
+                      clock_rate: 90_000,
                       encoding: "h263-1998",
                       params: [],
                       payload_type: 99
@@ -108,7 +108,7 @@ defmodule Membrane.Protocol.SDPTest do
                  },
                  encryption: %Encryption{key: "key", method: :clear},
                  fmt: [99],
-                 ports: [51372],
+                 ports: [51_372],
                  protocol: "RTP/AVP",
                  title: nil,
                  type: "video"
@@ -131,18 +131,18 @@ defmodule Membrane.Protocol.SDPTest do
              time_repeats: [
                %RepeatTimes{
                  active_duration: 3600,
-                 offsets: [0, 90000],
+                 offsets: [0, 90_000],
                  repeat_interval: 604_800
                },
                %RepeatTimes{
                  active_duration: 3600,
-                 offsets: [0, 90000],
+                 offsets: [0, 90_000],
                  repeat_interval: 604_800
                }
              ],
              time_zones_adjustments: [
                %Timezone{adjustment_time: 2_882_844_526, offset: "-1h"},
-               %Membrane.Protocol.SDP.Timezone{adjustment_time: 2_898_848_070, offset: "0"}
+               %Timezone{adjustment_time: 2_898_848_070, offset: "0"}
              ],
              timing: %Timing{
                start_time: 2_873_397_496,

@@ -1,7 +1,7 @@
 defmodule Membrane.Protocol.SDP.ConnectionData do
   @moduledoc """
   This module represents Connection Information.
-  Connection can be represented by either:
+  Address can be represented by either:
    - IPv4 address
    - IPv6 address
    - FQDN
@@ -48,9 +48,9 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
           address: sdp_address()
         }
 
-  @spec parse(binary()) ::
-          {:error, :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl}
-          | {:ok, [sdp_address] | sdp_address}
+  @type reason :: :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl
+
+  @spec parse(binary()) :: {:ok, [t] | t()} | {:error, reason}
   def parse(connection_string) do
     with [nettype, addrtype, connection_address] <- String.split(connection_string, " "),
          [address | optional] <- String.split(connection_address, "/") do
@@ -149,7 +149,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   end
 
   defp max_octet_value(size)
-  defp max_octet_value(8), do: 65535
+  defp max_octet_value(8), do: 65_535
   defp max_octet_value(4), do: 255
 
   defp wrap_result([_ | _] = addresses, nettype) do
