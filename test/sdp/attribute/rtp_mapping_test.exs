@@ -13,9 +13,6 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
              } = mapping
     end
 
-    # a=rtpmap:97 L16/8000#
-    # a=rtpmap:98 L16/11025/2
-
     test "parses valid rtp mapping for audio media without specified channels" do
       assert {:ok, mapping} = RTPMapping.parse("97 L16/8000", :audio)
 

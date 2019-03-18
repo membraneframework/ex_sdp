@@ -8,8 +8,8 @@ defmodule Membrane.Protocol.SDP.TimezoneTest do
       assert {:ok, corrections} = Timezone.parse("2882844526 -1h 2898848070 0")
 
       assert corrections == [
-               %Timezone{adjustment_time: 2_882_844_526, offset: "-1h"},
-               %Timezone{adjustment_time: 2_898_848_070, offset: "0"}
+               %Timezone{adjustment_time: 2_882_844_526, offset: -1},
+               %Timezone{adjustment_time: 2_898_848_070, offset: 0}
              ]
     end
 

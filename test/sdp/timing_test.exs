@@ -9,10 +9,6 @@ defmodule Membrane.Protocol.SDP.TimingTest do
       assert timing == %Timing{start_time: 1_550_678_539, stop_time: 1_550_878_520}
     end
 
-    test "returns an error when end is missing" do
-      assert {:error, :missing_stop} = Timing.parse("1550678539")
-    end
-
     test "returns an error when description is invalid" do
       assert {:error, :invalid_timing} = Timing.parse("")
     end

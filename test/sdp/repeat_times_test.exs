@@ -41,7 +41,7 @@ defmodule Membrane.Protocol.SDP.RepeatTimesTest do
       assert {:error, :no_offsets} == RepeatTimes.parse("6000 60")
     end
 
-    test "return an error if offest is not valid" do
+    test "return an error if offset is not valid" do
       assert {:error, {:invalid_offset, "64er"}} == RepeatTimes.parse("600 600 64er")
     end
 

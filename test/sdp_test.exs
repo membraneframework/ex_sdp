@@ -29,7 +29,7 @@ defmodule Membrane.Protocol.SDPTest do
          t=2873397496 2873404696
          r=604800 3600 0 90000
          r=7d 1h 0 25h
-         z=2882844526 -1h 2898848070 0
+         z=2882844526 -1h 2898848070 2h
          k=clear:key
          a=recvonly
          a=key:value
@@ -118,8 +118,8 @@ defmodule Membrane.Protocol.SDPTest do
       }
     ],
     time_zones_adjustments: [
-      %Timezone{adjustment_time: 2_882_844_526, offset: "-1h"},
-      %Timezone{adjustment_time: 2_898_848_070, offset: "0"}
+      %Timezone{adjustment_time: 2_882_844_526, offset: -1},
+      %Timezone{adjustment_time: 2_898_848_070, offset: 2}
     ],
     timing: %Timing{
       start_time: 2_873_397_496,
@@ -166,7 +166,7 @@ defmodule Membrane.Protocol.SDPTest do
       expected = """
       An error has occurred while parsing following SDP line:
       o=jdoe 2890844526 2890842807 IN
-      with reason: invalid_origin
+      with reason: invalid_connection_data
       """
 
       assert_raise RuntimeError, expected, fn ->

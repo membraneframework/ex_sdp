@@ -33,16 +33,16 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
     "s" => 1
   }
 
-  @valid_keys @unit_mappings |> Map.keys()
+  @valid_keys Map.keys(@unit_mappings)
 
-  @spec parse(binary()) ::
-          {:ok, t()}
-          | {:error,
-             :duration_nan
-             | :interval_nan
-             | :no_offsets
-             | :malformed_repeat
-             | {:invalid_offset | :invalid_unit, binary()}}
+  @type reason ::
+          :duration_nan
+          | :interval_nan
+          | :no_offsets
+          | :malformed_repeat
+          | {:invalid_offset | :invalid_unit, binary()}
+
+  @spec parse(binary()) :: {:ok, t()} | {:error, reason}
   def parse(repeat) do
     case String.split(repeat, " ") do
       [interval, duration | offsets] = as_list ->
@@ -93,9 +93,11 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
   end
 
   defp parse_compact(list) do
-    list
-    |> decode_compact()
-    ~>> (result when is_list(result) -> result |> Enum.reverse() |> build_compact())
+    with [_ | _] = result <- decode_compact(list) do
+      result
+      |> Enum.reverse()
+      |> build_compact()
+    end
   end
 
   defp decode_compact(list) do

@@ -25,8 +25,12 @@ defmodule Membrane.Protocol.SDP.Origin do
           address: ConnectionData.sdp_address()
         }
 
+  @type reason ::
+          :invalid_address | :invalid_connection_data | :invalid_origin | :option_nan | :wrong_ttl
+
   @spec parse(binary()) ::
-          {:ok, t()} | {:error, :invalid_address | :invalid_origin | :option_nan | :wrong_ttl}
+          {:error, reason}
+          | {:ok, t()}
   def parse(origin) do
     with [username, sess_id, sess_version, conn_info] <- String.split(origin, " ", parts: 4),
          {:ok, conn_info} <- ConnectionData.parse(conn_info) do
@@ -39,7 +43,6 @@ defmodule Membrane.Protocol.SDP.Origin do
 
       {:ok, origin}
     else
-      {:error, :invalid_connection_data} -> {:error, :invalid_origin}
       {:error, _} = error -> error
       _ -> {:error, :invalid_origin}
     end

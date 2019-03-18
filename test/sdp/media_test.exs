@@ -163,6 +163,11 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         """
         |> String.split("\n")
 
+      result =
+        options
+        |> Media.parse_optional(media)
+        ~> ({:ok, {_, medium}} -> Media.apply_session(medium, session))
+
       assert %Media{
                bandwidth: [%Bandwidth{bandwidth: 128, type: :AS}],
                connection_data: [
@@ -172,10 +177,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
                  }
                ],
                encryption: %Encryption{key: nil, method: :prompt}
-             } =
-               options
-               |> Media.parse_optional(media)
-               ~> ({:ok, {_, medium}} -> Media.apply_session(medium, session))
+             } = result
     end
   end
 

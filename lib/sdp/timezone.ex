@@ -11,14 +11,12 @@ defmodule Membrane.Protocol.SDP.Timezone do
 
   @type t :: %__MODULE__{
           adjustment_time: non_neg_integer(),
-          offset: binary()
+          offset: -12..12
         }
 
   @spec parse(binary()) :: {:ok, [t]} | {:error, :invalid_timezone}
   def parse(timezones) do
-    timezones
-    |> String.split(" ")
-    |> case do
+    case String.split(timezones, " ") do
       list when rem(length(list), 2) == 0 ->
         parse_timezones(list)
 
@@ -42,17 +40,15 @@ defmodule Membrane.Protocol.SDP.Timezone do
   end
 
   defp parse_timezone(adjustment_time, offset) do
-    adjustment_time
-    |> Integer.parse()
-    |> case do
-      {adjustment_time, ""} ->
-        timezone = %__MODULE__{
-          adjustment_time: adjustment_time,
-          offset: offset
-        }
+    with {adjustment_time, ""} <- Integer.parse(adjustment_time),
+         {offset, rest} when rest == "" or rest == "h" <- Integer.parse(offset) do
+      timezone = %__MODULE__{
+        adjustment_time: adjustment_time,
+        offset: offset
+      }
 
-        {:ok, timezone}
-
+      {:ok, timezone}
+    else
       _ ->
         {:error, :invalid_timezone}
     end

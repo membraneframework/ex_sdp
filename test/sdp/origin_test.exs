@@ -26,7 +26,7 @@ defmodule Membrane.Protocol.SDP.OriginTest do
                Origin.parse("jdoe 2890844526 2890842807 IN NOTIP 10.47.16.5")
     end
 
-    test "processes origin with fqdn" do
+    test "processes origin with FQDN" do
       assert {:ok,
               %Origin{
                 address: "host.origin.name",
