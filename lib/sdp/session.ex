@@ -47,7 +47,7 @@ defmodule Membrane.Protocol.SDP.Session do
           uri: binary(),
           email: binary() | nil,
           phone_number: binary() | nil,
-          connection_data: ConnectionData.t(),
+          connection_data: ConnectionData.sdp_address(),
           bandwidth: [Bandwidth.t()],
           time_zones_adjustments: [Timezone.t()],
           encryption: Encryption.t(),

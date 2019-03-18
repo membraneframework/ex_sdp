@@ -31,7 +31,7 @@ defmodule Membrane.Protocol.SDP.Media do
           protocol: binary(),
           fmt: binary() | [0..127],
           title: binary() | nil,
-          connection_data: [ConnectionData.t()],
+          connection_data: [ConnectionData.sdp_address()],
           bandwidth: [Bandwidth.t()],
           encryption: Encryption.t() | nil,
           attributes: [binary()]
@@ -102,8 +102,8 @@ defmodule Membrane.Protocol.SDP.Media do
   @spec apply_session(__MODULE__.t(), Session.t()) :: __MODULE__.t()
   def apply_session(media, session) do
     session
-    |> Map.delete(:__struct__)
-    |> Enum.reduce(media |> Map.delete(:__struct__), fn
+    |> Map.from_struct()
+    |> Enum.reduce(Map.from_struct(media), fn
       {inherited_key, value}, acc
       when inherited_key == :encryption ->
         if acc[inherited_key] != nil,

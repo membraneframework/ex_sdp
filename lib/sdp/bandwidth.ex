@@ -10,15 +10,20 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
   @enforce_keys [:type, :bandwidth]
   defstruct @enforce_keys
 
+  @type type :: :CT | :AS
+
+  @supported_types ["CT", "AS"]
+
   @type t :: %__MODULE__{
-          type: binary(),
+          type: type(),
           bandwidth: non_neg_integer()
         }
 
   @spec parse(binary()) :: {:error, :invalid_bandwidth} | {:ok, t()}
   def parse(bandwidth) do
     with [type, bandwidth] <- String.split(bandwidth, ":"),
-         {:ok, bandwidth} <- parse_bandwidth(bandwidth) do
+         {:ok, bandwidth} <- parse_bandwidth(bandwidth),
+         {:ok, type} <- parse_type(type) do
       bandwidth = %__MODULE__{
         type: type,
         bandwidth: bandwidth
@@ -31,9 +36,13 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
     end
   end
 
+  defp parse_type(type) when type in @supported_types, do: {:ok, String.to_atom(type)}
+  defp parse_type("X-" <> _), do: {:error, :experimental_not_supported}
+  defp parse_type(_), do: {:error, :invalid_type}
+
   defp parse_bandwidth(bandwidth) do
-    bandwidth
-    |> Integer.parse()
-    ~>> ({value, ""} -> {:ok, value})
+    with {value, ""} <- Integer.parse(bandwidth) do
+      {:ok, value}
+    end
   end
 end

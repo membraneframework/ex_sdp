@@ -4,7 +4,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   Address can be represented by either:
    - IPv4 address
    - IPv6 address
-   - FQDN
+   - FQDN (Fully Qualified Domain Name)
 
   In case of IPv4 and IPv6 multicast addresses there can be more than one
   parsed from single SDP field if it is described using slash notation.

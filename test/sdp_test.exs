@@ -25,8 +25,7 @@ defmodule Membrane.Protocol.SDPTest do
          e=j.doe@example.com (Jane Doe)
          p=111 111 111
          c=IN IP4 224.2.17.12/127
-         b=YZ:256
-         b=X-YZ:128
+         b=CT:256
          t=2873397496 2873404696
          r=604800 3600 0 90000
          r=7d 1h 0 25h
@@ -45,8 +44,7 @@ defmodule Membrane.Protocol.SDPTest do
   @expected_output %Session{
     attributes: [{"key", "value"}, :recvonly],
     bandwidth: [
-      %Bandwidth{bandwidth: 128, type: "X-YZ"},
-      %Bandwidth{bandwidth: 256, type: "YZ"}
+      %Bandwidth{bandwidth: 256, type: :CT}
     ],
     connection_data: %ConnectionData.IP4{
       ttl: 127,
@@ -58,8 +56,7 @@ defmodule Membrane.Protocol.SDPTest do
       %Media{
         attributes: [],
         bandwidth: [
-          %Bandwidth{bandwidth: 128, type: "X-YZ"},
-          %Bandwidth{bandwidth: 256, type: "YZ"}
+          %Bandwidth{bandwidth: 256, type: :CT}
         ],
         connection_data: %ConnectionData.IP4{
           ttl: 127,
@@ -83,8 +80,7 @@ defmodule Membrane.Protocol.SDPTest do
            }}
         ],
         bandwidth: [
-          %Bandwidth{bandwidth: 128, type: "X-YZ"},
-          %Bandwidth{bandwidth: 256, type: "YZ"}
+          %Bandwidth{bandwidth: 256, type: :CT}
         ],
         connection_data: %ConnectionData.IP4{
           ttl: 127,

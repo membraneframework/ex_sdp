@@ -157,14 +157,14 @@ defmodule Membrane.Protocol.SDP.MediaTest do
     } do
       options =
         """
-        b=YZ:128
+        b=AS:128
         c=IN IP4 144.2.17.12/220
         k=prompt
         """
         |> String.split("\n")
 
       assert %Media{
-               bandwidth: [%Bandwidth{bandwidth: 128, type: "YZ"}],
+               bandwidth: [%Bandwidth{bandwidth: 128, type: :AS}],
                connection_data: [
                  %ConnectionData.IP4{
                    ttl: 220,
