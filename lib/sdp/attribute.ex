@@ -30,53 +30,42 @@ defmodule Membrane.Protocol.SDP.Attribute do
   def parse(line) do
     line
     |> String.split(":", parts: 2)
-    |> case do
-      [name, value] ->
-        name = String.replace(name, "-", "-")
-
-        {name, value}
-
-      [flag] ->
-        flag
-    end
     |> handle_known_attribute()
   end
 
   defp handle_known_attribute(attr)
 
-  defp handle_known_attribute({"rtpmap", mapping}) do
-    mapping
-    |> RTPMapping.parse()
-    ~>> ({:ok, result} -> {:ok, {:rtpmap, result}})
+  defp handle_known_attribute(["rtpmap", mapping]) do
+    with {:ok, result} <- RTPMapping.parse(mapping) do
+      {:ok, {:rtpmap, result}}
+    end
   end
 
-  defp handle_known_attribute({"framerate", framerate}) do
+  defp handle_known_attribute(["framerate", framerate]) do
     with {:ok, framerate} <- parse_framerate(framerate) do
       {:ok, {:framerate, framerate}}
     end
   end
 
-  defp handle_known_attribute(flag) when is_binary(flag) and flag in @valid_flags do
-    String.to_atom(flag)
-    ~> {:ok, &1}
+  defp handle_known_attribute([flag]) when is_binary(flag) and flag in @valid_flags do
+    {:ok, String.to_atom(flag)}
   end
 
-  defp handle_known_attribute({prop, value})
+  defp handle_known_attribute([prop, value])
        when is_binary(prop) and prop in @directly_assignable do
-    {String.to_atom(prop), value}
-    ~> {:ok, &1}
+    {:ok, {String.to_atom(prop), value}}
   end
 
-  defp handle_known_attribute({prop, value}) when is_binary(prop) and prop in @numeric do
+  defp handle_known_attribute([prop, value]) when is_binary(prop) and prop in @numeric do
     with {number, ""} <- Integer.parse(value) do
-      {String.to_atom(prop), number}
-      ~> {:ok, &1}
+      {:ok, {String.to_atom(prop), number}}
     else
       _ -> {:error, :invalid_attribute}
     end
   end
 
-  defp handle_known_attribute(other), do: other ~> {:ok, &1}
+  defp handle_known_attribute([name, value]), do: {:ok, {name, value}}
+  defp handle_known_attribute([other]), do: {:ok, other}
 
   def parse_framerate(framerate) do
     case Float.parse(framerate) do
