@@ -58,11 +58,10 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   defp parse_address(address, addrtype, optional) do
     with {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
          {:ok, addresses} <- handle_address(address, addrtype, optional) do
-      addresses
-      ~> {:ok, &1}
+      {:ok, addresses}
     else
       {:error, :einval} ->
-        address ~> {:ok, &1}
+        {:ok, address}
 
       {:error, _} = error ->
         error
@@ -74,8 +73,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
 
   defp handle_address(address, "IP4", [ttl]) do
     with {:ok, ttl} <- parse_ttl(ttl) do
-      %IP4{value: address, ttl: ttl}
-      ~> {:ok, &1}
+      {:ok, %IP4{value: address, ttl: ttl}}
     end
   end
 
@@ -84,22 +82,21 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
          ttl when ttl in 0..255 <- ttl,
          {:ok, count} <- parse_numeric_option(count),
          {:ok, addresses} <- unfold_addresses(address, count) do
-      Enum.map(addresses, fn address -> %IP4{value: address, ttl: ttl} end)
-      ~> {:ok, &1}
+      addresses = Enum.map(addresses, fn address -> %IP4{value: address, ttl: ttl} end)
+      {:ok, addresses}
     else
       wrong_ttl when is_number(wrong_ttl) -> {:error, :wrong_ttl}
       {:error, _} = error -> error
     end
   end
 
-  defp handle_address(address, "IP6", []), do: %IP6{value: address} ~> {:ok, &1}
+  defp handle_address(address, "IP6", []), do: {:ok, %IP6{value: address}}
 
   defp handle_address(address, "IP6", [count]) do
     with {:ok, count} <- parse_numeric_option(count),
          {:ok, addresses} <- unfold_addresses(address, count) do
-      addresses
-      |> Enum.map(fn address -> %IP6{value: address} end)
-      ~> {:ok, &1}
+      addresses = Enum.map(addresses, fn address -> %IP6{value: address} end)
+      {:ok, addresses}
     end
   end
 
@@ -134,9 +131,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
     value = elem(ip, index)
 
     if value + 1 <= max_octet_value(tuple_size(ip)) do
-      ip
-      |> put_elem(index, value + 1)
-      ~> {:ok, &1}
+      {:ok, put_elem(ip, index, value + 1)}
     else
       {:error, :invalid_address}
     end

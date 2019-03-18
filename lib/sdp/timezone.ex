@@ -38,7 +38,7 @@ defmodule Membrane.Protocol.SDP.Timezone do
         {:error, _} = error -> {:halt, error}
       end
     end)
-    ~>> (list when is_list(list) -> list |> Enum.reverse() ~> {:ok, &1})
+    ~>> (list when is_list(list) -> {:ok, Enum.reverse(list)})
   end
 
   defp parse_timezone(adjustment_time, offset) do
@@ -46,11 +46,12 @@ defmodule Membrane.Protocol.SDP.Timezone do
     |> Integer.parse()
     |> case do
       {adjustment_time, ""} ->
-        %__MODULE__{
+        timezone = %__MODULE__{
           adjustment_time: adjustment_time,
           offset: offset
         }
-        ~> {:ok, &1}
+
+        {:ok, timezone}
 
       _ ->
         {:error, :invalid_timezone}

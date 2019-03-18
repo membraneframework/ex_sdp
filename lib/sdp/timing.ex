@@ -19,11 +19,12 @@ defmodule Membrane.Protocol.SDP.Timing do
     withl split: [start, stop] <- String.split(timing, " "),
           parse_start: {start, ""} <- Integer.parse(start),
           parse_stop: {stop, ""} <- Integer.parse(stop) do
-      %__MODULE__{
+      timing = %__MODULE__{
         start_time: start,
         stop_time: stop
       }
-      ~> {:ok, &1}
+
+      {:ok, timing}
     else
       split: [""] -> {:error, :invalid_timing}
       split: [_start] -> {:error, :missing_stop}

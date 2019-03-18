@@ -19,11 +19,12 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
   def parse(bandwidth) do
     with [type, bandwidth] <- String.split(bandwidth, ":"),
          {:ok, bandwidth} <- parse_bandwidth(bandwidth) do
-      %__MODULE__{
+      bandwidth = %__MODULE__{
         type: type,
         bandwidth: bandwidth
       }
-      ~> {:ok, &1}
+
+      {:ok, bandwidth}
     else
       _ ->
         {:error, :invalid_bandwidth}

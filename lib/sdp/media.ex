@@ -42,13 +42,14 @@ defmodule Membrane.Protocol.SDP.Media do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
           int: {port_no, port_options} when port_no in 0..65_535 <- Integer.parse(port),
           fmt: {:ok, fmt} <- parse_fmt(fmt, proto) do
-      %__MODULE__{
+      media = %__MODULE__{
         type: parse_type(type),
         ports: gen_ports(port_no, port_options),
         protocol: proto,
         fmt: fmt
       }
-      ~> {:ok, &1}
+
+      {:ok, media}
     else
       conn: _ -> {:error, :invalid_media_spec}
       int: _ -> {:error, :malformed_port_number}
@@ -59,10 +60,10 @@ defmodule Membrane.Protocol.SDP.Media do
   @spec parse_optional([binary()], t()) :: {:ok, {[binary()], t()}} | {:error, atom()}
   def parse_optional(lines, media)
 
-  def parse_optional([""], media), do: {[""], finalize_optional_parsing(media)} ~> {:ok, &1}
+  def parse_optional([""], media), do: {:ok, {[""], finalize_optional_parsing(media)}}
 
   def parse_optional(["m=" <> _ | _] = lines, media),
-    do: {lines, finalize_optional_parsing(media)} ~> {:ok, &1}
+    do: {:ok, {lines, finalize_optional_parsing(media)}}
 
   def parse_optional(["i=" <> title | rest], media),
     do: parse_optional(rest, %__MODULE__{media | title: title})
@@ -91,7 +92,8 @@ defmodule Membrane.Protocol.SDP.Media do
   end
 
   def parse_optional(["a=" <> attribute | rest], %__MODULE__{attributes: attrs} = media) do
-    with {:ok, attribute} <- Attribute.parse(attribute) do
+    with {:ok, attribute} <- Attribute.parse(attribute),
+         {:ok, attribute} <- Attribute.parse_media_attribute(attribute, media.type) do
       %__MODULE__{media | attributes: [attribute | attrs]}
       ~> parse_optional(rest, &1)
     end

@@ -15,7 +15,8 @@ defmodule Membrane.Protocol.SDP.Attribute do
     "type",
     "charset",
     "sdplang",
-    "lang"
+    "lang",
+    "rtpmap"
   ]
   @numeric ["ptime", "maxptime", "quality"]
 
@@ -33,13 +34,18 @@ defmodule Membrane.Protocol.SDP.Attribute do
     |> handle_known_attribute()
   end
 
-  defp handle_known_attribute(attr)
-
-  defp handle_known_attribute(["rtpmap", mapping]) do
-    with {:ok, result} <- RTPMapping.parse(mapping) do
-      {:ok, {:rtpmap, result}}
+  @spec parse_media_attribute({binary() | atom, binary()}, atom() | binary()) ::
+          {:error, :invalid_attribute}
+          | {:ok, {atom(), any()}}
+  def parse_media_attribute({:rtpmap, value}, media) do
+    with {:ok, %RTPMapping{} = mapping} <- RTPMapping.parse(value, media) do
+      {:ok, {:rtpmap, mapping}}
     end
   end
+
+  def parse_media_attribute(other), do: other
+
+  defp handle_known_attribute(attr)
 
   defp handle_known_attribute(["framerate", framerate]) do
     with {:ok, framerate} <- parse_framerate(framerate) do

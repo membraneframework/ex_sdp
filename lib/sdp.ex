@@ -64,70 +64,68 @@ defmodule Membrane.Protocol.SDP do
   defp parse_line(lines, session)
 
   defp parse_line(["v=" <> version | rest], spec),
-    do: %Session{spec | version: version} ~> {rest, &1}
+    do: {rest, %Session{spec | version: version}}
 
   defp parse_line(["o=" <> origin | rest], spec) do
     with {:ok, %Origin{} = origin} <- Origin.parse(origin) do
-      %Session{spec | origin: origin} ~> {rest, &1}
+      {rest, %Session{spec | origin: origin}}
     end
   end
 
   defp parse_line(["s=" <> session_name | rest], spec),
-    do: %Session{spec | session_name: session_name} ~> {rest, &1}
+    do: {rest, %Session{spec | session_name: session_name}}
 
   defp parse_line(["i=" <> session_information | rest], spec),
-    do: %Session{spec | session_information: session_information} ~> {rest, &1}
+    do: {rest, %Session{spec | session_information: session_information}}
 
   defp parse_line(["u=" <> uri | rest], spec),
-    do: %Session{spec | uri: uri} ~> {rest, &1}
+    do: {rest, %Session{spec | uri: uri}}
 
   defp parse_line(["e=" <> email | rest], spec),
-    do: %Session{spec | email: email} ~> {rest, &1}
+    do: {rest, %Session{spec | email: email}}
 
   defp parse_line(["p=" <> phone_number | rest], spec),
-    do: %Session{spec | phone_number: phone_number} ~> {rest, &1}
+    do: {rest, %Session{spec | phone_number: phone_number}}
 
   defp parse_line(["c=" <> connection_data | rest], spec) do
     with {:ok, connection_info} <- ConnectionData.parse(connection_data) do
-      %Session{spec | connection_data: connection_info} ~> {rest, &1}
+      {rest, %Session{spec | connection_data: connection_info}}
     end
   end
 
   defp parse_line(["b=" <> bandwidth | rest], %Session{bandwidth: acc_bandwidth} = spec) do
     with {:ok, bandwidth} <- Bandwidth.parse(bandwidth) do
-      %Session{spec | bandwidth: [bandwidth | acc_bandwidth]} ~> {rest, &1}
+      {rest, %Session{spec | bandwidth: [bandwidth | acc_bandwidth]}}
     end
   end
 
   defp parse_line(["t=" <> timing | rest], spec) do
     with {:ok, timing} <- Timing.parse(timing) do
-      %Session{spec | timing: timing} ~> {rest, &1}
+      {rest, %Session{spec | timing: timing}}
     end
   end
 
   defp parse_line(["r=" <> repeat | rest], %Session{time_repeats: time_repeats} = spec) do
     with {:ok, repeats} <- RepeatTimes.parse(repeat) do
-      %Session{spec | time_repeats: [repeats | time_repeats]} ~> {rest, &1}
+      {rest, %Session{spec | time_repeats: [repeats | time_repeats]}}
     end
   end
 
   defp parse_line(["z=" <> timezones | rest], spec) do
     with {:ok, timezones} <- Timezone.parse(timezones) do
-      %Session{spec | time_zones_adjustments: timezones} ~> {rest, &1}
+      {rest, %Session{spec | time_zones_adjustments: timezones}}
     end
   end
 
   defp parse_line(["k=" <> encryption | rest], spec) do
     encryption
     |> Encryption.parse()
-    ~> %Session{spec | encryption: &1}
-    ~> {rest, &1}
+    ~> {rest, %Session{spec | encryption: &1}}
   end
 
   defp parse_line(["a=" <> attribute | rest], %{attributes: attrs} = session) do
     with {:ok, attribute} <- Attribute.parse(attribute) do
-      %Session{session | attributes: [attribute | attrs]}
-      ~> {rest, &1}
+      {rest, %Session{session | attributes: [attribute | attrs]}}
     end
   end
 
@@ -136,8 +134,7 @@ defmodule Membrane.Protocol.SDP do
          {:ok, {rest, medium}} <- Media.parse_optional(rest, medium) do
       medium
       |> Media.apply_session(session)
-      ~> %Session{session | media: [&1 | media]}
-      ~> {rest, &1}
+      ~> {rest, %Session{session | media: [&1 | media]}}
     end
   end
 

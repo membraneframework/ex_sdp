@@ -27,4 +27,11 @@ defmodule Membrane.Protocol.SDP.AttributeTest do
       assert {:ok, "otherattr"} = Attribute.parse("otherattr")
     end
   end
+
+  describe "Media attribute parser" do
+    test "handles rtpmaping" do
+      assert {:ok, {:rtpmap, %Attribute.RTPMapping{}}} =
+               Attribute.parse_media_attribute({:rtpmap, "98 L16/16000/2"}, :audio)
+    end
+  end
 end

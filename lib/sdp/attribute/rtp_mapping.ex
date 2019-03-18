@@ -8,28 +8,41 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
   defstruct @enforce_keys
 
   @type t :: %__MODULE__{
-          payload_type: 0..127,
+          payload_type: 99..127,
           encoding: binary(),
           clock_rate: non_neg_integer(),
           params: [any()]
         }
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_attribute}
-  def parse(mapping) do
-    with [ptype, encoding | _] <- String.split(mapping, " "),
+  @spec parse(binary(), atom | binary()) ::
+          {:ok, t()} | {:error, :invalid_attribute | :invalid_param}
+  def parse(mapping, type) do
+    with [payload_type, encoding | _] <- String.split(mapping, " "),
          [encoding_name, clock_rate | params] <- String.split(encoding, "/"),
-         {ptype, ""} <- Integer.parse(ptype),
+         {payload_type, ""} <- Integer.parse(payload_type),
          {clock_rate, ""} <- Integer.parse(clock_rate) do
-      %__MODULE__{
-        payload_type: ptype,
+      mapping = %__MODULE__{
+        payload_type: payload_type,
         encoding: encoding_name,
         clock_rate: clock_rate,
-        params: params
+        params: parse_params(type, params)
       }
-      ~> {:ok, &1}
+
+      {:ok, mapping}
     else
       _ ->
         {:error, :invalid_attribute}
     end
   end
+
+  defp parse_params(:audio, [raw_channels]) do
+    case Integer.parse(raw_channels) do
+      {channels_count, ""} -> [{:channels_count, channels_count}]
+      _ -> {:error, :invalid_param}
+    end
+  end
+
+  defp parse_params(:audio, []), do: [{:channels_count, 1}]
+
+  defp parse_params(_, params), do: params
 end

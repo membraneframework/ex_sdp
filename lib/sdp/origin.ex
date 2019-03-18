@@ -30,13 +30,14 @@ defmodule Membrane.Protocol.SDP.Origin do
   def parse(origin) do
     with [username, sess_id, sess_version, conn_info] <- String.split(origin, " ", parts: 4),
          {:ok, conn_info} <- ConnectionData.parse(conn_info) do
-      %__MODULE__{
+      origin = %__MODULE__{
         username: username,
         session_id: sess_id,
         session_version: sess_version,
         address: conn_info
       }
-      ~> {:ok, &1}
+
+      {:ok, origin}
     else
       {:error, :invalid_connection_data} -> {:error, :invalid_origin}
       {:error, _} = error -> error

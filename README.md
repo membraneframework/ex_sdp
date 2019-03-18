@@ -79,7 +79,7 @@ a=rtpmap:99 h263-1998/90000
        ports: [49170],
        protocol: "RTP/AVP",
        title: "Sample media title",
-       type: "audio"
+       type: :audio
      },
      %Membrane.Protocol.SDP.Media{
        attributes: [
@@ -103,7 +103,7 @@ a=rtpmap:99 h263-1998/90000
        ports: [51372],
        protocol: "RTP/AVP",
        title: nil,
-       type: "video"
+       type: :video
      }
    ],
    origin: %Membrane.Protocol.SDP.Origin{

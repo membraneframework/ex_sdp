@@ -69,12 +69,13 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
     with {interval, ""} <- Integer.parse(interval),
          {duration, ""} <- Integer.parse(duration),
          {:ok, offsets} <- process_offsets(offsets) do
-      %__MODULE__{
+      explicit_repeat = %__MODULE__{
         repeat_interval: interval,
         active_duration: duration,
         offsets: offsets
       }
-      ~> {:ok, &1}
+
+      {:ok, explicit_repeat}
     else
       {:error, _} = error -> error
       _ -> {:error, :malformed_repeat}
@@ -119,11 +120,12 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
   defp build_compact([_, _]), do: {:error, :no_offsets}
 
   defp build_compact([interval, duration | offsets]) do
-    %__MODULE__{
+    compact = %__MODULE__{
       repeat_interval: interval,
       active_duration: duration,
       offsets: offsets
     }
-    ~> {:ok, &1}
+
+    {:ok, compact}
   end
 end
