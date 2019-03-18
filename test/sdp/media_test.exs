@@ -23,7 +23,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
                fmt: [31],
                ports: [49_170],
                protocol: "RTP/AVP",
-               type: "video"
+               type: :video
              } = media
     end
 
@@ -36,7 +36,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
                fmt: [31],
                ports: [49_170, 49_172],
                protocol: "RTP/AVP",
-               type: "video"
+               type: :video
              } = media
     end
 

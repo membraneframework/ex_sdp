@@ -26,30 +26,38 @@ defmodule Membrane.Protocol.SDP do
   @spec parse(binary()) ::
           {:ok, Session.t()} | {:error, atom() | {:not_supported_addr_type, binary()}}
   def parse(binary) do
-    initial_value =
-      Session.fields()
-      |> Map.new(fn
-        {k, v} -> {k, v}
-        k -> {k, nil}
-      end)
-      ~> struct(Session, &1)
-
     binary
     |> String.split("\r\n")
-    |> do_parse(initial_value)
+    |> do_parse()
   end
 
-  defp do_parse(lines, spec)
-  defp do_parse([""], session), do: session |> flip_media() ~> {:ok, &1}
+  defp do_parse(lines, session \\ struct(Session))
+  defp do_parse([""], session), do: {:ok, flip_media(session)}
 
-  defp do_parse(lines, spec) do
-    case parse_line(lines, spec) do
-      {:error, reason} = error ->
-        report_error(lines, reason)
-        error
+  defp do_parse(lines, session) do
+    with {rest, %Session{} = session} <- parse_line(lines, session) do
+      do_parse(rest, session)
+    end
+  end
 
-      {rest, %{} = session} ->
-        do_parse(rest, session)
+  @spec parse!(binary()) :: Session.t()
+  def parse!(binary) do
+    binary
+    |> String.split("\r\n")
+    |> do_parse!()
+  end
+
+  defp do_parse!(lines, session \\ struct(Session))
+  defp do_parse!([""], session), do: flip_media(session)
+
+  defp do_parse!(lines, session) do
+    case parse_line(lines, session) do
+      {:error, reason} ->
+        error_message = format_error(lines, reason)
+        raise error_message
+
+      {rest, %Session{} = session} ->
+        do_parse!(rest, session)
     end
   end
 
@@ -133,7 +141,7 @@ defmodule Membrane.Protocol.SDP do
     end
   end
 
-  defp report_error(["m=" <> _ = line | rest], reason) do
+  defp format_error(["m=" <> _ = line | rest], reason) do
     attributes =
       rest
       |> Enum.take_while(fn
@@ -142,7 +150,7 @@ defmodule Membrane.Protocol.SDP do
       end)
       |> Enum.join("\n")
 
-    Logger.error("""
+    """
     Error while parsing media:
     #{line}
 
@@ -150,15 +158,15 @@ defmodule Membrane.Protocol.SDP do
     #{attributes}
 
     with reason: #{reason}
-    """)
+    """
   end
 
-  defp report_error([line | _], reason) do
-    Logger.error("""
+  defp format_error([line | _], reason) do
+    """
     An error has occurred while parsing following SDP line:
     #{line}
     with reason: #{reason}
-    """)
+    """
   end
 
   defp flip_media(%{media: media} = session),

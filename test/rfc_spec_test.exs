@@ -56,7 +56,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    fmt: [0],
                    ports: [49_170],
                    protocol: "RTP/AVP",
-                   type: "audio"
+                   type: :audio
                  },
                  %Media{
                    attributes: [
@@ -74,7 +74,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    fmt: [99],
                    ports: [51_372],
                    protocol: "RTP/AVP",
-                   type: "video"
+                   type: :video
                  }
                ],
                origin: %Origin{
@@ -151,7 +151,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    ports: [49_170],
                    protocol: "RTP/AVP",
                    title: nil,
-                   type: "audio"
+                   type: :audio
                  },
                  %Media{
                    attributes: [
@@ -175,7 +175,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    ports: [51_372],
                    protocol: "RTP/AVP",
                    title: nil,
-                   type: "video"
+                   type: :video
                  }
                ],
                origin: %Origin{
@@ -235,7 +235,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    ports: [49_174],
                    protocol: "RTP/AVP",
                    title: nil,
-                   type: "audio"
+                   type: :audio
                  },
                  %Media{
                    attributes: [
@@ -253,7 +253,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                    ports: [49_170],
                    protocol: "RTP/AVP",
                    title: nil,
-                   type: "video"
+                   type: :video
                  }
                ],
                origin: %Origin{

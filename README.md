@@ -99,7 +99,7 @@ a=rtpmap:99 h263-1998/90000
          value: {224, 2, 17, 12}
        },
        encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: "rsa"},
-       fmt: 'c',
+       fmt: [99],
        ports: [51372],
        protocol: "RTP/AVP",
        title: nil,

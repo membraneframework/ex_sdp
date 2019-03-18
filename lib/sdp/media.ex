@@ -17,8 +17,16 @@ defmodule Membrane.Protocol.SDP.Media do
 
   alias Membrane.Protocol.SDP.{Attribute, Bandwidth, ConnectionData, Encryption, Session}
 
+  @typedoc """
+  Represents type of media. In [RFC4566](https://tools.ietf.org/html/rfc4566#section-5.14)
+  there are defined "audio", "video", "text", "application", and "message" types.
+
+  Known types are represented as atoms others are binaries.
+  """
+  @type type :: :audio | :video | :text | :application | :message | binary()
+
   @type t :: %__MODULE__{
-          type: binary(),
+          type: type(),
           ports: [:inet.port_number()],
           protocol: binary(),
           fmt: binary() | [0..127],
@@ -35,7 +43,7 @@ defmodule Membrane.Protocol.SDP.Media do
           int: {port_no, port_options} when port_no in 0..65_535 <- Integer.parse(port),
           fmt: {:ok, fmt} <- parse_fmt(fmt, proto) do
       %__MODULE__{
-        type: type,
+        type: parse_type(type),
         ports: gen_ports(port_no, port_options),
         protocol: proto,
         fmt: fmt
@@ -117,7 +125,23 @@ defmodule Membrane.Protocol.SDP.Media do
     ~> %__MODULE__{media | attributes: &1}
   end
 
-  defp gen_ports(port_no, port_options)
+  defp parse_type(type) when type in ["audio", "video", "text", "application", "message"],
+    do: String.to_atom(type)
+
+  defp parse_type(type) when is_binary(type), do: type
+
+  defp parse_fmt(fmt, proto) when proto == "RTP/AVP" or proto == "RTP/SAVP" do
+    fmt
+    |> String.split(" ")
+    |> Bunch.Enum.try_map(fn single_fmt ->
+      case Integer.parse(single_fmt) do
+        {parsed_fmt, ""} -> {:ok, parsed_fmt}
+        _ -> {:error, :invalid_fmt}
+      end
+    end)
+  end
+
+  defp parse_fmt(fmt, _), do: {:ok, fmt}
 
   defp gen_ports(port_no, "/" <> port_count) do
     port_count
@@ -135,19 +159,4 @@ defmodule Membrane.Protocol.SDP.Media do
   end
 
   defp gen_ports(port_no, _), do: [port_no]
-
-  defp parse_fmt(fmt, proto)
-
-  defp parse_fmt(fmt, proto) when proto == "RTP/AVP" or proto == "RTP/SAVP" do
-    fmt
-    |> String.split(" ")
-    |> Bunch.Enum.try_map(fn single_fmt ->
-      case Integer.parse(single_fmt) do
-        {parsed_fmt, ""} -> {:ok, parsed_fmt}
-        _ -> {:error, :invalid_fmt}
-      end
-    end)
-  end
-
-  defp parse_fmt(fmt, _), do: {:ok, fmt}
 end

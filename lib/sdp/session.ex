@@ -29,14 +29,14 @@ defmodule Membrane.Protocol.SDP.Session do
   defstruct @enforce_keys ++ @optional_keys
 
   alias Membrane.Protocol.SDP.{
-    ConnectionData,
     Bandwidth,
+    ConnectionData,
     Encryption,
     Media,
-    Timezone,
-    Timing,
     Origin,
-    RepeatTimes
+    RepeatTimes,
+    Timezone,
+    Timing
   }
 
   @type t :: %__MODULE__{
@@ -56,7 +56,4 @@ defmodule Membrane.Protocol.SDP.Session do
           time_repeats: [RepeatTimes.t()],
           media: [Media.t()]
         }
-
-  @spec fields() :: [atom() | {atom(), []}]
-  def fields(), do: @enforce_keys ++ @optional_keys
 end

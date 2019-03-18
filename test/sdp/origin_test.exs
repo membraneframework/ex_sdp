@@ -1,8 +1,7 @@
 defmodule Membrane.Protocol.SDP.OriginTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP.Origin
-  alias Membrane.Protocol.SDP.ConnectionData
+  alias Membrane.Protocol.SDP.{ConnectionData, Origin}
 
   describe "Origin parser" do
     test "processes valid origin declaration" do
