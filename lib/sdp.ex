@@ -2,7 +2,6 @@ defmodule Membrane.Protocol.SDP do
   @moduledoc """
   This module is responsible for parsing SDP multimedia session.
   """
-  use Bunch
   require Logger
 
   alias Membrane.Protocol.SDP.{
@@ -118,9 +117,9 @@ defmodule Membrane.Protocol.SDP do
   end
 
   defp parse_line(["k=" <> encryption | rest], spec) do
-    encryption
-    |> Encryption.parse()
-    ~> {rest, %Session{spec | encryption: &1}}
+    with {:ok, encryption} <- Encryption.parse(encryption) do
+      {rest, %Session{spec | encryption: encryption}}
+    end
   end
 
   defp parse_line(["a=" <> attribute | rest], %{attributes: attrs} = session) do
@@ -132,9 +131,8 @@ defmodule Membrane.Protocol.SDP do
   defp parse_line(["m=" <> medium | rest], %Session{media: media} = session) do
     with {:ok, medium} <- Media.parse(medium),
          {:ok, {rest, medium}} <- Media.parse_optional(rest, medium) do
-      medium
-      |> Media.apply_session(session)
-      ~> {rest, %Session{session | media: [&1 | media]}}
+      medium = Media.apply_session(medium, session)
+      {rest, %Session{session | media: [medium | media]}}
     end
   end
 
@@ -167,5 +165,5 @@ defmodule Membrane.Protocol.SDP do
   end
 
   defp flip_media(%{media: media} = session),
-    do: media |> Enum.reverse() ~> %{session | media: &1}
+    do: %{session | media: Enum.reverse(media)}
 end

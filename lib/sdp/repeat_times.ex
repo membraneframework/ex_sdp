@@ -110,8 +110,7 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
             {:cont, [time | acc]}
 
           {_, invalid_unit} ->
-            {:error, {:invalid_unit, invalid_unit}}
-            ~> {:halt, &1}
+            {:halt, {:error, {:invalid_unit, invalid_unit}}}
         end
     end)
   end

@@ -111,10 +111,10 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   defp parse_numeric_option(option) do
     option
     |> Integer.parse()
-    ~> (
+    |> case do
       {number, ""} -> {:ok, number}
       _ -> {:error, :option_nan}
-    )
+    end
   end
 
   defp unfold_addresses(address, count, acc \\ [])
@@ -130,14 +130,14 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
     index = tuple_size(ip) - 1
     value = elem(ip, index)
 
-    if value + 1 <= max_octet_value(tuple_size(ip)) do
+    if value + 1 <= max_section_size(tuple_size(ip)) do
       {:ok, put_elem(ip, index, value + 1)}
     else
       {:error, :invalid_address}
     end
   end
 
-  defp max_octet_value(size)
-  defp max_octet_value(8), do: 65_535
-  defp max_octet_value(4), do: 255
+  defp max_section_size(size)
+  defp max_section_size(8), do: 65_535
+  defp max_section_size(4), do: 255
 end

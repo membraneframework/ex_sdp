@@ -11,30 +11,38 @@ defmodule Membrane.Protocol.SDP.Encryption do
   @enforce_keys [:method]
   defstruct @enforce_keys ++ [:key]
 
+  @type methods :: :prompt | :base64 | :clear | :prompt
+
   @type t :: %__MODULE__{
-          method: binary(),
+          method: methods(),
           key: binary() | nil
         }
 
-  @spec parse(binary()) :: t()
+  @spec parse(binary()) :: {:ok, t()} | {:error, :unsupported_method}
   def parse(definition) do
+    with {method, key} <- parse_definition(definition),
+         {:ok, method} <- method_to_atom(method) do
+      {:ok,
+       %__MODULE__{
+         method: method,
+         key: key
+       }}
+    end
+  end
+
+  defp parse_definition(definition) do
     definition
     |> String.split(":", parts: 2)
     |> case do
-      [method] -> %__MODULE__{method: method}
-      [method, key] -> %__MODULE__{method: method, key: key}
+      [method] -> {method, nil}
+      [method, key] -> {method, key}
     end
-    |> parse_method()
   end
 
-  defp parse_method(%__MODULE__{method: method} = encryption),
-    do: %__MODULE__{encryption | method: method_to_atom(method)}
-
   defp method_to_atom(method)
-
-  defp method_to_atom("prompt"), do: :prompt
-  defp method_to_atom("clear"), do: :clear
-  defp method_to_atom("base64"), do: :base64
-  defp method_to_atom("uri"), do: :uri
-  defp method_to_atom(other), do: other
+  defp method_to_atom("prompt"), do: {:ok, :prompt}
+  defp method_to_atom("clear"), do: {:ok, :clear}
+  defp method_to_atom("base64"), do: {:ok, :base64}
+  defp method_to_atom("uri"), do: {:ok, :uri}
+  defp method_to_atom(_), do: {:error, :unsupported_method}
 end
