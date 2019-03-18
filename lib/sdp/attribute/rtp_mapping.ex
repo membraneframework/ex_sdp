@@ -8,7 +8,7 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
   defstruct @enforce_keys
 
   @type t :: %__MODULE__{
-          payload_type: 99..127,
+          payload_type: 96..127,
           encoding: binary(),
           clock_rate: non_neg_integer(),
           params: [any()]

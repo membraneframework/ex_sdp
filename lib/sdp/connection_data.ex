@@ -1,6 +1,7 @@
 defmodule Membrane.Protocol.SDP.ConnectionData do
   @moduledoc """
   This module represents Connection Information.
+
   Address can be represented by either:
    - IPv4 address
    - IPv6 address
