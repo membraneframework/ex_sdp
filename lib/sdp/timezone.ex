@@ -17,11 +17,8 @@ defmodule Membrane.Protocol.SDP.Timezone do
   @spec parse(binary()) :: {:ok, [t]} | {:error, :invalid_timezone}
   def parse(timezones) do
     case String.split(timezones, " ") do
-      list when rem(length(list), 2) == 0 ->
-        parse_timezones(list)
-
-      _ ->
-        {:error, :invalid_timezone}
+      list when rem(length(list), 2) == 0 -> parse_timezones(list)
+      _ -> {:error, :invalid_timezone}
     end
   end
 
@@ -49,8 +46,7 @@ defmodule Membrane.Protocol.SDP.Timezone do
 
       {:ok, timezone}
     else
-      _ ->
-        {:error, :invalid_timezone}
+      _ -> {:error, :invalid_timezone}
     end
   end
 end

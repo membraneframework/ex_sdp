@@ -2,8 +2,6 @@ defmodule Membrane.Protocol.SDP.Attribute do
   @moduledoc """
   This module is responsible for parsing SDP Attributes.
   """
-  use Bunch
-
   alias __MODULE__.RTPMapping
 
   @valid_flags ["recvonly", "sendrecv", "sendonly", "inactive"]
@@ -73,13 +71,10 @@ defmodule Membrane.Protocol.SDP.Attribute do
   defp handle_known_attribute([name, value]), do: {:ok, {name, value}}
   defp handle_known_attribute([other]), do: {:ok, other}
 
-  def parse_framerate(framerate) do
+  defp parse_framerate(framerate) do
     case Float.parse(framerate) do
-      {float_framerate, ""} ->
-        {:ok, float_framerate}
-
-      _ ->
-        parse_compound_framerate(framerate)
+      {float_framerate, ""} -> {:ok, float_framerate}
+      _ -> parse_compound_framerate(framerate)
     end
   end
 

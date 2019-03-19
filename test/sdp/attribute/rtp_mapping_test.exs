@@ -1,5 +1,6 @@
 defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
   use ExUnit.Case
+
   alias Membrane.Protocol.SDP.Attribute.RTPMapping
 
   describe "RTP Mapping parser" do

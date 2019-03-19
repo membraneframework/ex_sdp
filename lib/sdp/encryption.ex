@@ -22,18 +22,17 @@ defmodule Membrane.Protocol.SDP.Encryption do
   def parse(definition) do
     with {method, key} <- parse_definition(definition),
          {:ok, method} <- method_to_atom(method) do
-      {:ok,
-       %__MODULE__{
-         method: method,
-         key: key
-       }}
+      encryption = %__MODULE__{
+        method: method,
+        key: key
+      }
+
+      {:ok, encryption}
     end
   end
 
   defp parse_definition(definition) do
-    definition
-    |> String.split(":", parts: 2)
-    |> case do
+    case String.split(definition, ":", parts: 2) do
       [method] -> {method, nil}
       [method, key] -> {method, key}
     end

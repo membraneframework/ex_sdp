@@ -116,7 +116,9 @@ defmodule Membrane.Protocol.SDP.MediaTest do
             address: %ConnectionData.IP4{
               value: {10, 47, 16, 5}
             }
-          }
+          },
+          username: "-",
+          session_version: "2890842807"
         },
         timing: %Timing{
           start_time: 2_873_397_496,

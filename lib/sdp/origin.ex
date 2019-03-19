@@ -7,19 +7,18 @@ defmodule Membrane.Protocol.SDP.Origin do
 
   For more details please see [RFC4566 Section 5.2](https://tools.ietf.org/html/rfc4566#section-5.2)
   """
-  use Bunch
 
   alias Membrane.Protocol.SDP.ConnectionData
 
-  defstruct [
-    :username,
+  @enforce_keys [
     :session_id,
     :session_version,
     :address
   ]
+  defstruct @enforce_keys ++ [:username]
 
   @type t :: %__MODULE__{
-          username: binary(),
+          username: binary() | nil,
           session_id: binary(),
           session_version: binary(),
           address: ConnectionData.sdp_address()
@@ -28,12 +27,12 @@ defmodule Membrane.Protocol.SDP.Origin do
   @type reason ::
           :invalid_address | :invalid_connection_data | :invalid_origin | :option_nan | :wrong_ttl
 
-  @spec parse(binary()) ::
-          {:error, reason}
-          | {:ok, t()}
+  @spec parse(binary()) :: {:ok, t()} | {:error, reason}
   def parse(origin) do
     with [username, sess_id, sess_version, conn_info] <- String.split(origin, " ", parts: 4),
          {:ok, conn_info} <- ConnectionData.parse(conn_info) do
+      username = if username == "-", do: nil, else: username
+
       origin = %__MODULE__{
         username: username,
         session_id: sess_id,

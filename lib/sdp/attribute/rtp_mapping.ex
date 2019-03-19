@@ -2,7 +2,6 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
   @moduledoc """
   This module represents RTP mapping.
   """
-  use Bunch
 
   @enforce_keys [:payload_type, :encoding, :clock_rate, :params]
   defstruct @enforce_keys
@@ -30,8 +29,7 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
 
       {:ok, mapping}
     else
-      _ ->
-        {:error, :invalid_attribute}
+      _ -> {:error, :invalid_attribute}
     end
   end
 

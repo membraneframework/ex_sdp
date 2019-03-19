@@ -15,7 +15,6 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
 
   For more details please see [RFC4566 Section 5.10](https://tools.ietf.org/html/rfc4566#section-5.10).
   """
-  use Bunch
 
   @enforce_keys [:repeat_interval, :active_duration, :offsets]
   defstruct @enforce_keys

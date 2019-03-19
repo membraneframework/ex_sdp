@@ -1,5 +1,6 @@
 defmodule Membrane.Protocol.SDP.AttributeTest do
   use ExUnit.Case
+
   alias Membrane.Protocol.SDP.Attribute
 
   describe "Attribute parser" do

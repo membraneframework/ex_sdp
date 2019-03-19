@@ -5,7 +5,6 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
 
   For more details please see [RFC4566 Section 5.8](https://tools.ietf.org/html/rfc4566#section-5.8).
   """
-  use Bunch
 
   @enforce_keys [:type, :bandwidth]
   defstruct @enforce_keys
@@ -31,8 +30,7 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
 
       {:ok, bandwidth}
     else
-      _ ->
-        {:error, :invalid_bandwidth}
+      _ -> {:error, :invalid_bandwidth}
     end
   end
 

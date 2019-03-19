@@ -43,7 +43,6 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   end
 
   @type sdp_address :: IP6.t() | IP4.t() | binary()
-
   @type reason :: :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl
 
   @spec parse(binary()) :: {:ok, [sdp_address()] | sdp_address()} | {:error, reason}
@@ -61,11 +60,8 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
          {:ok, addresses} <- handle_address(address, addrtype, optional) do
       {:ok, addresses}
     else
-      {:error, :einval} ->
-        {:ok, address}
-
-      {:error, _} = error ->
-        error
+      {:error, :einval} -> {:ok, address}
+      {:error, _} = error -> error
     end
   end
 

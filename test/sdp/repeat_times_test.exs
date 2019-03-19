@@ -1,5 +1,6 @@
 defmodule Membrane.Protocol.SDP.RepeatTimesTest do
   use ExUnit.Case
+
   alias Membrane.Protocol.SDP.RepeatTimes
 
   describe "Repeat Times parses compact format" do

@@ -101,26 +101,24 @@ defmodule Membrane.Protocol.SDP.Media do
 
   @spec apply_session(__MODULE__.t(), Session.t()) :: __MODULE__.t()
   def apply_session(media, session) do
-    media =
-      session
-      |> Map.from_struct()
-      |> Enum.reduce(Map.from_struct(media), fn
-        {inherited_key, value}, acc
-        when inherited_key == :encryption ->
-          if acc[inherited_key] != nil,
-            do: acc,
-            else: Map.put(acc, inherited_key, value)
+    session
+    |> Map.from_struct()
+    |> Enum.reduce(Map.from_struct(media), fn
+      {inherited_key, value}, acc
+      when inherited_key == :encryption ->
+        if acc[inherited_key] != nil,
+          do: acc,
+          else: Map.put(acc, inherited_key, value)
 
-        {inherited_key, value}, acc when inherited_key in [:connection_data, :bandwidth] ->
-          if acc[inherited_key] != [],
-            do: acc,
-            else: Map.put(acc, inherited_key, value)
+      {inherited_key, value}, acc when inherited_key in [:connection_data, :bandwidth] ->
+        if acc[inherited_key] != [],
+          do: acc,
+          else: Map.put(acc, inherited_key, value)
 
-        _, acc ->
-          acc
-      end)
-
-    struct(__MODULE__, media)
+      _, acc ->
+        acc
+    end)
+    ~> struct(__MODULE__, &1)
   end
 
   defp finalize_optional_parsing(%__MODULE__{attributes: attrs} = media) do
