@@ -36,6 +36,9 @@ defmodule Membrane.Protocol.SDP do
   defp do_parse(lines, session) do
     with {rest, %Session{} = session} <- parse_line(lines, session) do
       do_parse(rest, session)
+    else
+      {:error, reason} ->
+        {:error, {reason, List.first(lines)}}
     end
   end
 

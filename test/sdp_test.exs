@@ -129,9 +129,29 @@ defmodule Membrane.Protocol.SDPTest do
     version: "0"
   }
 
-  test "SDP parser parses long and complex session description" do
-    assert {:ok, result} = SDP.parse(@input)
-    assert result == @expected_output
+  describe "Parser parse/1" do
+    test "parses long and complex session description" do
+      assert {:ok, result} = SDP.parse(@input)
+      assert result == @expected_output
+    end
+
+    test "returns an error with line that crashed parser" do
+      input =
+        """
+        v=0
+        o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
+        s=Very fancy session name
+        i=A Seminar on the session description protocol
+        u=http://www.example.com/seminars/sdp.pdf
+        e=j.doe@example.com (Jane Doe)
+        p=111 111 111
+        c=IN IP4 224.2.17.12/127
+        b=X-YZ:256
+        """
+        |> String.replace("\n", "\r\n")
+
+      assert {:error, {:invalid_bandwidth, "b=X-YZ:256"}} == assert(SDP.parse(input))
+    end
   end
 
   describe "Parser parse!/1" do

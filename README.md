@@ -21,6 +21,33 @@ The docs can be found at [https://hexdocs.pm/membrane_sdp](https://hexdocs.pm/me
 Parser parses string with `\r\n` terminated lines.
 
 ```elixir
+"""
+v=0
+o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
+s=Very fancy session name
+i=A Seminar on the session description protocol
+u=http://www.example.com/seminars/sdp.pdf
+e=j.doe@example.com (Jane Doe)
+p=111 111 111
+c=IN IP4 224.2.17.12/127
+b=AS:256
+t=2873397496 2873404696
+r=604800 3600 0 90000
+r=7d 1h 0 25h
+z=2882844526 -1h 2898848070 0
+k=clear:key
+a=recvonly
+a=key:value
+m=audio 49170 RTP/AVP 0
+i=Sample media title
+k=prompt
+m=video 51372 RTP/AVP 99
+a=rtpmap:99 h263-1998/90000
+"""
+|> String.replace("\n", "\r\n")
+|> Membrane.Protocol.SDP.parse()
+
+# =>
 {:ok,
  %Membrane.Protocol.SDP.Session{
    attributes: [{"key", "value"}, :recvonly],
