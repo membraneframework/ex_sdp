@@ -41,7 +41,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
     end
 
     test "processes media with attributes" do
-      media = "m=audio 49230 RTP/AVP 96 97 98"
+      media = "audio 49230 RTP/AVP 96 97 98"
 
       attributes =
         """
@@ -55,19 +55,19 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         rtpmap: %Attribute.RTPMapping{
           clock_rate: 8000,
           encoding: "L8",
-          params: [],
+          params: [channels: 1],
           payload_type: 96
         },
         rtpmap: %Attribute.RTPMapping{
           clock_rate: 8000,
           encoding: "L16",
-          params: [],
+          params: [channels: 1],
           payload_type: 97
         },
         rtpmap: %Attribute.RTPMapping{
           clock_rate: 11_025,
           encoding: "L16",
-          params: ["2"],
+          params: [channels: 2],
           payload_type: 98
         }
       ]
@@ -78,12 +78,12 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         ~> ({:ok, medium} -> Media.parse_optional(attributes, medium))
 
       assert %Media{
-               attributes: ^parsed_attributes,
+               attributes: parsed_attributes,
                fmt: [96, 97, 98],
                ports: [49_230],
                protocol: "RTP/AVP",
-               type: "m=audio"
-             } = medium
+               type: :audio
+             } == medium
     end
   end
 

@@ -18,8 +18,16 @@ defmodule Membrane.Protocol.SDP.OriginTest do
     end
 
     test "username is nil if server does not support it" do
-      assert {:ok, %Origin{username: nil}} =
-               Origin.parse("- 2890844526 2890842807 IN IP4 10.47.16.5")
+      assert {:ok, origin} = Origin.parse("- 2890844526 2890842807 IN IP4 10.47.16.5")
+
+      assert origin == %Origin{
+               session_id: "2890844526",
+               address: %ConnectionData.IP4{
+                 value: {10, 47, 16, 5}
+               },
+               session_version: "2890842807",
+               username: nil
+             }
     end
 
     test "returns an error if declaration is invalid" do
