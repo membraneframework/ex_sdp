@@ -35,12 +35,12 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
 
   defp parse_params(:audio, [raw_channels]) do
     case Integer.parse(raw_channels) do
-      {channels_count, ""} -> [{:channels_count, channels_count}]
+      {channels, ""} -> [{:channels, channels}]
       _ -> {:error, :invalid_param}
     end
   end
 
-  defp parse_params(:audio, []), do: [{:channels_count, 1}]
+  defp parse_params(:audio, []), do: [{:channels, 1}]
 
   defp parse_params(_, params), do: params
 end

@@ -24,8 +24,7 @@ defmodule Membrane.Protocol.SDP.Origin do
           address: ConnectionData.sdp_address()
         }
 
-  @type reason ::
-          :invalid_address | :invalid_connection_data | :invalid_origin | :option_nan | :wrong_ttl
+  @type reason :: :invalid_address | ConnectionData.reason()
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason}
   def parse(origin) do

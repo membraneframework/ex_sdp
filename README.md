@@ -21,55 +21,20 @@ The docs can be found at [https://hexdocs.pm/membrane_sdp](https://hexdocs.pm/me
 Parser parses string with `\r\n` terminated lines.
 
 ```elixir
-"""
-v=0
-o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
-s=Very fancy session name
-i=A Seminar on the session description protocol
-u=http://www.example.com/seminars/sdp.pdf
-e=j.doe@example.com (Jane Doe)
-p=111 111 111
-c=IN IP4 224.2.17.12/127
-b=YZ:256
-b=X-YZ:128
-t=2873397496 2873404696
-r=604800 3600 0 90000
-r=7d 1h 0 25h
-z=2882844526 -1h 2898848070 0
-k=rsa:key
-a=recvonly
-a=key:value
-m=audio 49170 RTP/AVP 0
-i=Sample media title
-k=prompt
-m=video 51372 RTP/AVP 99
-a=rtpmap:99 h263-1998/90000
-"""
-|> String.replace("\n", "\r\n")
-|> Membrane.Protocol.SDP.parse()
-
-# =>
-
 {:ok,
  %Membrane.Protocol.SDP.Session{
    attributes: [{"key", "value"}, :recvonly],
-   bandwidth: [
-     %Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "X-YZ"},
-     %Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: "YZ"}
-   ],
+   bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
    connection_data: %Membrane.Protocol.SDP.ConnectionData.IP4{
      ttl: 127,
      value: {224, 2, 17, 12}
    },
    email: "j.doe@example.com (Jane Doe)",
-   encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: "rsa"},
+   encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: :clear},
    media: [
      %Membrane.Protocol.SDP.Media{
        attributes: [],
-       bandwidth: [
-         %Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "X-YZ"},
-         %Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: "YZ"}
-       ],
+       bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
        connection_data: %Membrane.Protocol.SDP.ConnectionData.IP4{
          ttl: 127,
          value: {224, 2, 17, 12}
@@ -90,16 +55,13 @@ a=rtpmap:99 h263-1998/90000
            payload_type: 99
          }
        ],
-       bandwidth: [
-         %Membrane.Protocol.SDP.Bandwidth{bandwidth: 128, type: "X-YZ"},
-         %Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: "YZ"}
-       ],
+       bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
        connection_data: %Membrane.Protocol.SDP.ConnectionData.IP4{
          ttl: 127,
          value: {224, 2, 17, 12}
        },
-       encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: "rsa"},
-       fmt: [99],
+       encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: :clear},
+       fmt: 'c',
        ports: [51372],
        protocol: "RTP/AVP",
        title: nil,
@@ -131,8 +93,8 @@ a=rtpmap:99 h263-1998/90000
      }
    ],
    time_zones_adjustments: [
-     %Membrane.Protocol.SDP.Timezone{adjustment_time: 2882844526, offset: "-1h"},
-     %Membrane.Protocol.SDP.Timezone{adjustment_time: 2898848070, offset: "0"}
+     %Membrane.Protocol.SDP.Timezone{adjustment_time: 2882844526, offset: -1},
+     %Membrane.Protocol.SDP.Timezone{adjustment_time: 2898848070, offset: 0}
    ],
    timing: %Membrane.Protocol.SDP.Timing{
      start_time: 2873397496,

@@ -5,7 +5,6 @@ defmodule Membrane.Protocol.SDP.Timezone do
 
   For more details please see [RFC4566 Section 5.11](https://tools.ietf.org/html/rfc4566#section-5.11)
   """
-  use Bunch
   @enforce_keys [:adjustment_time, :offset]
   defstruct @enforce_keys
 
@@ -25,15 +24,17 @@ defmodule Membrane.Protocol.SDP.Timezone do
   defp parse_timezones(timezone_corrections) do
     timezone_corrections
     |> Enum.chunk_every(2)
-    |> Enum.reduce_while([], fn [adjustment_time, offset], acc ->
+    |> Bunch.Enum.try_map(fn [adjustment_time, offset] ->
       adjustment_time
       |> parse_timezone(offset)
       |> case do
-        {:ok, timezone} -> {:cont, [timezone | acc]}
-        {:error, _} = error -> {:halt, error}
+        {:ok, timezone} ->
+          {:ok, timezone}
+
+        {:error, _reason} = error ->
+          error
       end
     end)
-    ~>> (list when is_list(list) -> {:ok, Enum.reverse(list)})
   end
 
   defp parse_timezone(adjustment_time, offset) do

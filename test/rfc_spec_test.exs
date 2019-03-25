@@ -128,19 +128,19 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      rtpmap: %Attribute.RTPMapping{
                        clock_rate: 8000,
                        encoding: "PCMU",
-                       params: [{:channels_count, 1}],
+                       params: [{:channels, 1}],
                        payload_type: 0
                      },
                      rtpmap: %Attribute.RTPMapping{
                        clock_rate: 8000,
                        encoding: "PCMA",
-                       params: [{:channels_count, 1}],
+                       params: [{:channels, 1}],
                        payload_type: 8
                      },
                      rtpmap: %Attribute.RTPMapping{
                        clock_rate: 8000,
                        encoding: "iLBC",
-                       params: [{:channels_count, 1}],
+                       params: [{:channels, 1}],
                        payload_type: 97
                      }
                    ],
@@ -224,7 +224,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      rtpmap: %Attribute.RTPMapping{
                        clock_rate: 8000,
                        encoding: "PCMU",
-                       params: [{:channels_count, 1}],
+                       params: [{:channels, 1}],
                        payload_type: 0
                      }
                    ],

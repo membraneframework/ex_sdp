@@ -21,7 +21,7 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
                payload_type: 97,
                encoding: "L16",
                clock_rate: 8_000,
-               params: [{:channels_count, 1}]
+               params: [{:channels, 1}]
              } = mapping
     end
 
@@ -32,7 +32,7 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
                payload_type: 112,
                encoding: "L16",
                clock_rate: 8_000,
-               params: [{:channels_count, 2}]
+               params: [{:channels, 2}]
              } = mapping
     end
 
