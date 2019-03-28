@@ -41,7 +41,7 @@ defmodule Membrane.Protocol.SDP.Attribute do
     end
   end
 
-  def parse_media_attribute(other, _), do: other
+  def parse_media_attribute(other, _), do: {:ok, other}
 
   defp handle_known_attribute(attr)
 

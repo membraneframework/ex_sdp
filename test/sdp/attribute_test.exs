@@ -36,7 +36,7 @@ defmodule Membrane.Protocol.SDP.AttributeTest do
     end
 
     test "handles unknown attribute" do
-      assert {"dunno", "123"} = Attribute.parse_media_attribute({"dunno", "123"}, :message)
+      assert {:ok, {"dunno", "123"}} = Attribute.parse_media_attribute({"dunno", "123"}, :message)
     end
   end
 end
