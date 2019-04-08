@@ -17,16 +17,16 @@ defmodule Membrane.Protocol.SDP do
     Timing
   }
 
+  @line_ending ["\r\n", "\r", "\n"]
+
   @doc """
   Parses SDP Multimedia Session.
-
-  Requires lines to be `\\r\\n` separated.
   """
   @spec parse(binary()) ::
           {:ok, Session.t()} | {:error, atom() | {:not_supported_addr_type, binary()}}
   def parse(binary) do
     binary
-    |> String.split("\r\n")
+    |> String.split(@line_ending)
     |> do_parse()
   end
 
@@ -42,10 +42,13 @@ defmodule Membrane.Protocol.SDP do
     end
   end
 
+  @doc """
+  Parses SDP Multimedia Session raising an exception in case of failure.
+  """
   @spec parse!(binary()) :: Session.t()
   def parse!(binary) do
     binary
-    |> String.split("\r\n")
+    |> String.split(@line_ending)
     |> do_parse!()
   end
 
