@@ -18,8 +18,10 @@ defmodule Membrane.Protocol.SDP.Attribute do
   ]
   @numeric ["ptime", "maxptime", "quality"]
 
+  @type t :: binary() | atom() | {binary() | atom(), binary()}
+
   @doc """
-  Parses SPD Attribute.
+  Parses SDP Attribute.
 
   Value attributes formatted as `name:value` shall be parsed as `{name, value}`
   other will be treated as property (flag) attributes.

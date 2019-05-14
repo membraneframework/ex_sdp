@@ -9,10 +9,10 @@ defmodule Membrane.Protocol.SDP.Media do
   defstruct @enforce_keys ++
               [
                 :title,
-                {:connection_data, []},
-                {:bandwidth, []},
                 :encryption,
-                {:attributes, []}
+                bandwidth: [],
+                attributes: [],
+                connection_data: []
               ]
 
   alias Membrane.Protocol.SDP.{Attribute, Bandwidth, ConnectionData, Encryption, Session}

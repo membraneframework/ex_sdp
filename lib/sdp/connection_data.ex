@@ -75,8 +75,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   end
 
   defp handle_address(address, "IP4", [ttl, count]) do
-    with {:ok, ttl} <- parse_numeric_option(ttl),
-         ttl when ttl in 0..255 <- ttl,
+    with {:ok, ttl} <- parse_ttl(ttl),
          {:ok, count} <- parse_numeric_option(count),
          {:ok, addresses} <- unfold_addresses(address, count) do
       addresses = Enum.map(addresses, fn address -> %IP4{value: address, ttl: ttl} end)
@@ -127,14 +126,19 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
     index = tuple_size(ip) - 1
     value = elem(ip, index)
 
-    if value + 1 <= max_section_size(tuple_size(ip)) do
+    if value + 1 <= max_section_size(ip) do
       {:ok, put_elem(ip, index, value + 1)}
     else
       {:error, :invalid_address}
     end
   end
 
-  defp max_section_size(size)
-  defp max_section_size(8), do: 65_535
-  defp max_section_size(4), do: 255
+  defp max_section_size(ip) do
+    ip
+    |> tuple_size()
+    |> case do
+      8 -> 65_535
+      4 -> 255
+    end
+  end
 end

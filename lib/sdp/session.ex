@@ -12,23 +12,24 @@ defmodule Membrane.Protocol.SDP.Session do
   ]
 
   @optional_keys [
-    :session_information,
-    :uri,
     :email,
-    :phone_number,
-    {:connection_data, []},
-    {:bandwidth, []},
-    {:time_zones_adjustments, []},
     :encryption,
-    {:attributes, []},
+    :uri,
+    :phone_number,
+    :session_information,
     :timing,
-    {:time_repeats, []},
-    {:media, []}
+    attributes: [],
+    bandwidth: [],
+    connection_data: [],
+    media: [],
+    time_repeats: [],
+    time_zones_adjustments: []
   ]
 
   defstruct @enforce_keys ++ @optional_keys
 
   alias Membrane.Protocol.SDP.{
+    Attribute,
     Bandwidth,
     ConnectionData,
     Encryption,
@@ -43,17 +44,17 @@ defmodule Membrane.Protocol.SDP.Session do
           version: non_neg_integer(),
           origin: Origin.t(),
           session_name: binary(),
-          session_information: binary() | nil,
-          uri: binary(),
           email: binary() | nil,
+          encryption: Encryption.t() | nil,
+          uri: binary() | nil,
           phone_number: binary() | nil,
-          connection_data: ConnectionData.sdp_address(),
+          session_information: binary() | nil,
+          timing: Timing.t() | nil,
+          attributes: [Attribute.t()],
           bandwidth: [Bandwidth.t()],
-          time_zones_adjustments: [Timezone.t()],
-          encryption: Encryption.t(),
-          attributes: [binary() | {binary(), binary()}],
-          timing: Timing.t(),
+          connection_data: [ConnectionData.sdp_address()],
+          media: [Media.t()],
           time_repeats: [RepeatTimes.t()],
-          media: [Media.t()]
+          time_zones_adjustments: [Timezone.t()]
         }
 end

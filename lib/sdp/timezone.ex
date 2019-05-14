@@ -25,15 +25,7 @@ defmodule Membrane.Protocol.SDP.Timezone do
     timezone_corrections
     |> Enum.chunk_every(2)
     |> Bunch.Enum.try_map(fn [adjustment_time, offset] ->
-      adjustment_time
-      |> parse_timezone(offset)
-      |> case do
-        {:ok, timezone} ->
-          {:ok, timezone}
-
-        {:error, _reason} = error ->
-          error
-      end
+      parse_timezone(adjustment_time, offset)
     end)
   end
 

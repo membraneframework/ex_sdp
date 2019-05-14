@@ -18,7 +18,8 @@ The docs can be found at [https://hexdocs.pm/membrane_sdp](https://hexdocs.pm/me
 
 ## Usage
 
-Parser parses string with `\r\n` terminated lines.
+Parser parses string with `\r\n` terminated lines. (although it will also accept records terminated with
+a single newline character)
 
 ```elixir
 """
