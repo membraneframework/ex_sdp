@@ -76,7 +76,6 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
 
   defp handle_address(address, "IP4", [ttl, count]) do
     with {:ok, ttl} <- parse_ttl(ttl),
-         {:ok, count} <- parse_numeric_option(count),
          {:ok, addresses} <- unfold_addresses(address, count) do
       addresses = Enum.map(addresses, fn address -> %IP4{value: address, ttl: ttl} end)
       {:ok, addresses}
@@ -89,8 +88,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   defp handle_address(address, "IP6", []), do: {:ok, %IP6{value: address}}
 
   defp handle_address(address, "IP6", [count]) do
-    with {:ok, count} <- parse_numeric_option(count),
-         {:ok, addresses} <- unfold_addresses(address, count) do
+    with {:ok, addresses} <- unfold_addresses(address, count) do
       addresses = Enum.map(addresses, fn address -> %IP6{value: address} end)
       {:ok, addresses}
     end
@@ -113,27 +111,25 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
     end
   end
 
-  defp unfold_addresses(address, count, acc \\ [])
-  defp unfold_addresses(_, 0, acc), do: {:ok, Enum.reverse(acc)}
-
-  defp unfold_addresses(address, count, acc) do
-    with {:ok, next_ip} <- increment_ip(address) do
-      unfold_addresses(next_ip, count - 1, [address | acc])
+  defp unfold_addresses(address, count) do
+    with {:ok, count} <- parse_numeric_option(count) do
+      0..(count - 1)
+      |> Bunch.Enum.try_map(&offset_ip(address, &1))
     end
   end
 
-  defp increment_ip(ip) do
+  defp offset_ip(ip, offset) do
     index = tuple_size(ip) - 1
     value = elem(ip, index)
 
-    if value + 1 <= max_section_size(ip) do
-      {:ok, put_elem(ip, index, value + 1)}
+    if value + offset <= max_section_value(ip) do
+      {:ok, put_elem(ip, index, value + offset)}
     else
       {:error, :invalid_address}
     end
   end
 
-  defp max_section_size(ip) do
+  defp max_section_value(ip) do
     ip
     |> tuple_size()
     |> case do

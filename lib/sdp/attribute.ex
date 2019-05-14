@@ -39,7 +39,7 @@ defmodule Membrane.Protocol.SDP.Attribute do
   shall be parsed as `{name, value}` other will be treated as
   `t:flag_attributes/0`. Known attribute names will be converted into atoms.
   """
-  @spec parse(binary()) :: {:ok, atom() | tuple()} | {:error, atom()}
+  @spec parse(binary()) :: {:ok, t} | {:error, atom()}
   def parse(line) do
     line
     |> String.split(":", parts: 2)
