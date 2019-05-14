@@ -3,29 +3,41 @@ defmodule Membrane.Protocol.SDP.Attribute do
   This module is responsible for parsing SDP Attributes.
   """
   alias __MODULE__.RTPMapping
+  use Bunch.Typespec
 
-  @valid_flags ["recvonly", "sendrecv", "sendonly", "inactive"]
-  @directly_assignable [
-    "cat",
-    "keywds",
-    "tool",
-    "orient",
-    "type",
-    "charset",
-    "sdplang",
-    "lang",
-    "rtpmap"
-  ]
-  @numeric ["ptime", "maxptime", "quality"]
+  @list_type flag_attributes :: [:recvonly, :sendrecv, :sendonly, :inactive]
+  @list_type value_attributes :: [
+               :cat,
+               :charset,
+               :keywds,
+               :orient,
+               :lang,
+               :rtpmap,
+               :sdplang,
+               :tool,
+               :type
+             ]
 
-  @type t :: binary() | atom() | {binary() | atom(), binary()}
+  @list_type numeric_attributes :: [:maxptime, :ptime, :quality]
+
+  @type t ::
+          binary()
+          | flag_attributes
+          | {binary()
+             | value_attributes
+             | numeric_attributes
+             | :framerate, binary()}
+
+  @flag_values @flag_attributes |> Enum.map(&to_string/1)
+  @directly_assignable_values @value_attributes |> Enum.map(&to_string/1)
+  @numeric_values @numeric_attributes |> Enum.map(&to_string/1)
 
   @doc """
   Parses SDP Attribute.
 
-  Value attributes formatted as `name:value` shall be parsed as `{name, value}`
-  other will be treated as property (flag) attributes.
-  Known attributes' names will be converted into atoms.
+  `t:value_attributes/0` and `t:numeric_attributes/0` formatted as `name:value`
+  shall be parsed as `{name, value}` other will be treated as
+  `t:flag_attributes/0`. Known attribute names will be converted into atoms.
   """
   @spec parse(binary()) :: {:ok, atom() | tuple()} | {:error, atom()}
   def parse(line) do
@@ -53,16 +65,16 @@ defmodule Membrane.Protocol.SDP.Attribute do
     end
   end
 
-  defp handle_known_attribute([flag]) when is_binary(flag) and flag in @valid_flags do
+  defp handle_known_attribute([flag]) when is_binary(flag) and flag in @flag_values do
     {:ok, String.to_atom(flag)}
   end
 
   defp handle_known_attribute([prop, value])
-       when is_binary(prop) and prop in @directly_assignable do
+       when is_binary(prop) and prop in @directly_assignable_values do
     {:ok, {String.to_atom(prop), value}}
   end
 
-  defp handle_known_attribute([prop, value]) when is_binary(prop) and prop in @numeric do
+  defp handle_known_attribute([prop, value]) when is_binary(prop) and prop in @numeric_values do
     with {number, ""} <- Integer.parse(value) do
       {:ok, {String.to_atom(prop), number}}
     else
