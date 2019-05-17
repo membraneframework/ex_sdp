@@ -74,9 +74,10 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
     end
   end
 
+  @ipv4_max_value 255
   defp handle_address(address, "IP4", [ttl, count]) do
     with {:ok, ttl} <- parse_ttl(ttl),
-         {:ok, addresses} <- unfold_addresses(address, count) do
+         {:ok, addresses} <- unfold_addresses(address, count, @ipv4_max_value) do
       addresses = Enum.map(addresses, fn address -> %IP4{value: address, ttl: ttl} end)
       {:ok, addresses}
     else
@@ -87,8 +88,9 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
 
   defp handle_address(address, "IP6", []), do: {:ok, %IP6{value: address}}
 
+  @ipv6_max_value 65_535
   defp handle_address(address, "IP6", [count]) do
-    with {:ok, addresses} <- unfold_addresses(address, count) do
+    with {:ok, addresses} <- unfold_addresses(address, count, @ipv6_max_value) do
       addresses = Enum.map(addresses, fn address -> %IP6{value: address} end)
       {:ok, addresses}
     end
@@ -111,30 +113,24 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
     end
   end
 
-  defp unfold_addresses(address, count) do
+  # https://tools.ietf.org/html/rfc4566#page-15 defines a notation where
+  # ip_ddress/count defines a sequence of consecuttive addresses, this function
+  # creates such sequence.
+  defp unfold_addresses(address, count, max_value) do
     with {:ok, count} <- parse_numeric_option(count) do
       0..(count - 1)
-      |> Bunch.Enum.try_map(&offset_ip(address, &1))
+      |> Bunch.Enum.try_map(&offset_ip(address, &1, max_value))
     end
   end
 
-  defp offset_ip(ip, offset) do
+  defp offset_ip(ip, offset, max_value) do
     index = tuple_size(ip) - 1
     value = elem(ip, index)
 
-    if value + offset <= max_section_value(ip) do
+    if value + offset <= max_value do
       {:ok, put_elem(ip, index, value + offset)}
     else
       {:error, :invalid_address}
-    end
-  end
-
-  defp max_section_value(ip) do
-    ip
-    |> tuple_size()
-    |> case do
-      8 -> 65_535
-      4 -> 255
     end
   end
 end
