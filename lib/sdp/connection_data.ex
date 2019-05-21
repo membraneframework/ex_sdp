@@ -18,6 +18,9 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   """
   use Bunch
 
+  @ipv4_max_value 255
+  @ipv6_max_value 65_535
+
   @enforce_keys [:network_type, :address]
   defstruct @enforce_keys
 
@@ -74,7 +77,6 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
     end
   end
 
-  @ipv4_max_value 255
   defp handle_address(address, "IP4", [ttl, count]) do
     with {:ok, ttl} <- parse_ttl(ttl),
          {:ok, addresses} <- unfold_addresses(address, count, @ipv4_max_value) do
@@ -88,7 +90,6 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
 
   defp handle_address(address, "IP6", []), do: {:ok, %IP6{value: address}}
 
-  @ipv6_max_value 65_535
   defp handle_address(address, "IP6", [count]) do
     with {:ok, addresses} <- unfold_addresses(address, count, @ipv6_max_value) do
       addresses = Enum.map(addresses, fn address -> %IP6{value: address} end)

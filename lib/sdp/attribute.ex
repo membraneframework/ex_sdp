@@ -36,8 +36,8 @@ defmodule Membrane.Protocol.SDP.Attribute do
   Parses SDP Attribute.
 
   `t:value_attributes/0` and `t:numeric_attributes/0` formatted as `name:value`
-  shall be parsed as `{name, value}` other will be treated as
-  `t:flag_attributes/0`. Known attribute names will be converted into atoms.
+  are be parsed as `{name, value}` other values are treated as
+  `t:flag_attributes/0`. Known attribute names are converted into atoms.
   """
   @spec parse(binary()) :: {:ok, t} | {:error, atom()}
   def parse(line) do
