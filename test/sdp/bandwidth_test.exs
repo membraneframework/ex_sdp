@@ -1,0 +1,16 @@
+defmodule Membrane.Protocol.SDP.BandwidthTest do
+  use ExUnit.Case
+
+  alias Membrane.Protocol.SDP.Bandwidth
+
+  describe "Bandwidth parses" do
+    test "valid property" do
+      assert {:ok, result} = Bandwidth.parse("CT:128")
+      assert %Bandwidth{type: :CT, bandwidth: 128} == result
+    end
+
+    test "returns error when property is invalid" do
+      assert {:error, :invalid_bandwidth} == Bandwidth.parse("gibberish")
+    end
+  end
+end
