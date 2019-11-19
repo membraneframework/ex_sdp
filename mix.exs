@@ -2,6 +2,7 @@ defmodule Membrane.Protocol.SDP.MixProject do
   use Mix.Project
 
   @version "0.1.0"
+  @github_url "https://github.com/membraneframework/membrane-protocol-sdp"
 
   def project do
     [
@@ -10,6 +11,9 @@ defmodule Membrane.Protocol.SDP.MixProject do
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      name: "Membrane Protocol SDP",
+      description: "Membrane Multimedia Framework (SDP protocol)",
+      source_url: @github_url,
       deps: deps(),
       docs: docs(),
       package: package()
@@ -41,14 +45,10 @@ defmodule Membrane.Protocol.SDP.MixProject do
       maintainers: ["Membrane Team"],
       licenses: ["Apache 2.0"],
       links: %{
-        "GitHub" => link(),
+        "GitHub" => @github_url,
         "Membrane Framework Homepage" => "https://membraneframework.org"
       }
     ]
-  end
-
-  defp link do
-    "https://github.com/membraneframework/membrane-protocol-sdp"
   end
 
   defp deps do
