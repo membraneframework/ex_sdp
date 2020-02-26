@@ -57,6 +57,10 @@ defmodule Membrane.Protocol.SDP.Attribute do
 
   def parse_media_attribute(other, _), do: {:ok, other}
 
+  @spec serialize(t()) :: binary()
+  def serialize(attribute) do
+  end
+
   defp handle_known_attribute(attr)
 
   defp handle_known_attribute(["framerate", framerate]) do

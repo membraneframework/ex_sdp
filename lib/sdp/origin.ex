@@ -45,4 +45,19 @@ defmodule Membrane.Protocol.SDP.Origin do
       _ -> {:error, :invalid_origin}
     end
   end
+
+  @spec serialize(t()) :: binary()
+  def serialize(origin) do
+    origin_serialized_fields = [
+      serialize_username(origin.username),
+      origin.session_id,
+      origin.session_version,
+      ConnectionData.serialize_address(origin.address)
+    ]
+
+    "o=" <> Enum.join(origin_serialized_fields, " ")
+  end
+
+  defp serialize_username(nil), do: "-"
+  defp serialize_username(username), do: username
 end

@@ -34,6 +34,10 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
     end
   end
 
+  @spec serialize(t()) :: binary()
+  def serialize(bandwidth),
+    do: "b=" <> Atom.to_string(bandwidth.type) <> ":" <> Integer.to_string(bandwidth.bandwidth)
+
   defp parse_type(type) when type in @supported_types, do: {:ok, String.to_atom(type)}
   defp parse_type("X-" <> _), do: {:error, :experimental_not_supported}
   defp parse_type(_), do: {:error, :invalid_type}

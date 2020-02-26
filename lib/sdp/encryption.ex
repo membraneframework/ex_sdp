@@ -31,6 +31,17 @@ defmodule Membrane.Protocol.SDP.Encryption do
     end
   end
 
+  @spec serialize(t()) :: binary()
+  def serialize(encryption) do
+    result = "k=" <> Atom.to_string(encryption.method)
+
+    if is_nil(encryption.key) do
+      result
+    else
+      result <> ":" <> encryption.key
+    end
+  end
+
   defp parse_definition(definition) do
     case String.split(definition, ":", parts: 2) do
       [method] -> {method, nil}

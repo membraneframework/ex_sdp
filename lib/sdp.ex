@@ -80,7 +80,7 @@ defmodule Membrane.Protocol.SDP do
       serialize_uri(session.uri),
       serialize_email(session.email),
       serialize_phone_number(session.phone_number),
-      Enum.map_join(session.connection_data, @preffered_ending, &ConnectionData.serialize/1),
+      ConnectionData.serialize(session.connection_data),
       Enum.map_join(session.bandwidth, @preffered_ending, &Bandwidth.serialize/1),
       Timing.serialize(session.timing),
       Enum.map_join(session.time_repeats, @preffered_ending, &RepeatTimes.serialize/1),
