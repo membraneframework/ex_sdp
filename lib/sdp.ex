@@ -18,6 +18,7 @@ defmodule Membrane.Protocol.SDP do
   }
 
   @line_ending ["\r\n", "\r", "\n"]
+  @preffered_ending "\r\n"
 
   @doc """
   Parses SDP Multimedia Session.
@@ -64,6 +65,32 @@ defmodule Membrane.Protocol.SDP do
       {rest, %Session{} = session} ->
         do_parse!(rest, session)
     end
+  end
+
+  @doc """
+  Serializes SDP.Session struct into SDP Multimedia Session string.
+  """
+  @spec serialize(Session.t()) :: binary()
+  def serialize(session) do
+    session_fields_serialized = [
+      serialize_version(session.version),
+      Origin.serialize(session.origin),
+      serialize_session_name(session.session_name),
+      serialize_session_information(session.session_information),
+      serialize_uri(session.uri),
+      serialize_email(session.email),
+      serialize_phone_number(session.phone_number),
+      Enum.map_join(session.connection_data, @preffered_ending, &ConnectionData.serialize/1),
+      Enum.map_join(session.bandwidth, @preffered_ending, &Bandwidth.serialize/1),
+      Timing.serialize(session.timing),
+      Enum.map_join(session.time_repeats, @preffered_ending, &RepeatTimes.serialize/1),
+      Enum.map_join(session.time_zones_adjustments, @preffered_ending, &Timezone.serialize/1),
+      Encryption.serialize(session.encryption),
+      Enum.map_join(session.attributes, @preffered_ending, &Attribute.serialize/1),
+      Enum.map_join(session.media, @preffered_ending, &Media.serialize/1)
+    ]
+
+    session_fields_serialized |> Enum.reject(&(&1 == "")) |> Enum.join(@preffered_ending)
   end
 
   defp parse_line(lines, session)
@@ -172,4 +199,20 @@ defmodule Membrane.Protocol.SDP do
 
   defp flip_media(%{media: media} = session),
     do: %{session | media: Enum.reverse(media)}
+
+  defp serialize_version(version), do: "v=" <> Integer.to_string(version)
+
+  defp serialize_session_name(session_name), do: "s=" <> session_name
+
+  defp serialize_session_information(nil), do: ""
+  defp serialize_session_information(session_information), do: "i=" <> session_information
+
+  defp serialize_uri(nil), do: ""
+  defp serialize_uri(uri), do: "u=" <> uri
+
+  defp serialize_email(nil), do: ""
+  defp serialize_email(email), do: "e=" <> email
+
+  defp serialize_phone_number(nil), do: ""
+  defp serialize_phone_number(number), do: "p=" <> number
 end
