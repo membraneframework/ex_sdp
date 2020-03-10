@@ -59,6 +59,7 @@ defmodule Membrane.Protocol.SDP.Attribute do
 
   @spec serialize(t()) :: binary()
   def serialize(attribute) do
+    "a=" <> serialize_attribute(attribute)
   end
 
   defp handle_known_attribute(attr)
@@ -79,9 +80,8 @@ defmodule Membrane.Protocol.SDP.Attribute do
   end
 
   defp handle_known_attribute([prop, value]) when is_binary(prop) and prop in @numeric_values do
-    with {number, ""} <- Integer.parse(value) do
-      {:ok, {String.to_atom(prop), number}}
-    else
+    case Integer.parse(value) do
+      {number, ""} -> {:ok, {String.to_atom(prop), number}}
       _ -> {:error, :invalid_attribute}
     end
   end
@@ -104,4 +104,10 @@ defmodule Membrane.Protocol.SDP.Attribute do
       _ -> {:error, :invalid_framerate}
     end
   end
+
+  defp serialize_attribute(attribute) when is_binary(attribute), do: attribute
+  defp serialize_attribute(attribute) when is_atom(attribute), do: Atom.to_string(attribute)
+  defp serialize_attribute({:rtpmap, mapping}), do: RTPMapping.serialize(mapping)
+  defp serialize_attribute({:framerate, value}), do: "framerate:" <> value
+  defp serialize_attribute({key, value}), do: key <> ":" <> value
 end

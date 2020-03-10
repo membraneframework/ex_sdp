@@ -33,6 +33,16 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
     end
   end
 
+  @spec serialize(t()) :: binary()
+  def serialize(mapping) do
+    "rtpmap:" <>
+      Integer.to_string(mapping.payload_type) <>
+      " " <>
+      mapping.encoding <>
+      "/" <>
+      Integer.to_string(mapping.clock_rate) <> serialize_params(mapping)
+  end
+
   defp parse_params(:audio, [raw_channels]) do
     case Integer.parse(raw_channels) do
       {channels, ""} -> [{:channels, channels}]
@@ -43,4 +53,10 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
   defp parse_params(:audio, []), do: [{:channels, 1}]
 
   defp parse_params(_, params), do: params
+
+  defp serialize_params(%__MODULE__{params: []}), do: ""
+
+  defp serialize_params(%__MODULE__{params: list}) do
+    "/" <> (list |> Enum.map_join(" ", &to_string/1))
+  end
 end
