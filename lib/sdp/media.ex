@@ -10,9 +10,9 @@ defmodule Membrane.Protocol.SDP.Media do
               [
                 :title,
                 :encryption,
+                :connection_data,
                 bandwidth: [],
-                attributes: [],
-                connection_data: []
+                attributes: []
               ]
 
   alias Membrane.Protocol.SDP.{Attribute, Bandwidth, ConnectionData, Encryption, Session}
@@ -31,7 +31,7 @@ defmodule Membrane.Protocol.SDP.Media do
           protocol: binary(),
           fmt: binary() | [0..127],
           title: binary() | nil,
-          connection_data: [ConnectionData.sdp_address()],
+          connection_data: ConnectionData.sdp_address() | nil,
           bandwidth: [Bandwidth.t()],
           encryption: Encryption.t() | nil,
           attributes: [binary()]
@@ -121,6 +121,15 @@ defmodule Membrane.Protocol.SDP.Media do
     ~> struct(__MODULE__, &1)
   end
 
+  @spec serialize(t()) :: binary()
+  def serialize(media) do
+    serialized_header = media |> header_fields |> Enum.join(" ") |> String.trim()
+
+    optional = media |> other_fields |> Enum.join("\n")
+
+    String.trim("m=" <> serialized_header <> "\n" <> optional)
+  end
+
   defp finalize_optional_parsing(%__MODULE__{attributes: attrs} = media) do
     %__MODULE__{media | attributes: Enum.reverse(attrs)}
   end
@@ -159,4 +168,68 @@ defmodule Membrane.Protocol.SDP.Media do
   end
 
   defp gen_ports(port_no, _), do: [port_no]
+
+  defp header_fields(media) do
+    [
+      serialize_type(media.type),
+      serialize_ports(media.ports),
+      media.protocol,
+      serialize_fmt(media.fmt)
+    ]
+  end
+
+  defp other_fields(media) do
+    [
+      {"i", :title, nil},
+      {"c", :connection_data, Membrane.Protocol.SDP.ConnectionData},
+      {"b", :bandwidth, Membrane.Protocol.SDP.Bandwidth},
+      {"k", :encryption, Membrane.Protocol.SDP.Encryption},
+      {"a", :attributes, Membrane.Protocol.SDP.Attribute}
+    ]
+    |> Enum.map(&add_types(&1, media))
+    |> Enum.reject(&(&1 == ""))
+  end
+
+  def add_types({type_string, key, module}, media) do
+    case Map.get(media, key) do
+      nil ->
+        ""
+
+      list when is_list(list) ->
+        list
+        |> Enum.map(&serialize_optional(&1, module))
+        |> Enum.reject(&(&1 == ""))
+        |> Enum.map_join(&add_type(&1, type_string))
+
+      single_field ->
+        single_field |> serialize_optional(module) |> add_type(type_string)
+    end
+  end
+
+  defp add_type(string, type) do
+    if String.at(string, 1) == "=" do
+      string
+    else
+      type <> "=" <> string
+    end
+  end
+
+  defp serialize_optional(value, nil), do: to_string(value)
+  defp serialize_optional(value, module), do: apply(module, :serialize, [value])
+
+  defp serialize_type(type) when is_binary(type), do: type
+  defp serialize_type(type) when is_atom(type), do: Atom.to_string(type)
+
+  defp serialize_ports(ports) do
+    port = ports |> Enum.sort() |> hd |> Integer.to_string()
+
+    if length(ports) == 1 do
+      port
+    else
+      port <> "/" <> Integer.to_string(length(ports))
+    end
+  end
+
+  defp serialize_fmt(fmt) when is_binary(fmt), do: fmt
+  defp serialize_fmt(fmt), do: Enum.map_join(fmt, " ", &Integer.to_string/1)
 end
