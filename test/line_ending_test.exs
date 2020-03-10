@@ -18,7 +18,7 @@ defmodule Membrane.Protocol.SDP.LineEndingTest do
       start_time: 2_873_397_496,
       stop_time: 2_873_404_696
     },
-    version: "0"
+    version: 0
   }
 
   describe "SDP.parse handles" do

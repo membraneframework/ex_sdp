@@ -127,7 +127,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         encryption: encryption,
         bandwidth: bandwidth,
         session_name: "123",
-        version: "0"
+        version: 0
       }
 
       [

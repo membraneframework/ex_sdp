@@ -10,7 +10,7 @@ defmodule Membrane.Protocol.SDP.Media do
               [
                 :title,
                 :encryption,
-                :connection_data,
+                connection_data: [],
                 bandwidth: [],
                 attributes: []
               ]
@@ -31,7 +31,7 @@ defmodule Membrane.Protocol.SDP.Media do
           protocol: binary(),
           fmt: binary() | [0..127],
           title: binary() | nil,
-          connection_data: ConnectionData.sdp_address() | nil,
+          connection_data: [ConnectionData.sdp_address()],
           bandwidth: [Bandwidth.t()],
           encryption: Encryption.t() | nil,
           attributes: [binary()]

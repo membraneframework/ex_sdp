@@ -56,7 +56,8 @@ defmodule Membrane.Protocol.SDP.MixProject do
       {:bunch, "~> 1.3"},
       {:dialyxir, "~> 1.0.0-rc.7", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.21", only: :dev, runtime: false},
-      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false}
+      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
+      {:credo, "~> 1.2", only: [:dev], runtime: false}
     ]
   end
 end

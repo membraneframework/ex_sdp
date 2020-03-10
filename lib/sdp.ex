@@ -35,9 +35,10 @@ defmodule Membrane.Protocol.SDP do
   defp do_parse([""], session), do: {:ok, flip_media(session)}
 
   defp do_parse(lines, session) do
-    with {rest, %Session{} = session} <- parse_line(lines, session) do
-      do_parse(rest, session)
-    else
+    case parse_line(lines, session) do
+      {rest, %Session{} = session} ->
+        do_parse(rest, session)
+
       {:error, reason} ->
         {:error, {reason, List.first(lines)}}
     end
@@ -84,7 +85,7 @@ defmodule Membrane.Protocol.SDP do
       Enum.map_join(session.bandwidth, @preffered_ending, &Bandwidth.serialize/1),
       Timing.serialize(session.timing),
       Enum.map_join(session.time_repeats, @preffered_ending, &RepeatTimes.serialize/1),
-      Enum.map_join(session.time_zones_adjustments, @preffered_ending, &Timezone.serialize/1),
+      Timezone.serialize(session.time_zones_adjustments),
       Encryption.serialize(session.encryption),
       Enum.map_join(session.attributes, @preffered_ending, &Attribute.serialize/1),
       Enum.map_join(session.media, @preffered_ending, &Media.serialize/1)
@@ -96,7 +97,7 @@ defmodule Membrane.Protocol.SDP do
   defp parse_line(lines, session)
 
   defp parse_line(["v=" <> version | rest], spec),
-    do: {rest, %Session{spec | version: version}}
+    do: {rest, %Session{spec | version: String.to_integer(version)}}
 
   defp parse_line(["o=" <> origin | rest], spec) do
     with {:ok, %Origin{} = origin} <- Origin.parse(origin) do

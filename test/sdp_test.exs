@@ -126,7 +126,7 @@ defmodule Membrane.Protocol.SDPTest do
       stop_time: 2_873_404_696
     },
     uri: "http://www.example.com/seminars/sdp.pdf",
-    version: "0"
+    version: 0
   }
 
   describe "Parser parse/1" do

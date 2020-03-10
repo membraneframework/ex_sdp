@@ -92,7 +92,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                  stop_time: 2_873_404_696
                },
                uri: "http://www.example.com/seminars/sdp.pdf",
-               version: "0"
+               version: 0
              }
     end
 
@@ -191,7 +191,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                time_zones_adjustments: [],
                timing: %Timing{start_time: 0, stop_time: 0},
                uri: nil,
-               version: "0"
+               version: 0
              } == result
     end
 
@@ -269,7 +269,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                time_zones_adjustments: [],
                timing: %Timing{start_time: 0, stop_time: 0},
                uri: nil,
-               version: "0"
+               version: 0
              } = result
     end
   end
