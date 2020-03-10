@@ -45,7 +45,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
           }
   end
 
-  @type sdp_address :: IP6.t() | IP4.t() | binary()
+  @type sdp_address :: IP6.t() | IP4.t()
   @type reason :: :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl
 
   @spec parse(binary()) :: {:ok, [sdp_address()] | sdp_address()} | {:error, reason}
@@ -55,6 +55,56 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
       parse_address(address, addrtype, optional)
     else
       list when is_list(list) -> {:error, :invalid_connection_data}
+    end
+  end
+
+  @spec serialize(sdp_address()) :: binary()
+  def serialize(address) when not is_list(address) do
+    with {:ok, serialized} <- serialize_address(address) do
+      serialized
+    end
+  end
+
+  @spec serialize([sdp_address()]) :: binary()
+  def serialize(addresses) do
+    case length(addresses) do
+      0 ->
+        ""
+
+      size ->
+        with {:ok, result} <- addresses |> Enum.sort_by(& &1.value) |> hd |> serialize_address do
+          "c=" <> result <> serialize_size(size)
+        end
+    end
+  end
+
+  defp serialize_size(1), do: ""
+  defp serialize_size(size) when size > 1, do: "/" <> Integer.to_string(size)
+
+  @spec serialize_address(%IP4{ttl: nil}) :: {:ok, binary()} | {:error, any()}
+  def serialize_address(%IP4{ttl: nil, value: value}) do
+    with {:ok, address} <- serialize_address_value(value) do
+      {:ok, "IN IP4 " <> address}
+    end
+  end
+
+  @spec serialize_address(%IP4{ttl: 0..255}) :: {:ok, binary()} | {:error, any()}
+  def serialize_address(%IP4{ttl: ttl, value: value}) do
+    with {:ok, address} <- serialize_address_value(value) do
+      {:ok, "IN IP4 " <> address <> "/" <> Integer.to_string(ttl)}
+    end
+  end
+
+  @spec serialize_address(IP6.t()) :: {:ok, binary()} | {:error, any()}
+  def serialize_address(%IP6{value: value}) do
+    with {:ok, address} <- serialize_address_value(value) do
+      {:ok, "IN IP6 " <> address}
+    end
+  end
+
+  defp serialize_address_value(value) do
+    with address <- :inet.ntoa(value) do
+      {:ok, to_string(address)}
     end
   end
 
