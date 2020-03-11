@@ -21,7 +21,7 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
                payload_type: 97,
                encoding: "L16",
                clock_rate: 8_000,
-               params: [{:channels, 1}]
+               params: 1
              } = mapping
     end
 
@@ -32,12 +32,35 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
                payload_type: 112,
                encoding: "L16",
                clock_rate: 8_000,
-               params: [{:channels, 2}]
+               params: 2
              } = mapping
     end
 
     test "returns an error when clock_rate or payload type is not a number" do
       assert {:error, :invalid_attribute} = RTPMapping.parse("9t9 h264/90000", :video)
+    end
+  end
+
+  describe "RTP Mapping serializer" do
+    test "serializes mapping without parameter" do
+      mapping = %RTPMapping{
+        payload_type: 101,
+        encoding: "h263-1998",
+        clock_rate: 90_000
+      }
+
+      assert RTPMapping.serialize(mapping) == "rtpmap:101 h263-1998/90000"
+    end
+
+    test "serializes mapping with parameter" do
+      mapping = %RTPMapping{
+        payload_type: 98,
+        encoding: "L16",
+        clock_rate: 11_025,
+        params: 2
+      }
+
+      assert RTPMapping.serialize(mapping) == "rtpmap:98 L16/11025/2"
     end
   end
 end

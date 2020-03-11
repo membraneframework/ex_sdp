@@ -13,4 +13,11 @@ defmodule Membrane.Protocol.SDP.BandwidthTest do
       assert {:error, :invalid_bandwidth} == Bandwidth.parse("gibberish")
     end
   end
+
+  describe "Bandwidth serializer" do
+    test "serializes valid bandwidth" do
+      bandwidth = %Bandwidth{type: :CT, bandwidth: 128}
+      assert Bandwidth.serialize(bandwidth) == "b=CT:128"
+    end
+  end
 end
