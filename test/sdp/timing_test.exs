@@ -18,4 +18,11 @@ defmodule Membrane.Protocol.SDP.TimingTest do
       assert {:error, :time_nan} = Timing.parse("1550678539 155s0878520")
     end
   end
+
+  describe "Timing serializer" do
+    test "serializes valid timing" do
+      timing = %Timing{start_time: 2_208_988_800, stop_time: 2_208_988_898}
+      assert Timing.serialize(timing) == "t=2208988800 2208988898"
+    end
+  end
 end

@@ -21,4 +21,19 @@ defmodule Membrane.Protocol.SDP.TimezoneTest do
       assert {:error, :invalid_timezone} = Timezone.parse("2882844526 -1h 28988ds4a8dd0a70 1h")
     end
   end
+
+  describe "Timezone serializer" do
+    test "serializes empty list" do
+      assert Timezone.serialize([]) == ""
+    end
+
+    test "serializes multiple adjustments" do
+      timezones = [
+        %Timezone{adjustment_time: 1, offset: -1},
+        %Timezone{adjustment_time: 2, offset: 0}
+      ]
+
+      assert Timezone.serialize(timezones) == "z=1 -1h 2 0"
+    end
+  end
 end
