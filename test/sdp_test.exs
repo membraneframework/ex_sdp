@@ -75,7 +75,7 @@ defmodule Membrane.Protocol.SDPTest do
            %Attribute.RTPMapping{
              clock_rate: 90_000,
              encoding: "h263-1998",
-             params: [],
+             params: nil,
              payload_type: 99
            }}
         ],
