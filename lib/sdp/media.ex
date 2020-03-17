@@ -125,9 +125,9 @@ defmodule Membrane.Protocol.SDP.Media do
   def serialize(media) do
     serialized_header = media |> header_fields |> Enum.join(" ") |> String.trim()
 
-    optional = media |> other_fields |> Enum.join("\n")
+    optional = media |> other_fields |> Enum.join("\r\n")
 
-    String.trim("m=" <> serialized_header <> "\n" <> optional)
+    String.trim("m=" <> serialized_header <> "\r\n" <> optional)
   end
 
   defp finalize_optional_parsing(%__MODULE__{attributes: attrs} = media) do
@@ -199,7 +199,7 @@ defmodule Membrane.Protocol.SDP.Media do
         list
         |> Enum.map(&serialize_optional(&1, module))
         |> Enum.reject(&(&1 == ""))
-        |> Enum.map_join(&add_type(&1, type_string))
+        |> Enum.map_join("\r\n", &add_type(&1, type_string))
 
       single_field ->
         single_field |> serialize_optional(module) |> add_type(type_string)

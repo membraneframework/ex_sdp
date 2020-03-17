@@ -3,14 +3,14 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
   This module represents RTP mapping.
   """
 
-  @enforce_keys [:payload_type, :encoding, :clock_rate, :params]
-  defstruct @enforce_keys
+  @enforce_keys [:payload_type, :encoding, :clock_rate]
+  defstruct @enforce_keys ++ [:params]
 
   @type t :: %__MODULE__{
           payload_type: 96..127,
           encoding: binary(),
           clock_rate: non_neg_integer(),
-          params: [any()]
+          params: non_neg_integer() | nil
         }
 
   @spec parse(binary(), atom | binary()) ::
@@ -45,18 +45,19 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMapping do
 
   defp parse_params(:audio, [raw_channels]) do
     case Integer.parse(raw_channels) do
-      {channels, ""} -> [{:channels, channels}]
+      {channels, ""} -> channels
       _ -> {:error, :invalid_param}
     end
   end
 
-  defp parse_params(:audio, []), do: [{:channels, 1}]
+  defp parse_params(:audio, []), do: 1
+  defp parse_params(_, [params]), do: params
+  defp parse_params(_, []), do: nil
 
-  defp parse_params(_, params), do: params
+  defp serialize_params(%__MODULE__{params: nil}), do: ""
+  defp serialize_params(%__MODULE__{params: 1}), do: ""
 
-  defp serialize_params(%__MODULE__{params: []}), do: ""
-
-  defp serialize_params(%__MODULE__{params: list}) do
-    "/" <> (list |> Enum.map_join(" ", &to_string/1))
+  defp serialize_params(%__MODULE__{params: params}) do
+    "/" <> to_string(params)
   end
 end

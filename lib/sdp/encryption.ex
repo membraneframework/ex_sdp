@@ -11,7 +11,7 @@ defmodule Membrane.Protocol.SDP.Encryption do
   @enforce_keys [:method]
   defstruct @enforce_keys ++ [:key]
 
-  @type methods :: :prompt | :base64 | :clear | :prompt
+  @type methods :: :prompt | :base64 | :clear | :prompt | :uri
 
   @type t :: %__MODULE__{
           method: methods(),

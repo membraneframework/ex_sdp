@@ -75,20 +75,20 @@ defmodule Membrane.Protocol.SDP do
   def serialize(session) do
     session_fields_serialized = [
       serialize_version(session.version),
-      Origin.serialize(session.origin),
+      serialize_single(session.origin, Origin),
       serialize_session_name(session.session_name),
       serialize_session_information(session.session_information),
       serialize_uri(session.uri),
       serialize_email(session.email),
       serialize_phone_number(session.phone_number),
-      ConnectionData.serialize(session.connection_data),
-      Enum.map_join(session.bandwidth, @preffered_ending, &Bandwidth.serialize/1),
-      Timing.serialize(session.timing),
-      Enum.map_join(session.time_repeats, @preffered_ending, &RepeatTimes.serialize/1),
-      Timezone.serialize(session.time_zones_adjustments),
-      Encryption.serialize(session.encryption),
-      Enum.map_join(session.attributes, @preffered_ending, &Attribute.serialize/1),
-      Enum.map_join(session.media, @preffered_ending, &Media.serialize/1)
+      serialize_single(session.connection_data, ConnectionData),
+      serialize_multiple(session.bandwidth, Bandwidth),
+      serialize_single(session.timing, Timing),
+      serialize_multiple(session.time_repeats, RepeatTimes),
+      serialize_single(session.time_zones_adjustments, Timezone),
+      serialize_single(session.encryption, Encryption),
+      serialize_multiple(session.attributes, Attribute),
+      serialize_multiple(session.media, Media)
     ]
 
     session_fields_serialized |> Enum.reject(&(&1 == "")) |> Enum.join(@preffered_ending)
@@ -200,6 +200,14 @@ defmodule Membrane.Protocol.SDP do
 
   defp flip_media(%{media: media} = session),
     do: %{session | media: Enum.reverse(media)}
+
+  defp serialize_single(nil, _module), do: ""
+  defp serialize_single(value, module), do: apply(module, :serialize, [value])
+
+  defp serialize_multiple(nil, _module), do: ""
+
+  defp serialize_multiple(list, module),
+    do: Enum.map_join(list, @preffered_ending, &module.serialize/1)
 
   defp serialize_version(version), do: "v=" <> Integer.to_string(version)
 

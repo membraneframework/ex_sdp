@@ -21,16 +21,22 @@ defmodule Membrane.Protocol.SDP.Timezone do
     end
   end
 
-  @spec serialize([t()]) :: binary()
+  @spec serialize([]) :: binary()
   def serialize([]), do: ""
 
   def serialize(adjustments), do: "z=" <> Enum.map_join(adjustments, " ", &serialize_timezone/1)
 
   @spec serialize_timezone(t()) :: binary()
-  def serialize_timezone(timezone),
-    do:
-      Integer.to_string(timezone.adjustment_time) <>
-        " " <> Integer.to_string(timezone.offset) <> "h"
+  def serialize_timezone(timezone) do
+    serialized_offset =
+      if timezone.offset == 0 do
+        Integer.to_string(timezone.offset)
+      else
+        Integer.to_string(timezone.offset) <> "h"
+      end
+
+    Integer.to_string(timezone.adjustment_time) <> " " <> serialized_offset
+  end
 
   defp parse_timezones(timezone_corrections) do
     timezone_corrections

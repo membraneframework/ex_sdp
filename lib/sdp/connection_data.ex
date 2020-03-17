@@ -45,7 +45,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
           }
   end
 
-  @type sdp_address :: IP6.t() | IP4.t()
+  @type sdp_address :: IP6.t() | IP4.t() | binary()
   @type reason :: :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl
 
   @spec parse(binary()) :: {:ok, [sdp_address()] | sdp_address()} | {:error, reason}
@@ -66,20 +66,16 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   end
 
   @spec serialize([sdp_address()]) :: binary()
-  def serialize(addresses) do
-    case length(addresses) do
-      0 ->
-        ""
+  def serialize([]), do: ""
 
-      size ->
-        with {:ok, result} <- addresses |> Enum.sort_by(& &1.value) |> hd |> serialize_address do
-          "c=" <> result <> serialize_size(size)
-        end
-    end
-  end
+  @spec serialize([sdp_address()]) :: binary()
+  def serialize(addresses), do: serialized_addresses_list(addresses)
 
   defp serialize_size(1), do: ""
   defp serialize_size(size) when size > 1, do: "/" <> Integer.to_string(size)
+
+  @spec serialize_address(binary()) :: {:ok, binary()}
+  def serialize_address(address) when is_binary(address), do: {:ok, "IN IP4 " <> address}
 
   @spec serialize_address(%IP4{ttl: nil}) :: {:ok, binary()} | {:error, any()}
   def serialize_address(%IP4{ttl: nil, value: value}) do
@@ -105,6 +101,18 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   defp serialize_address_value(value) do
     with address <- :inet.ntoa(value) do
       {:ok, to_string(address)}
+    end
+  end
+
+  defp serialized_addresses_list([head | _rest]) when is_binary(head) do
+    with {:ok, result} <- serialize_address(head) do
+      "c=" <> result
+    end
+  end
+
+  defp serialized_addresses_list(list) do
+    with {:ok, result} <- list |> Enum.sort_by(& &1.value) |> hd |> serialize_address do
+      "c=" <> result <> serialize_size(length(list))
     end
   end
 

@@ -109,5 +109,6 @@ defmodule Membrane.Protocol.SDP.Attribute do
   defp serialize_attribute(attribute) when is_atom(attribute), do: Atom.to_string(attribute)
   defp serialize_attribute({:rtpmap, mapping}), do: RTPMapping.serialize(mapping)
   defp serialize_attribute({:framerate, value}), do: "framerate:" <> value
-  defp serialize_attribute({key, value}), do: key <> ":" <> value
+  defp serialize_attribute({key, value}) when is_atom(key), do: to_string(key) <> ":" <> value
+  defp serialize_attribute({key, value}) when is_binary(key), do: key <> ":" <> value
 end

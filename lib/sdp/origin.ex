@@ -5,6 +5,8 @@ defmodule Membrane.Protocol.SDP.Origin do
 
   If username is set to `-` the originating host does not support the concept of user IDs.
 
+  Username MUST NOT contain spaces.
+
   For more details please see [RFC4566 Section 5.2](https://tools.ietf.org/html/rfc4566#section-5.2)
   """
 
@@ -48,14 +50,16 @@ defmodule Membrane.Protocol.SDP.Origin do
 
   @spec serialize(t()) :: binary()
   def serialize(origin) do
-    origin_serialized_fields = [
-      serialize_username(origin.username),
-      origin.session_id,
-      origin.session_version,
-      ConnectionData.serialize_address(origin.address)
-    ]
+    with {:ok, serialized_address} <- ConnectionData.serialize_address(origin.address) do
+      origin_serialized_fields = [
+        serialize_username(origin.username),
+        origin.session_id,
+        origin.session_version,
+        serialized_address
+      ]
 
-    "o=" <> Enum.join(origin_serialized_fields, " ")
+      "o=" <> Enum.join(origin_serialized_fields, " ")
+    end
   end
 
   defp serialize_username(nil), do: "-"
