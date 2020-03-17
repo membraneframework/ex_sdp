@@ -39,4 +39,26 @@ defmodule Membrane.Protocol.SDP.AttributeTest do
       assert {:ok, {"dunno", "123"}} = Attribute.parse_media_attribute({"dunno", "123"}, :message)
     end
   end
+
+  describe "Attribute serializer" do
+    test "serializes framerate attribute" do
+      assert Attribute.serialize({:framerate, "value"}) == "a=framerate:value"
+    end
+
+    test "serializes flag attributes" do
+      assert Attribute.serialize(:sendrecv) == "a=sendrecv"
+    end
+
+    test "serializes numeric attributes" do
+      assert Attribute.serialize({:maxptime, "100"}) == "a=maxptime:100"
+    end
+
+    test "serializes value attributes" do
+      assert Attribute.serialize({:type, "some-type"}) == "a=type:some-type"
+    end
+
+    test "serializes custom attributes" do
+      assert Attribute.serialize({"custom", "attribute"}) == "a=custom:attribute"
+    end
+  end
 end
