@@ -1,6 +1,7 @@
 defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
   use ExUnit.Case
 
+  alias Membrane.Protocol.SDP.Serializer
   alias Membrane.Protocol.SDP.Attribute.RTPMapping
 
   describe "RTP Mapping parser" do
@@ -49,7 +50,7 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
         clock_rate: 90_000
       }
 
-      assert RTPMapping.serialize(mapping) == "rtpmap:101 h263-1998/90000"
+      assert Serializer.serialize(mapping) == "rtpmap:101 h263-1998/90000"
     end
 
     test "serializes mapping with parameter" do
@@ -60,7 +61,7 @@ defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
         params: 2
       }
 
-      assert RTPMapping.serialize(mapping) == "rtpmap:98 L16/11025/2"
+      assert Serializer.serialize(mapping) == "rtpmap:98 L16/11025/2"
     end
   end
 end
