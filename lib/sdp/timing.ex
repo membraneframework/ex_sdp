@@ -31,8 +31,9 @@ defmodule Membrane.Protocol.SDP.Timing do
       parse_stop: _ -> {:error, :time_nan}
     end
   end
+end
 
-  @spec serialize(t()) :: binary()
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Timing do
   def serialize(timing),
     do: "t=" <> Integer.to_string(timing.start_time) <> " " <> Integer.to_string(timing.stop_time)
 end

@@ -1,7 +1,7 @@
 defmodule Membrane.Protocol.SDP.TimingTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP.Timing
+  alias Membrane.Protocol.SDP.{Serializer, Timing}
 
   describe "Timing parser" do
     test "processes valid description" do
@@ -22,7 +22,7 @@ defmodule Membrane.Protocol.SDP.TimingTest do
   describe "Timing serializer" do
     test "serializes valid timing" do
       timing = %Timing{start_time: 2_208_988_800, stop_time: 2_208_988_898}
-      assert Timing.serialize(timing) == "t=2208988800 2208988898"
+      assert Serializer.serialize(timing) == "t=2208988800 2208988898"
     end
   end
 end

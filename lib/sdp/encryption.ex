@@ -31,17 +31,6 @@ defmodule Membrane.Protocol.SDP.Encryption do
     end
   end
 
-  @spec serialize(t()) :: binary()
-  def serialize(encryption) do
-    result = "k=" <> Atom.to_string(encryption.method)
-
-    if is_nil(encryption.key) do
-      result
-    else
-      result <> ":" <> encryption.key
-    end
-  end
-
   defp parse_definition(definition) do
     case String.split(definition, ":", parts: 2) do
       [method] -> {method, nil}
@@ -55,4 +44,16 @@ defmodule Membrane.Protocol.SDP.Encryption do
   defp method_to_atom("base64"), do: {:ok, :base64}
   defp method_to_atom("uri"), do: {:ok, :uri}
   defp method_to_atom(_), do: {:error, :unsupported_method}
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Encryption do
+  def serialize(encryption) do
+    result = "k=" <> Atom.to_string(encryption.method)
+
+    if is_nil(encryption.key) do
+      result
+    else
+      result <> ":" <> encryption.key
+    end
+  end
 end

@@ -47,8 +47,11 @@ defmodule Membrane.Protocol.SDP.Origin do
       _ -> {:error, :invalid_origin}
     end
   end
+end
 
-  @spec serialize(t()) :: binary()
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Origin do
+  alias Membrane.Protocol.SDP.ConnectionData
+
   def serialize(origin) do
     with {:ok, serialized_address} <- ConnectionData.serialize_address(origin.address) do
       origin_serialized_fields = [

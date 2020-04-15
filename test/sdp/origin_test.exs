@@ -1,7 +1,7 @@
 defmodule Membrane.Protocol.SDP.OriginTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP.{ConnectionData, Origin}
+  alias Membrane.Protocol.SDP.{ConnectionData, Origin, Serializer}
 
   describe "Origin parser" do
     test "processes valid origin declaration" do
@@ -53,7 +53,7 @@ defmodule Membrane.Protocol.SDP.OriginTest do
   describe "Origin serializer" do
     test "serializes origin with unknown username" do
       origin = %Origin{session_version: "0", address: "some.origin.address", session_id: "222"}
-      assert Origin.serialize(origin) == "o=- 222 0 IN IP4 some.origin.address"
+      assert Serializer.serialize(origin) == "o=- 222 0 IN IP4 some.origin.address"
     end
 
     test "serializes origin with given username" do
@@ -64,7 +64,7 @@ defmodule Membrane.Protocol.SDP.OriginTest do
         username: "username_id"
       }
 
-      assert Origin.serialize(origin) == "o=username_id 222 0 IN IP4 some.origin.address"
+      assert Serializer.serialize(origin) == "o=username_id 222 0 IN IP4 some.origin.address"
     end
   end
 end

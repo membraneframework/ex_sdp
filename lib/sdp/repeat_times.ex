@@ -56,18 +56,6 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
     end
   end
 
-  @spec serialize(t()) :: binary()
-  def serialize(repeat_times) do
-    serialized_fields =
-      [
-        Integer.to_string(repeat_times.repeat_interval),
-        Integer.to_string(repeat_times.active_duration)
-      ] ++
-        Enum.map(repeat_times.offsets, &Integer.to_string/1)
-
-    "r=" <> Enum.join(serialized_fields, " ")
-  end
-
   defp compact?(parts) do
     Enum.any?(parts, fn time ->
       Enum.any?(@valid_keys, fn unit -> String.ends_with?(time, unit) end)
@@ -139,5 +127,18 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
     }
 
     {:ok, compact}
+  end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.RepeatTimes do
+  def serialize(repeat_times) do
+    serialized_fields =
+      [
+        Integer.to_string(repeat_times.repeat_interval),
+        Integer.to_string(repeat_times.active_duration)
+      ] ++
+        Enum.map(repeat_times.offsets, &Integer.to_string/1)
+
+    "r=" <> Enum.join(serialized_fields, " ")
   end
 end

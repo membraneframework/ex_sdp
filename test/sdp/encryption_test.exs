@@ -1,7 +1,7 @@
 defmodule Membrane.Protocol.SDP.EncryptionTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP.Encryption
+  alias Membrane.Protocol.SDP.{Encryption, Serializer}
 
   describe "Encryption parser" do
     test "processes valid method only string" do
@@ -41,12 +41,12 @@ defmodule Membrane.Protocol.SDP.EncryptionTest do
   describe "Encryption serializer" do
     test "serializes encryption description without key" do
       encryption = %Encryption{method: :prompt}
-      assert Encryption.serialize(encryption) == "k=prompt"
+      assert Serializer.serialize(encryption) == "k=prompt"
     end
 
     test "serializes encryption description with key" do
       encryption = %Encryption{method: :uri, key: "https://some.url.net"}
-      assert Encryption.serialize(encryption) == "k=uri:https://some.url.net"
+      assert Serializer.serialize(encryption) == "k=uri:https://some.url.net"
     end
   end
 end
