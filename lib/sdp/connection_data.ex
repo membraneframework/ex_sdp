@@ -21,9 +21,6 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
   @ipv4_max_value 255
   @ipv6_max_value 65_535
 
-  @enforce_keys [:network_type, :address]
-  defstruct @enforce_keys
-
   defmodule IP4 do
     @moduledoc false
     @enforce_keys [:value]
@@ -45,8 +42,26 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
           }
   end
 
-  @type sdp_address :: IP6.t() | IP4.t() | binary()
+  defmodule FQDN do
+    @moduledoc false
+    @enforce_keys [:value]
+    defstruct @enforce_keys
+
+    @type t :: %__MODULE__{
+            value: binary()
+          }
+  end
+
+  @type sdp_address :: IP6.t() | IP4.t() | FQDN.t()
   @type reason :: :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl
+
+  @enforce_keys [:addresses]
+  defstruct @enforce_keys ++ [network_type: "IN"]
+
+  @type t :: %__MODULE__{
+          addresses: [IP6.t()] | [IP6.t()] | [FQDN.t()],
+          network_type: binary()
+        }
 
   @spec parse(binary()) :: {:ok, [sdp_address()] | sdp_address()} | {:error, reason}
   def parse(connection_string) do
@@ -58,70 +73,12 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
     end
   end
 
-  @spec serialize(sdp_address()) :: binary()
-  def serialize(address) when not is_list(address) do
-    with {:ok, serialized} <- serialize_address(address) do
-      serialized
-    end
-  end
-
-  @spec serialize([sdp_address()]) :: binary()
-  def serialize([]), do: ""
-
-  @spec serialize([sdp_address()]) :: binary()
-  def serialize(addresses), do: serialized_addresses_list(addresses)
-
-  defp serialize_size(1), do: ""
-  defp serialize_size(size) when size > 1, do: "/" <> Integer.to_string(size)
-
-  @spec serialize_address(binary()) :: {:ok, binary()}
-  def serialize_address(address) when is_binary(address), do: {:ok, "IN IP4 " <> address}
-
-  @spec serialize_address(%IP4{ttl: nil}) :: {:ok, binary()} | {:error, any()}
-  def serialize_address(%IP4{ttl: nil, value: value}) do
-    with {:ok, address} <- serialize_address_value(value) do
-      {:ok, "IN IP4 " <> address}
-    end
-  end
-
-  @spec serialize_address(%IP4{ttl: 0..255}) :: {:ok, binary()} | {:error, any()}
-  def serialize_address(%IP4{ttl: ttl, value: value}) do
-    with {:ok, address} <- serialize_address_value(value) do
-      {:ok, "IN IP4 " <> address <> "/" <> Integer.to_string(ttl)}
-    end
-  end
-
-  @spec serialize_address(IP6.t()) :: {:ok, binary()} | {:error, any()}
-  def serialize_address(%IP6{value: value}) do
-    with {:ok, address} <- serialize_address_value(value) do
-      {:ok, "IN IP6 " <> address}
-    end
-  end
-
-  defp serialize_address_value(value) do
-    with address <- :inet.ntoa(value) do
-      {:ok, to_string(address)}
-    end
-  end
-
-  defp serialized_addresses_list([head | _rest]) when is_binary(head) do
-    with {:ok, result} <- serialize_address(head) do
-      "c=" <> result
-    end
-  end
-
-  defp serialized_addresses_list(list) do
-    with {:ok, result} <- list |> Enum.sort_by(& &1.value) |> hd |> serialize_address do
-      "c=" <> result <> serialize_size(length(list))
-    end
-  end
-
   defp parse_address(address, addrtype, optional) do
     with {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
          {:ok, addresses} <- handle_address(address, addrtype, optional) do
       {:ok, addresses}
     else
-      {:error, :einval} -> {:ok, address}
+      {:error, :einval} -> {:ok, %FQDN{value: address}}
       {:error, _} = error -> error
     end
   end
@@ -192,4 +149,50 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
       {:error, :invalid_address}
     end
   end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData.IP4 do
+  alias Membrane.Protocol.SDP.ConnectionData.IP4
+
+  def serialize(%Membrane.Protocol.SDP.ConnectionData.IP4{ttl: nil, value: value}) do
+    address = value |> :inet.ntoa() |> to_string()
+    "IN IP4 " <> address
+  end
+
+  def serialize(%Membrane.Protocol.SDP.ConnectionData.IP4{ttl: ttl, value: value}) do
+    address = value |> :inet.ntoa() |> to_string()
+    "IN IP4 " <> address <> "/" <> Integer.to_string(ttl)
+  end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData.IP6 do
+  alias Membrane.Protocol.SDP.ConnectionData
+  alias ConnectionData.IP6
+
+  def serialize(%IP6{value: value}) do
+    address = value |> :inet.ntoa() |> to_string()
+    "IN IP6 " <> address
+  end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData.FQDN do
+  alias Membrane.Protocol.SDP.ConnectionData.FQDN
+  def serialize(%FQDN{value: address}), do: "IN IP4 " <> address
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData do
+  alias Membrane.Protocol.SDP.ConnectionData
+  alias Membrane.Protocol.SDP.Serializer
+
+  def serialize(%ConnectionData{addresses: []}), do: ""
+
+  def serialize(%ConnectionData{addresses: list}) do
+    serialized = list |> hd |> Serializer.serialize()
+    size = list |> length |> serialize_size
+    "c=" <> serialized <> size
+  end
+
+  defp serialize_size(0), do: ""
+  defp serialize_size(1), do: ""
+  defp serialize_size(size) when size > 1, do: "/" <> Integer.to_string(size)
 end

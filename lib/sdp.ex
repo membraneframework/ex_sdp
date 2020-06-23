@@ -9,16 +9,21 @@ defmodule Membrane.Protocol.SDP do
     Bandwidth,
     ConnectionData,
     Encryption,
+    Email,
     Media,
     Origin,
+    PhoneNumber,
     RepeatTimes,
     Session,
+    SessionInformation,
+    SessionName,
     Timezone,
-    Timing
+    Timing,
+    URI,
+    Version
   }
 
   @line_ending ["\r\n", "\r", "\n"]
-  @preffered_ending "\r\n"
 
   @doc """
   Parses SDP Multimedia Session.
@@ -68,36 +73,10 @@ defmodule Membrane.Protocol.SDP do
     end
   end
 
-  @doc """
-  Serializes SDP.Session struct into SDP Multimedia Session string.
-  """
-  @spec serialize(Session.t()) :: binary()
-  def serialize(session) do
-    session_fields_serialized = [
-      serialize_version(session.version),
-      serialize_single(session.origin, Origin),
-      serialize_session_name(session.session_name),
-      serialize_session_information(session.session_information),
-      serialize_uri(session.uri),
-      serialize_email(session.email),
-      serialize_phone_number(session.phone_number),
-      serialize_single(session.connection_data, ConnectionData),
-      serialize_multiple(session.bandwidth, Bandwidth),
-      serialize_single(session.timing, Timing),
-      serialize_multiple(session.time_repeats, RepeatTimes),
-      serialize_single(session.time_zones_adjustments, Timezone),
-      serialize_single(session.encryption, Encryption),
-      serialize_multiple(session.attributes, Attribute),
-      serialize_multiple(session.media, Media)
-    ]
-
-    session_fields_serialized |> Enum.reject(&(&1 == "")) |> Enum.join(@preffered_ending)
-  end
-
   defp parse_line(lines, session)
 
   defp parse_line(["v=" <> version | rest], spec),
-    do: {rest, %Session{spec | version: String.to_integer(version)}}
+    do: {rest, %Session{spec | version: %Version{value: String.to_integer(version)}}}
 
   defp parse_line(["o=" <> origin | rest], spec) do
     with {:ok, %Origin{} = origin} <- Origin.parse(origin) do
@@ -106,19 +85,21 @@ defmodule Membrane.Protocol.SDP do
   end
 
   defp parse_line(["s=" <> session_name | rest], spec),
-    do: {rest, %Session{spec | session_name: session_name}}
+    do: {rest, %Session{spec | session_name: %SessionName{value: session_name}}}
 
   defp parse_line(["i=" <> session_information | rest], spec),
-    do: {rest, %Session{spec | session_information: session_information}}
+    do:
+      {rest,
+       %Session{spec | session_information: %SessionInformation{value: session_information}}}
 
   defp parse_line(["u=" <> uri | rest], spec),
-    do: {rest, %Session{spec | uri: uri}}
+    do: {rest, %Session{spec | uri: %URI{value: uri}}}
 
   defp parse_line(["e=" <> email | rest], spec),
-    do: {rest, %Session{spec | email: email}}
+    do: {rest, %Session{spec | email: %Email{value: email}}}
 
   defp parse_line(["p=" <> phone_number | rest], spec),
-    do: {rest, %Session{spec | phone_number: phone_number}}
+    do: {rest, %Session{spec | phone_number: %PhoneNumber{value: phone_number}}}
 
   defp parse_line(["c=" <> connection_data | rest], spec) do
     with {:ok, connection_info} <- ConnectionData.parse(connection_data) do
@@ -200,28 +181,40 @@ defmodule Membrane.Protocol.SDP do
 
   defp flip_media(%{media: media} = session),
     do: %{session | media: Enum.reverse(media)}
+end
 
-  defp serialize_single(nil, _module), do: ""
-  defp serialize_single(value, module), do: apply(module, :serialize, [value])
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Session do
+  @preffered_eol "\r\n"
 
-  defp serialize_multiple(nil, _module), do: ""
+  alias Membrane.Protocol.SDP.{Serializer, Timezone}
 
-  defp serialize_multiple(list, module),
-    do: Enum.map_join(list, @preffered_ending, &module.serialize/1)
+  def serialize(session) do
+    [
+      :version,
+      :origin,
+      :session_name,
+      :session_information,
+      :uri,
+      :email,
+      :phone_number,
+      :connection_data,
+      :bandwidth,
+      :timing,
+      :time_repeats,
+      :time_zones_adjustments,
+      :encryption,
+      :attributes,
+      :media
+    ]
+    |> Enum.map(&Map.get(session, &1))
+    |> Enum.reject(&(&1 == [] or &1 == nil))
+    |> Enum.map_join(@preffered_eol, &serialize_field/1)
+  end
 
-  defp serialize_version(version), do: "v=" <> Integer.to_string(version)
+  defp serialize_field([%Timezone{} | _rest] = adjustments), do: Serializer.serialize(adjustments)
 
-  defp serialize_session_name(session_name), do: "s=" <> session_name
+  defp serialize_field(list) when is_list(list),
+    do: Enum.map_join(list, @preffered_eol, &Serializer.serialize/1)
 
-  defp serialize_session_information(nil), do: ""
-  defp serialize_session_information(session_information), do: "i=" <> session_information
-
-  defp serialize_uri(nil), do: ""
-  defp serialize_uri(uri), do: "u=" <> uri
-
-  defp serialize_email(nil), do: ""
-  defp serialize_email(email), do: "e=" <> email
-
-  defp serialize_phone_number(nil), do: ""
-  defp serialize_phone_number(number), do: "p=" <> number
+  defp serialize_field(value), do: Serializer.serialize(value)
 end

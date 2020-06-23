@@ -50,19 +50,19 @@ defmodule Membrane.Protocol.SDP.Origin do
 end
 
 defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Origin do
-  alias Membrane.Protocol.SDP.ConnectionData
+  alias Membrane.Protocol.SDP.Serializer
 
   def serialize(origin) do
-    with {:ok, serialized_address} <- ConnectionData.serialize_address(origin.address) do
-      origin_serialized_fields = [
-        serialize_username(origin.username),
-        origin.session_id,
-        origin.session_version,
-        serialized_address
-      ]
+    serialized_address = Serializer.serialize(origin.address)
 
-      "o=" <> Enum.join(origin_serialized_fields, " ")
-    end
+    origin_serialized_fields = [
+      serialize_username(origin.username),
+      origin.session_id,
+      origin.session_version,
+      serialized_address
+    ]
+
+    "o=" <> Enum.join(origin_serialized_fields, " ")
   end
 
   defp serialize_username(nil), do: "-"

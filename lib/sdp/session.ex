@@ -18,12 +18,12 @@ defmodule Membrane.Protocol.SDP.Session do
     :phone_number,
     :session_information,
     :timing,
+    :time_zones_adjustments,
     attributes: [],
     bandwidth: [],
     connection_data: [],
     media: [],
-    time_repeats: [],
-    time_zones_adjustments: []
+    time_repeats: []
   ]
 
   defstruct @enforce_keys ++ @optional_keys
@@ -32,29 +32,35 @@ defmodule Membrane.Protocol.SDP.Session do
     Attribute,
     Bandwidth,
     ConnectionData,
+    Email,
     Encryption,
     Media,
     Origin,
+    PhoneNumber,
     RepeatTimes,
+    SessionInformation,
+    SessionName,
     Timezone,
-    Timing
+    Timing,
+    URI,
+    Version
   }
 
   @type t :: %__MODULE__{
-          version: non_neg_integer(),
+          version: Version.t(),
           origin: Origin.t(),
-          session_name: binary(),
-          email: binary() | nil,
-          encryption: Encryption.t() | nil,
-          uri: binary() | nil,
-          phone_number: binary() | nil,
-          session_information: binary() | nil,
-          timing: Timing.t() | nil,
-          attributes: [Attribute.t()],
+          session_name: SessionName.t(),
+          session_information: SessionInformation.t() | nil,
+          uri: URI.t() | nil,
+          email: Email.t() | nil,
+          phone_number: PhoneNumber.t() | nil,
+          connection_data: ConnectionData.t(),
           bandwidth: [Bandwidth.t()],
-          connection_data: [ConnectionData.sdp_address()],
-          media: [Media.t()],
+          time_zones_adjustments: Timezone.t(),
+          encryption: Encryption.t() | nil,
+          attributes: [Attribute.t()],
+          timing: Timing.t() | nil,
           time_repeats: [RepeatTimes.t()],
-          time_zones_adjustments: [Timezone.t()]
+          media: [Media.t()]
         }
 end
