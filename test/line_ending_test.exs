@@ -2,7 +2,7 @@ defmodule Membrane.Protocol.SDP.LineEndingTest do
   use ExUnit.Case
   alias Membrane.Protocol.SDP
 
-  alias Membrane.Protocol.SDP.{ConnectionData, Origin, Session, Timing}
+  alias Membrane.Protocol.SDP.{ConnectionData, Origin, Session, SessionName, Timing, Version}
 
   @expected_output %Session{
     origin: %Origin{
@@ -13,12 +13,12 @@ defmodule Membrane.Protocol.SDP.LineEndingTest do
       session_version: "2890842807",
       username: "jdoe"
     },
-    session_name: "Very fancy session name",
+    session_name: %SessionName{value: "Very fancy session name"},
     timing: %Timing{
       start_time: 2_873_397_496,
       stop_time: 2_873_404_696
     },
-    version: 0
+    version: %Version{value: 0}
   }
 
   describe "SDP.parse handles" do

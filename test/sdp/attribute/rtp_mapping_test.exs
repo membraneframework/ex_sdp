@@ -1,8 +1,8 @@
 defmodule Membrane.Protocol.SDP.Attribute.RTPMappingTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP.Serializer
   alias Membrane.Protocol.SDP.Attribute.RTPMapping
+  alias Membrane.Protocol.SDP.Serializer
 
   describe "RTP Mapping parser" do
     test "parses valid rtp mapping for video media" do

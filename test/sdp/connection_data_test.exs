@@ -1,7 +1,7 @@
 defmodule Membrane.Protocol.SDP.ConnectionDataTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP.ConnectionData
+  alias Membrane.Protocol.SDP.{ConnectionData, Serializer}
   alias ConnectionData.{IP4, IP6}
 
   describe "Connection information parser when working with ip4" do
@@ -94,41 +94,45 @@ defmodule Membrane.Protocol.SDP.ConnectionDataTest do
 
   describe "Connection Data Serializer serializes IPv4" do
     test "address with ttl" do
-      assert ConnectionData.serialize(%IP4{value: {43, 22, 11, 101}, ttl: 3}) ==
+      assert Serializer.serialize(%IP4{value: {43, 22, 11, 101}, ttl: 3}) ==
                "IN IP4 43.22.11.101/3"
     end
 
     test "address without ttl" do
-      assert ConnectionData.serialize(%IP4{value: {98, 122, 75, 1}}) == "IN IP4 98.122.75.1"
+      assert Serializer.serialize(%IP4{value: {98, 122, 75, 1}}) == "IN IP4 98.122.75.1"
     end
 
     test "multiple addresses" do
-      addresses = [
-        %IP4{value: {28, 0, 0, 1}},
-        %IP4{value: {28, 0, 0, 2}},
-        %IP4{value: {28, 0, 0, 3}}
-      ]
+      data = %ConnectionData{
+        addresses: [
+          %IP4{value: {28, 0, 0, 1}},
+          %IP4{value: {28, 0, 0, 2}},
+          %IP4{value: {28, 0, 0, 3}}
+        ]
+      }
 
-      assert ConnectionData.serialize(addresses) == "c=IN IP4 28.0.0.1/3"
+      assert Serializer.serialize(data) == "c=IN IP4 28.0.0.1/3"
     end
   end
 
   describe "Connection Data Serializer serializes IPv6" do
     test "single address" do
-      assert ConnectionData.serialize(%IP6{value: {43, 0, 0, 0, 1, 1, 11, 101}}) ==
+      assert Serializer.serialize(%IP6{value: {43, 0, 0, 0, 1, 1, 11, 101}}) ==
                "IN IP6 2b::1:1:b:65"
     end
 
     test "multiple addresses" do
-      addresses = [
-        %IP6{value: {3, 72, 12, 4, 3, 7, 5, 0}},
-        %IP6{value: {3, 72, 12, 4, 3, 7, 5, 1}},
-        %IP6{value: {3, 72, 12, 4, 3, 7, 5, 2}},
-        %IP6{value: {3, 72, 12, 4, 3, 7, 5, 3}},
-        %IP6{value: {3, 72, 12, 4, 3, 7, 5, 4}}
-      ]
+      connection_data = %ConnectionData{
+        addresses: [
+          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 0}},
+          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 1}},
+          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 2}},
+          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 3}},
+          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 4}}
+        ]
+      }
 
-      assert ConnectionData.serialize(addresses) == "c=IN IP6 3:48:c:4:3:7:5:0/5"
+      assert Serializer.serialize(connection_data) == "c=IN IP6 3:48:c:4:3:7:5:0/5"
     end
   end
 end
