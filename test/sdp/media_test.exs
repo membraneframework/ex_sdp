@@ -2,7 +2,9 @@ defmodule Membrane.Protocol.SDP.MediaTest do
   use ExUnit.Case
   use Bunch
 
-  alias Membrane.Protocol.SDP.{
+  alias Membrane.Protocol.SDP
+
+  alias SDP.{
     Attribute,
     Bandwidth,
     ConnectionData,
@@ -10,7 +12,6 @@ defmodule Membrane.Protocol.SDP.MediaTest do
     Media,
     Origin,
     Serializer,
-    Session,
     Timing
   }
 
@@ -118,7 +119,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       encryption = %Encryption{method: :clear}
 
-      session = %Session{
+      session = %SDP{
         connection_data: connection_data,
         origin: %Origin{
           session_id: "2890844526",

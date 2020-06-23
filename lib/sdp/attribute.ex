@@ -102,7 +102,6 @@ end
 
 defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Attribute do
   alias Membrane.Protocol.SDP.{Attribute, Serializer}
-  alias Membrane.Protocol.SDP.Attribute.RTPMapping
 
   @spec serialize(Attribute.t()) :: binary()
   def serialize(attribute) do

@@ -13,7 +13,6 @@ defmodule Membrane.Protocol.SDPTest do
     Origin,
     PhoneNumber,
     RepeatTimes,
-    Session,
     SessionInformation,
     SessionName,
     Timezone,
@@ -49,7 +48,7 @@ defmodule Membrane.Protocol.SDPTest do
          """
          |> String.replace("\n", "\r\n")
 
-  @expected_output %Session{
+  @expected_output %SDP{
     attributes: [%Attribute{key: "key", value: "value"}, %Attribute{value: :recvonly}],
     bandwidth: [
       %Bandwidth{bandwidth: 256, type: :CT}
@@ -169,7 +168,7 @@ defmodule Membrane.Protocol.SDPTest do
   end
 
   describe "Parser parse!/1" do
-    test "returns Session spec when parsing valid input" do
+    test "returns SDP spec when parsing valid input" do
       assert @expected_output == SDP.parse!(@input)
     end
 

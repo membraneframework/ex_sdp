@@ -2,9 +2,9 @@ defmodule Membrane.Protocol.SDP.LineEndingTest do
   use ExUnit.Case
   alias Membrane.Protocol.SDP
 
-  alias Membrane.Protocol.SDP.{ConnectionData, Origin, Session, SessionName, Timing, Version}
+  alias SDP.{ConnectionData, Origin, SessionName, Timing, Version}
 
-  @expected_output %Session{
+  @expected_output %SDP{
     origin: %Origin{
       address: %ConnectionData.IP4{
         value: {10, 47, 16, 5}

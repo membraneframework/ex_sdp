@@ -14,8 +14,6 @@ defmodule Membrane.Protocol.SDP.RFCTest do
     Email,
     Media,
     Origin,
-    Serializer,
-    Session,
     SessionInformation,
     SessionName,
     Timing,
@@ -46,7 +44,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                |> String.replace("\n", "\r\n")
                |> SDP.parse()
 
-      assert session_spec == %Session{
+      assert session_spec == %SDP{
                attributes: [%Attribute{value: :recvonly}],
                connection_data: %IP4{
                  ttl: 127,
@@ -128,7 +126,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                |> String.replace("\n", "\r\n")
                |> SDP.parse()
 
-      assert result == %Session{
+      assert result == %SDP{
                attributes: [],
                bandwidth: [],
                connection_data: %FQDN{value: "host.atlanta.example.com"},
@@ -237,7 +235,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                |> String.replace("\n", "\r\n")
                |> SDP.parse()
 
-      assert %Session{
+      assert %SDP{
                attributes: [],
                bandwidth: [],
                connection_data: %FQDN{value: "host.biloxi.example.com"},
@@ -327,7 +325,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         |> String.trim()
 
       assert expected ==
-               Serializer.serialize(%Session{
+               SDP.serialize(%SDP{
                  attributes: [%Attribute{value: :recvonly}],
                  connection_data: %ConnectionData{
                    addresses: [
@@ -406,7 +404,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         |> String.trim()
 
       assert expected ==
-               Serializer.serialize(%Session{
+               SDP.serialize(%SDP{
                  attributes: [],
                  bandwidth: [],
                  connection_data: %ConnectionData{
@@ -516,7 +514,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         |> String.trim()
 
       assert expected ==
-               Serializer.serialize(%Session{
+               SDP.serialize(%SDP{
                  attributes: [],
                  bandwidth: [],
                  connection_data: %ConnectionData{

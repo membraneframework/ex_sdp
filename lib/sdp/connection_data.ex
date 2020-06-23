@@ -154,12 +154,12 @@ end
 defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData.IP4 do
   alias Membrane.Protocol.SDP.ConnectionData.IP4
 
-  def serialize(%Membrane.Protocol.SDP.ConnectionData.IP4{ttl: nil, value: value}) do
+  def serialize(%IP4{ttl: nil, value: value}) do
     address = value |> :inet.ntoa() |> to_string()
     "IN IP4 " <> address
   end
 
-  def serialize(%Membrane.Protocol.SDP.ConnectionData.IP4{ttl: ttl, value: value}) do
+  def serialize(%IP4{ttl: ttl, value: value}) do
     address = value |> :inet.ntoa() |> to_string()
     "IN IP4 " <> address <> "/" <> Integer.to_string(ttl)
   end

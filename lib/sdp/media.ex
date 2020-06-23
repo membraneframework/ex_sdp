@@ -15,12 +15,13 @@ defmodule Membrane.Protocol.SDP.Media do
                 attributes: []
               ]
 
-  alias Membrane.Protocol.SDP.{
+  alias Membrane.Protocol.SDP
+
+  alias SDP.{
     Attribute,
     Bandwidth,
     ConnectionData,
-    Encryption,
-    Session
+    Encryption
   }
 
   @typedoc """
@@ -105,7 +106,7 @@ defmodule Membrane.Protocol.SDP.Media do
     end
   end
 
-  @spec apply_session(__MODULE__.t(), Session.t()) :: __MODULE__.t()
+  @spec apply_session(__MODULE__.t(), SDP.t()) :: __MODULE__.t()
   def apply_session(media, session) do
     session
     |> Map.from_struct()
