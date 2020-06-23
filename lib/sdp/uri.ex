@@ -1,7 +1,19 @@
 defmodule Membrane.Protocol.SDP.URI do
-  @type t() :: binary()
+  @moduledoc """
+  This module represents URI field of SDP.
 
-  defimpl Membrane.Protocol.SDP.Serializer do
-    def serialize(uri), do: "u=" <> uri
-  end
+  For more details please see [RFC4566 Section 5.5](https://tools.ietf.org/html/rfc4566#section-5.5)
+  """
+  @enforce_keys [:value]
+  defstruct @enforce_keys
+
+  @type t :: %__MODULE__{
+          value: binary()
+        }
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.URI do
+  alias Membrane.Protocol.SDP.URI
+
+  def serialize(%URI{value: uri}), do: "u=" <> uri
 end
