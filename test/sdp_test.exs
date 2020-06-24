@@ -53,9 +53,13 @@ defmodule Membrane.Protocol.SDPTest do
     bandwidth: [
       %Bandwidth{bandwidth: 256, type: :CT}
     ],
-    connection_data: %ConnectionData.IP4{
-      ttl: 127,
-      value: {224, 2, 17, 12}
+    connection_data: %ConnectionData{
+      addresses: [
+        %ConnectionData.IP4{
+          ttl: 127,
+          value: {224, 2, 17, 12}
+        }
+      ]
     },
     email: %Email{value: "j.doe@example.com (Jane Doe)"},
     encryption: %Encryption{key: "key", method: :clear},
@@ -65,9 +69,13 @@ defmodule Membrane.Protocol.SDPTest do
         bandwidth: [
           %Bandwidth{bandwidth: 256, type: :CT}
         ],
-        connection_data: %ConnectionData.IP4{
-          ttl: 127,
-          value: {224, 2, 17, 12}
+        connection_data: %ConnectionData{
+          addresses: [
+            %ConnectionData.IP4{
+              ttl: 127,
+              value: {224, 2, 17, 12}
+            }
+          ]
         },
         encryption: %Encryption{key: nil, method: :prompt},
         fmt: [0],
@@ -91,9 +99,13 @@ defmodule Membrane.Protocol.SDPTest do
         bandwidth: [
           %Bandwidth{bandwidth: 256, type: :CT}
         ],
-        connection_data: %ConnectionData.IP4{
-          ttl: 127,
-          value: {224, 2, 17, 12}
+        connection_data: %ConnectionData{
+          addresses: [
+            %ConnectionData.IP4{
+              ttl: 127,
+              value: {224, 2, 17, 12}
+            }
+          ]
         },
         encryption: %Encryption{key: "key", method: :clear},
         fmt: [99],

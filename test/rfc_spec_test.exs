@@ -46,18 +46,26 @@ defmodule Membrane.Protocol.SDP.RFCTest do
 
       assert session_spec == %SDP{
                attributes: [%Attribute{value: :recvonly}],
-               connection_data: %IP4{
-                 ttl: 127,
-                 value: {224, 2, 17, 12}
+               connection_data: %ConnectionData{
+                 addresses: [
+                   %IP4{
+                     ttl: 127,
+                     value: {224, 2, 17, 12}
+                   }
+                 ]
                },
                email: %Email{value: "j.doe@example.com (Jane Doe)"},
                media: [
                  %Media{
                    attributes: [],
                    bandwidth: [],
-                   connection_data: %IP4{
-                     ttl: 127,
-                     value: {224, 2, 17, 12}
+                   connection_data: %ConnectionData{
+                     addresses: [
+                       %IP4{
+                         ttl: 127,
+                         value: {224, 2, 17, 12}
+                       }
+                     ]
                    },
                    fmt: [0],
                    ports: [49_170],
@@ -75,9 +83,13 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                        }
                      }
                    ],
-                   connection_data: %IP4{
-                     ttl: 127,
-                     value: {224, 2, 17, 12}
+                   connection_data: %ConnectionData{
+                     addresses: [
+                       %IP4{
+                         ttl: 127,
+                         value: {224, 2, 17, 12}
+                       }
+                     ]
                    },
                    fmt: [99],
                    ports: [51_372],
@@ -129,7 +141,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
       assert result == %SDP{
                attributes: [],
                bandwidth: [],
-               connection_data: %FQDN{value: "host.atlanta.example.com"},
+               connection_data: %ConnectionData{
+                 addresses: [%FQDN{value: "host.atlanta.example.com"}]
+               },
                email: nil,
                encryption: nil,
                media: [
@@ -164,7 +178,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %FQDN{value: "host.atlanta.example.com"},
+                   connection_data: %ConnectionData{
+                     addresses: [%FQDN{value: "host.atlanta.example.com"}]
+                   },
                    encryption: nil,
                    fmt: [0, 8, 97],
                    ports: [49_170],
@@ -192,7 +208,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %FQDN{value: "host.atlanta.example.com"},
+                   connection_data: %ConnectionData{
+                     addresses: [%FQDN{value: "host.atlanta.example.com"}]
+                   },
                    encryption: nil,
                    fmt: [31, 32],
                    ports: [51_372],
@@ -238,7 +256,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
       assert %SDP{
                attributes: [],
                bandwidth: [],
-               connection_data: %FQDN{value: "host.biloxi.example.com"},
+               connection_data: %ConnectionData{
+                 addresses: [%FQDN{value: "host.biloxi.example.com"}]
+               },
                email: nil,
                encryption: nil,
                media: [
@@ -255,7 +275,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %FQDN{value: "host.biloxi.example.com"},
+                   connection_data: %ConnectionData{
+                     addresses: [%FQDN{value: "host.biloxi.example.com"}]
+                   },
                    encryption: nil,
                    fmt: [0],
                    ports: [49_174],
@@ -276,7 +298,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %FQDN{value: "host.biloxi.example.com"},
+                   connection_data: %ConnectionData{
+                     addresses: [%FQDN{value: "host.biloxi.example.com"}]
+                   },
                    encryption: nil,
                    fmt: [32],
                    ports: [49_170],
