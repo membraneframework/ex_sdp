@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Encryption do
   @moduledoc """
-  This module represents Encryption field of SDP that
+  This module represents the Encryption field of SDP that
   stores encryption key or acquisition method of such key.
 
   Session key should be present IFF the transport medium
@@ -48,12 +48,9 @@ end
 
 defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Encryption do
   def serialize(encryption) do
-    result = "k=" <> Atom.to_string(encryption.method)
+    method = "k=" <> Atom.to_string(encryption.method)
+    key = if encryption.key, do: ":" <> encryption.key, else: ""
 
-    if is_nil(encryption.key) do
-      result
-    else
-      result <> ":" <> encryption.key
-    end
+    method <> key
   end
 end

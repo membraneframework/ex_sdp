@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.SessionInformation do
   @moduledoc """
-  This module represents Session Information field of SDP.
+  This module represents the Session Information field of SDP.
 
   For more details please see [RFC4566 Section 5.3](https://tools.ietf.org/html/rfc4566#section-5.3)
   """

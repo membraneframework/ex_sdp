@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Origin do
   @moduledoc """
-  This module represents Origin field of SDP that represents
+  This module represents the Origin field of SDP that represents
   originator of the session.
 
   If username is set to `-` the originating host does not support the concept of user IDs.

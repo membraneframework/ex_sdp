@@ -1,4 +1,7 @@
 defprotocol Membrane.Protocol.SDP.Serializer do
+  @moduledoc """
+  This protocol is responsible for serializing structs into SDP strings. 
+  """
   @doc """
   Serializes struct to SDP string
   """

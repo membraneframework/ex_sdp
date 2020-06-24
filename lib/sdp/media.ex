@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Media do
   @moduledoc """
-  This module represents Media field of SDP.
+  This module represents the Media field of SDP.
 
   For more details please see [RFC4566 Section 5.14](https://tools.ietf.org/html/rfc4566#section-5.14)
   """
@@ -38,7 +38,7 @@ defmodule Membrane.Protocol.SDP.Media do
           protocol: binary(),
           fmt: binary() | [0..127],
           title: binary() | nil,
-          connection_data: [ConnectionData.sdp_address()],
+          connection_data: ConnectionData.t(),
           bandwidth: [Bandwidth.t()],
           encryption: Encryption.t() | nil,
           attributes: [binary()]
@@ -79,7 +79,7 @@ defmodule Membrane.Protocol.SDP.Media do
     with {:ok, conn} <- ConnectionData.parse(conn) do
       conn
       |> Bunch.listify()
-      ~> %__MODULE__{media | connection_data: &1 ++ info}
+      ~> %__MODULE__{media | connection_data: %ConnectionData{addresses: &1 ++ info}}
       ~> parse_optional(rest, &1)
     end
   end
@@ -208,7 +208,6 @@ defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Media do
       list when is_list(list) ->
         list
         |> Enum.map(&serialize_optional(&1, key))
-        |> Enum.reject(&(&1 == ""))
         |> Enum.map_join("\r\n", &add_type(&1, type_string))
 
       single_field ->
@@ -225,15 +224,11 @@ defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Media do
   defp serialize_type(type) when is_binary(type), do: type
   defp serialize_type(type) when is_atom(type), do: Atom.to_string(type)
 
-  defp serialize_ports(ports) do
-    port = ports |> Enum.sort() |> hd |> Integer.to_string()
+  defp serialize_ports([port]),
+    do: Integer.to_string(port)
 
-    if length(ports) == 1 do
-      port
-    else
-      port <> "/" <> Integer.to_string(length(ports))
-    end
-  end
+  defp serialize_ports([port | _rest] = ports),
+    do: Integer.to_string(port) <> "/" <> Integer.to_string(length(ports))
 
   defp serialize_fmt(fmt) when is_binary(fmt), do: fmt
   defp serialize_fmt(fmt), do: Enum.map_join(fmt, " ", &Integer.to_string/1)

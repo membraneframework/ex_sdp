@@ -101,8 +101,8 @@ defmodule Membrane.Protocol.SDP.Parser do
     do: {rest, %SDP{spec | phone_number: %PhoneNumber{value: phone_number}}}
 
   defp parse_line(["c=" <> connection_data | rest], spec) do
-    with {:ok, connection_info} <- ConnectionData.parse(connection_data) do
-      {rest, %SDP{spec | connection_data: connection_info}}
+    with {:ok, addresses} <- ConnectionData.parse(connection_data) do
+      {rest, %SDP{spec | connection_data: %ConnectionData{addresses: [addresses]}}}
     end
   end
 

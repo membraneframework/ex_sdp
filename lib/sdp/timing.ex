@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Timing do
   @moduledoc """
-  This module represents Timing field of SDP that specifies
+  This module represents the Timing field of SDP that specifies
   start and end time of the session.
 
   For more details please see [RFC4566 Section 5.9](https://tools.ietf.org/html/rfc4566#section-5.9)

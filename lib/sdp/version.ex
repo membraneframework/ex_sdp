@@ -2,6 +2,8 @@ defmodule Membrane.Protocol.SDP.Version do
   @moduledoc """
   This module represents Version field of SDP.
 
+  By default, `:value` field is set to `0`.
+
   For more details please see [RFC4566 Section 5.1](https://tools.ietf.org/html/rfc4566#section-5.1)
   """
   defstruct value: 0

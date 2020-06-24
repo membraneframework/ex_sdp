@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.PhoneNumber do
   @moduledoc """
-  This module represents Phone Number field of SDP.
+  This module represents the Phone Number field of SDP.
 
   For more details please see [RFC4566 Section 5.6](https://tools.ietf.org/html/rfc4566#section-5.6)
   """
