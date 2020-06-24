@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Email do
   @moduledoc """
-  This module represents Email Address field of SDP.
+  This module represents the Email Address field of SDP.
 
   For more details please see [RFC4566 Section 5.6](https://tools.ietf.org/html/rfc4566#section-5.6)
   """

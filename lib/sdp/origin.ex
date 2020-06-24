@@ -1,11 +1,10 @@
 defmodule Membrane.Protocol.SDP.Origin do
   @moduledoc """
-  This module represents the Origin field of SDP that represents
-  originator of the session.
+  This module represents the Origin field of SDP that represents the originator of the session.
 
-  If username is set to `-` the originating host does not support the concept of user IDs.
+  If the username is set to `-` the originating host does not support the concept of user IDs.
 
-  Username MUST NOT contain spaces.
+  The username MUST NOT contain spaces.
 
   For more details please see [RFC4566 Section 5.2](https://tools.ietf.org/html/rfc4566#section-5.2)
   """

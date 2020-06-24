@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Attribute do
   @moduledoc """
-  This module is responsible for parsing SDP Attributes.
+  This module represents Attributes fields of SDP.
   """
   alias __MODULE__.RTPMapping
   use Bunch.Typespec
