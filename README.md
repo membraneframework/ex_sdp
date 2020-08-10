@@ -1,5 +1,8 @@
 # Membrane Protocol SDP
 
+[![Hex.pm](https://img.shields.io/hexpm/v/membrane_protocol_sdp.svg)](https://hex.pm/packages/membrane_protocol_sdp)
+[![CircleCI](https://circleci.com/gh/membraneframework/membrane-protocol-sdp.svg?style=svg)](https://circleci.com/gh/membraneframework/membrane-protocol-sdp)
+
 Parser for Session Description Protocol. Based on [RFC4566](https://tools.ietf.org/html/rfc4566)
 
 ## Installation
@@ -9,12 +12,10 @@ The package can be installed by adding `membrane_protocol_sdp` to your list of d
 ```elixir
 def deps do
   [
-    {:membrane_sdp, "~> 0.1.0"}
+    {:membrane_protocol_sdp, "~> 0.1.0"}
   ]
 end
 ```
-
-The docs can be found at [https://hexdocs.pm/membrane_sdp](https://hexdocs.pm/membrane_sdp).
 
 ## Usage
 
@@ -133,3 +134,11 @@ a=rtpmap:99 h263-1998/90000
  }}
 
 ```
+
+## Copyright and License
+
+Copyright 2020, [Software Mansion](https://swmansion.com/?utm_source=git&utm_medium=readme&utm_campaign=membrane)
+
+[![Software Mansion](https://logo.swmansion.com/logo?color=white&variant=desktop&width=200&tag=membrane-github)](https://swmansion.com/?utm_source=git&utm_medium=readme&utm_campaign=membrane)
+
+Licensed under the [Apache License, Version 2.0](LICENSE)
