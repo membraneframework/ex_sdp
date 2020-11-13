@@ -1,7 +1,8 @@
 defmodule Membrane.Protocol.SDP.OriginTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP.{ConnectionData, Origin}
+  alias Membrane.Protocol.SDP.{ConnectionData, Origin, Serializer}
+  alias ConnectionData.FQDN
 
   describe "Origin parser" do
     test "processes valid origin declaration" do
@@ -42,11 +43,34 @@ defmodule Membrane.Protocol.SDP.OriginTest do
     test "processes origin with FQDN" do
       assert {:ok,
               %Origin{
-                address: "host.origin.name",
+                address: %FQDN{value: "host.origin.name"},
                 session_id: "2890844526",
                 session_version: "2890842807",
                 username: "jdoe"
               }} = Origin.parse("jdoe 2890844526 2890842807 IN IP4 host.origin.name")
+    end
+  end
+
+  describe "Origin serializer" do
+    test "serializes origin with unknown username" do
+      origin = %Origin{
+        session_version: "0",
+        address: %FQDN{value: "some.origin.address"},
+        session_id: "222"
+      }
+
+      assert Serializer.serialize(origin) == "o=- 222 0 IN IP4 some.origin.address"
+    end
+
+    test "serializes origin with given username" do
+      origin = %Origin{
+        session_version: "0",
+        address: %FQDN{value: "some.origin.address"},
+        session_id: "222",
+        username: "username_id"
+      }
+
+      assert Serializer.serialize(origin) == "o=username_id 222 0 IN IP4 some.origin.address"
     end
   end
 end

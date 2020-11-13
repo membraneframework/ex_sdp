@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Media do
   @moduledoc """
-  This module represents Media field of SDP.
+  This module represents the Media field of SDP.
 
   For more details please see [RFC4566 Section 5.14](https://tools.ietf.org/html/rfc4566#section-5.14)
   """
@@ -10,12 +10,19 @@ defmodule Membrane.Protocol.SDP.Media do
               [
                 :title,
                 :encryption,
+                connection_data: [],
                 bandwidth: [],
-                attributes: [],
-                connection_data: []
+                attributes: []
               ]
 
-  alias Membrane.Protocol.SDP.{Attribute, Bandwidth, ConnectionData, Encryption, Session}
+  alias Membrane.Protocol.SDP
+
+  alias SDP.{
+    Attribute,
+    Bandwidth,
+    ConnectionData,
+    Encryption
+  }
 
   @typedoc """
   Represents type of media. In [RFC4566](https://tools.ietf.org/html/rfc4566#section-5.14)
@@ -31,7 +38,7 @@ defmodule Membrane.Protocol.SDP.Media do
           protocol: binary(),
           fmt: binary() | [0..127],
           title: binary() | nil,
-          connection_data: [ConnectionData.sdp_address()],
+          connection_data: ConnectionData.t(),
           bandwidth: [Bandwidth.t()],
           encryption: Encryption.t() | nil,
           attributes: [binary()]
@@ -72,7 +79,7 @@ defmodule Membrane.Protocol.SDP.Media do
     with {:ok, conn} <- ConnectionData.parse(conn) do
       conn
       |> Bunch.listify()
-      ~> %__MODULE__{media | connection_data: &1 ++ info}
+      ~> %__MODULE__{media | connection_data: %ConnectionData{addresses: &1 ++ info}}
       ~> parse_optional(rest, &1)
     end
   end
@@ -99,7 +106,7 @@ defmodule Membrane.Protocol.SDP.Media do
     end
   end
 
-  @spec apply_session(__MODULE__.t(), Session.t()) :: __MODULE__.t()
+  @spec apply_session(__MODULE__.t(), SDP.t()) :: __MODULE__.t()
   def apply_session(media, session) do
     session
     |> Map.from_struct()
@@ -159,4 +166,62 @@ defmodule Membrane.Protocol.SDP.Media do
   end
 
   defp gen_ports(port_no, _), do: [port_no]
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Media do
+  alias Membrane.Protocol.SDP.Serializer
+
+  def serialize(media) do
+    serialized_header = media |> header_fields |> Enum.join(" ") |> String.trim()
+
+    optional = media |> other_fields() |> Enum.join("\r\n")
+
+    String.trim("m=" <> serialized_header <> "\r\n" <> optional)
+  end
+
+  defp header_fields(media) do
+    [
+      serialize_type(media.type),
+      serialize_ports(media.ports),
+      media.protocol,
+      serialize_fmt(media.fmt)
+    ]
+  end
+
+  defp other_fields(media) do
+    [
+      {"i", :title},
+      {"c", :connection_data},
+      {"b", :bandwidth},
+      {"k", :encryption},
+      {"a", :attributes}
+    ]
+    |> Enum.flat_map(&add_types(&1, media))
+  end
+
+  defp add_types({type_string, key}, media) do
+    Map.get(media, key)
+    |> List.wrap()
+    |> Enum.map(&serialize_optional(&1, key))
+    |> Enum.map(&add_type(&1, type_string))
+  end
+
+  defp add_type(string, type) do
+    if String.at(string, 1) == "=", do: string, else: type <> "=" <> string
+  end
+
+  defp serialize_optional(value, :title), do: to_string(value)
+  defp serialize_optional(value, _key), do: Serializer.serialize(value)
+
+  defp serialize_type(type) when is_binary(type), do: type
+  defp serialize_type(type) when is_atom(type), do: Atom.to_string(type)
+
+  defp serialize_ports([port]),
+    do: Integer.to_string(port)
+
+  defp serialize_ports([port | _rest] = ports),
+    do: Integer.to_string(port) <> "/" <> Integer.to_string(length(ports))
+
+  defp serialize_fmt(fmt) when is_binary(fmt), do: fmt
+  defp serialize_fmt(fmt), do: Enum.map_join(fmt, " ", &Integer.to_string/1)
 end

@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.RepeatTimes do
   @moduledoc """
-  This module represents field of SDP that specifies
+  This module represents the field of SDP that specifies
   rebroadcasts of a session. Works directly in conjunction
   with timing `t` parameter.
 
@@ -8,9 +8,9 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
    - repeat_interval - interval of session rebroadcast
    - offsets - offset between scheduled rebroadcast
 
-  If `start_time` of `t` is set to today 3pm, `active_duration` is set
+  If `start_time` of `t` is set to today 3 pm, `active_duration` is set
   to `3h`, `repeat_interval` is set to `14d` and `offsets` are `0 4d`
-  then session will be rebroadcasted today at 3pm and on Thursday 3pm
+  then the session will be rebroadcasted today at 3 pm and on Thursday 3 pm
   every two week until `end_time` of param `t`.
 
   For more details please see [RFC4566 Section 5.10](https://tools.ietf.org/html/rfc4566#section-5.10).
@@ -127,5 +127,18 @@ defmodule Membrane.Protocol.SDP.RepeatTimes do
     }
 
     {:ok, compact}
+  end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.RepeatTimes do
+  def serialize(repeat_times) do
+    serialized_fields =
+      [
+        Integer.to_string(repeat_times.repeat_interval),
+        Integer.to_string(repeat_times.active_duration)
+      ] ++
+        Enum.map(repeat_times.offsets, &Integer.to_string/1)
+
+    "r=" <> Enum.join(serialized_fields, " ")
   end
 end

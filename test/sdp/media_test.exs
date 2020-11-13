@@ -2,14 +2,16 @@ defmodule Membrane.Protocol.SDP.MediaTest do
   use ExUnit.Case
   use Bunch
 
-  alias Membrane.Protocol.SDP.{
+  alias Membrane.Protocol.SDP
+
+  alias SDP.{
     Attribute,
     Bandwidth,
     ConnectionData,
     Encryption,
     Media,
     Origin,
-    Session,
+    Serializer,
     Timing
   }
 
@@ -52,23 +54,32 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         |> String.split("\n")
 
       parsed_attributes = [
-        rtpmap: %Attribute.RTPMapping{
-          clock_rate: 8000,
-          encoding: "L8",
-          params: [channels: 1],
-          payload_type: 96
+        %Attribute{
+          key: :rtpmap,
+          value: %Attribute.RTPMapping{
+            clock_rate: 8000,
+            encoding: "L8",
+            params: 1,
+            payload_type: 96
+          }
         },
-        rtpmap: %Attribute.RTPMapping{
-          clock_rate: 8000,
-          encoding: "L16",
-          params: [channels: 1],
-          payload_type: 97
+        %Attribute{
+          key: :rtpmap,
+          value: %Attribute.RTPMapping{
+            clock_rate: 8000,
+            encoding: "L16",
+            params: 1,
+            payload_type: 97
+          }
         },
-        rtpmap: %Attribute.RTPMapping{
-          clock_rate: 11_025,
-          encoding: "L16",
-          params: [channels: 2],
-          payload_type: 98
+        %Attribute{
+          key: :rtpmap,
+          value: %Attribute.RTPMapping{
+            clock_rate: 11_025,
+            encoding: "L16",
+            params: 2,
+            payload_type: 98
+          }
         }
       ]
 
@@ -97,25 +108,27 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       connection_data = [
         %ConnectionData{
-          address: %ConnectionData.IP4{
-            ttl: 127,
-            value: {224, 2, 17, 12}
-          },
-          network_type: "IN"
+          addresses: [
+            %ConnectionData.IP4{
+              ttl: 127,
+              value: {224, 2, 17, 12}
+            }
+          ]
         }
       ]
 
       encryption = %Encryption{method: :clear}
 
-      session = %Session{
+      session = %SDP{
         connection_data: connection_data,
         origin: %Origin{
           session_id: "2890844526",
           address: %ConnectionData{
-            network_type: "IN",
-            address: %ConnectionData.IP4{
-              value: {10, 47, 16, 5}
-            }
+            addresses: [
+              %ConnectionData.IP4{
+                value: {10, 47, 16, 5}
+              }
+            ]
           },
           username: "-",
           session_version: "2890842807"
@@ -127,7 +140,7 @@ defmodule Membrane.Protocol.SDP.MediaTest do
         encryption: encryption,
         bandwidth: bandwidth,
         session_name: "123",
-        version: "0"
+        version: 0
       }
 
       [
@@ -172,12 +185,14 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
       assert %Media{
                bandwidth: [%Bandwidth{bandwidth: 128, type: :AS}],
-               connection_data: [
-                 %ConnectionData.IP4{
-                   ttl: 220,
-                   value: {144, 2, 17, 12}
-                 }
-               ],
+               connection_data: %ConnectionData{
+                 addresses: [
+                   %ConnectionData.IP4{
+                     ttl: 220,
+                     value: {144, 2, 17, 12}
+                   }
+                 ]
+               },
                encryption: %Encryption{key: nil, method: :prompt}
              } = result
     end
@@ -196,6 +211,91 @@ defmodule Membrane.Protocol.SDP.MediaTest do
 
     test "returns an error if one of payload types fails integer parsing" do
       assert {:error, :invalid_fmt} = Media.parse("audio 49170 RTP/AVP 0 9d8 99")
+    end
+  end
+
+  describe "Media serializer" do
+    test "serializes audio description" do
+      media = %Media{type: :audio, protocol: "RTP/AVP", fmt: [0], ports: [49_170]}
+      assert Serializer.serialize(media) == "m=audio 49170 RTP/AVP 0"
+    end
+
+    test "serializes video description with an attribute" do
+      # attribute = "rtpmap:99 h263-1998/90000"
+
+      attribute = %Attribute{
+        key: :rtpmap,
+        value: %Attribute.RTPMapping{
+          clock_rate: 90_000,
+          encoding: "h263-1998",
+          params: nil,
+          payload_type: 99
+        }
+      }
+
+      media = %Media{
+        type: :video,
+        protocol: "RTP/AVP",
+        ports: [51_372],
+        fmt: [99],
+        attributes: [attribute]
+      }
+
+      assert Serializer.serialize(media) ==
+               "m=video 51372 RTP/AVP 99\r\na=rtpmap:99 h263-1998/90000"
+    end
+
+    test "serializes media description with title, bandwidth and encryption description" do
+      media = %Media{
+        type: "type",
+        ports: [12_345],
+        title: "title",
+        protocol: "some_protocol",
+        fmt: [100],
+        bandwidth: %Bandwidth{type: :CT, bandwidth: 64},
+        encryption: %Encryption{method: :prompt}
+      }
+
+      assert Serializer.serialize(media) ==
+               "m=type 12345 some_protocol 100\r\ni=title\r\nb=CT:64\r\nk=prompt"
+    end
+
+    test "serializes media with connection_data description" do
+      addresses = [
+        %ConnectionData.IP4{
+          ttl: 127,
+          value: {224, 2, 1, 1}
+        },
+        %ConnectionData.IP6{
+          value: {15, 0, 0, 0, 0, 0, 0, 101}
+        },
+        %ConnectionData.FQDN{
+          value: "https://some.uri.net"
+        }
+      ]
+
+      serialized_addresses = [
+        "IN IP4 224.2.1.1/127",
+        "IN IP6 f::65",
+        "IN IP4 https://some.uri.net"
+      ]
+
+      media = %Media{
+        type: :video,
+        protocol: "RTP/AVP",
+        ports: [51_372],
+        fmt: [99]
+      }
+
+      serialized_media = "m=video 51372 RTP/AVP 99"
+
+      addresses
+      |> Enum.zip(serialized_addresses)
+      |> Enum.each(fn {address, serialized_address} ->
+        media = %Media{media | connection_data: address}
+        expected = serialized_media <> "\r\nc=" <> serialized_address
+        assert Serializer.serialize(media) == expected
+      end)
     end
   end
 end

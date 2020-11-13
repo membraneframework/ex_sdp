@@ -1,9 +1,10 @@
 defmodule Membrane.Protocol.SDP.Origin do
   @moduledoc """
-  This module represents Origin field of SDP that represents
-  originator of the session.
+  This module represents the Origin field of SDP that represents the originator of the session.
 
-  If username is set to `-` the originating host does not support the concept of user IDs.
+  If the username is set to `-` the originating host does not support the concept of user IDs.
+
+  The username MUST NOT contain spaces.
 
   For more details please see [RFC4566 Section 5.2](https://tools.ietf.org/html/rfc4566#section-5.2)
   """
@@ -45,4 +46,24 @@ defmodule Membrane.Protocol.SDP.Origin do
       _ -> {:error, :invalid_origin}
     end
   end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Origin do
+  alias Membrane.Protocol.SDP.Serializer
+
+  def serialize(origin) do
+    serialized_address = Serializer.serialize(origin.address)
+
+    origin_serialized_fields = [
+      serialize_username(origin.username),
+      origin.session_id,
+      origin.session_version,
+      serialized_address
+    ]
+
+    "o=" <> Enum.join(origin_serialized_fields, " ")
+  end
+
+  defp serialize_username(nil), do: "-"
+  defp serialize_username(username), do: username
 end

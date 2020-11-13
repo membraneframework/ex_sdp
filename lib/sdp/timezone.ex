@@ -1,19 +1,17 @@
 defmodule Membrane.Protocol.SDP.Timezone do
   @moduledoc """
-  This module represents SDP Timezone Correction used
+  This module groups multiple SDP Timezone Correction used
   for translating base time for rebroadcasts.
-
-  For more details please see [RFC4566 Section 5.11](https://tools.ietf.org/html/rfc4566#section-5.11)
   """
-  @enforce_keys [:adjustment_time, :offset]
-  defstruct @enforce_keys
+  alias __MODULE__.Correction
+
+  defstruct corrections: []
 
   @type t :: %__MODULE__{
-          adjustment_time: non_neg_integer(),
-          offset: -12..12
+          corrections: [Correction.t()]
         }
 
-  @spec parse(binary()) :: {:ok, [t]} | {:error, :invalid_timezone}
+  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_timezone}
   def parse(timezones) do
     case String.split(timezones, " ") do
       list when rem(length(list), 2) == 0 -> parse_timezones(list)
@@ -22,24 +20,24 @@ defmodule Membrane.Protocol.SDP.Timezone do
   end
 
   defp parse_timezones(timezone_corrections) do
-    timezone_corrections
-    |> Enum.chunk_every(2)
-    |> Bunch.Enum.try_map(fn [adjustment_time, offset] ->
-      parse_timezone(adjustment_time, offset)
-    end)
-  end
+    parsed =
+      timezone_corrections
+      |> Enum.chunk_every(2)
+      |> Bunch.Enum.try_map(fn [adjustment_time, offset] ->
+        Correction.parse("#{adjustment_time} #{offset}")
+      end)
 
-  defp parse_timezone(adjustment_time, offset) do
-    with {adjustment_time, ""} <- Integer.parse(adjustment_time),
-         {offset, rest} when rest == "" or rest == "h" <- Integer.parse(offset) do
-      timezone = %__MODULE__{
-        adjustment_time: adjustment_time,
-        offset: offset
-      }
-
-      {:ok, timezone}
-    else
-      _ -> {:error, :invalid_timezone}
+    with {:ok, corrections} when is_list(corrections) <- parsed do
+      {:ok, %__MODULE__{corrections: corrections}}
     end
   end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Timezone do
+  alias Membrane.Protocol.SDP.{Serializer, Timezone}
+
+  def serialize(%Timezone{corrections: []}), do: ""
+
+  def serialize(%Timezone{corrections: corrections}),
+    do: "z=" <> Enum.map_join(corrections, " ", &Serializer.serialize/1)
 end

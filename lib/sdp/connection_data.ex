@@ -1,13 +1,13 @@
 defmodule Membrane.Protocol.SDP.ConnectionData do
   @moduledoc """
-  This module represents Connection Information.
+  This module represents the Connection Information.
 
-  Address can be represented by either:
+  The address can be represented by either:
    - IPv4 address
    - IPv6 address
    - FQDN (Fully Qualified Domain Name)
 
-  In case of IPv4 and IPv6 multicast addresses there can be more than one
+  In the case of IPv4 and IPv6 multicast addresses there can be more than one
   parsed from single SDP field if it is described using slash notation.
 
   Sessions using an IPv4 multicast connection address MUST also have
@@ -20,9 +20,6 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
 
   @ipv4_max_value 255
   @ipv6_max_value 65_535
-
-  @enforce_keys [:network_type, :address]
-  defstruct @enforce_keys
 
   defmodule IP4 do
     @moduledoc false
@@ -45,8 +42,26 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
           }
   end
 
-  @type sdp_address :: IP6.t() | IP4.t() | binary()
+  defmodule FQDN do
+    @moduledoc false
+    @enforce_keys [:value]
+    defstruct @enforce_keys
+
+    @type t :: %__MODULE__{
+            value: binary()
+          }
+  end
+
+  @type sdp_address :: IP6.t() | IP4.t() | FQDN.t()
   @type reason :: :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl
+
+  @enforce_keys [:addresses]
+  defstruct @enforce_keys ++ [network_type: "IN"]
+
+  @type t :: %__MODULE__{
+          addresses: [IP6.t()] | [IP6.t()] | [FQDN.t()],
+          network_type: binary()
+        }
 
   @spec parse(binary()) :: {:ok, [sdp_address()] | sdp_address()} | {:error, reason}
   def parse(connection_string) do
@@ -63,7 +78,7 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
          {:ok, addresses} <- handle_address(address, addrtype, optional) do
       {:ok, addresses}
     else
-      {:error, :einval} -> {:ok, address}
+      {:error, :einval} -> {:ok, %FQDN{value: address}}
       {:error, _} = error -> error
     end
   end
@@ -134,4 +149,50 @@ defmodule Membrane.Protocol.SDP.ConnectionData do
       {:error, :invalid_address}
     end
   end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData.IP4 do
+  alias Membrane.Protocol.SDP.ConnectionData.IP4
+
+  def serialize(%IP4{ttl: nil, value: value}) do
+    address = value |> :inet.ntoa() |> to_string()
+    "IN IP4 " <> address
+  end
+
+  def serialize(%IP4{ttl: ttl, value: value}) do
+    address = value |> :inet.ntoa() |> to_string()
+    "IN IP4 " <> address <> "/" <> Integer.to_string(ttl)
+  end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData.IP6 do
+  alias Membrane.Protocol.SDP.ConnectionData
+  alias ConnectionData.IP6
+
+  def serialize(%IP6{value: value}) do
+    address = value |> :inet.ntoa() |> to_string()
+    "IN IP6 " <> address
+  end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData.FQDN do
+  alias Membrane.Protocol.SDP.ConnectionData.FQDN
+  def serialize(%FQDN{value: address}), do: "IN IP4 " <> address
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.ConnectionData do
+  alias Membrane.Protocol.SDP.ConnectionData
+  alias Membrane.Protocol.SDP.Serializer
+
+  def serialize(%ConnectionData{addresses: []}), do: ""
+
+  def serialize(%ConnectionData{addresses: list}) do
+    serialized = list |> hd |> Serializer.serialize()
+    size = list |> length |> serialize_size
+    "c=" <> serialized <> size
+  end
+
+  defp serialize_size(0), do: ""
+  defp serialize_size(1), do: ""
+  defp serialize_size(size) when size > 1, do: "/" <> Integer.to_string(size)
 end

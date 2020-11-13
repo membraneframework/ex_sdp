@@ -3,18 +3,25 @@ defmodule Membrane.Protocol.SDPTest do
 
   alias Membrane.Protocol.SDP
 
-  alias Membrane.Protocol.SDP.{
+  alias SDP.{
     Attribute,
     Bandwidth,
     ConnectionData,
+    Email,
     Encryption,
     Media,
     Origin,
+    PhoneNumber,
     RepeatTimes,
-    Session,
+    SessionInformation,
+    SessionName,
     Timezone,
-    Timing
+    Timing,
+    URI,
+    Version
   }
+
+  alias Timezone.Correction
 
   @input """
          v=0
@@ -41,16 +48,20 @@ defmodule Membrane.Protocol.SDPTest do
          """
          |> String.replace("\n", "\r\n")
 
-  @expected_output %Session{
-    attributes: [{"key", "value"}, :recvonly],
+  @expected_output %SDP{
+    attributes: [%Attribute{key: "key", value: "value"}, %Attribute{value: :recvonly}],
     bandwidth: [
       %Bandwidth{bandwidth: 256, type: :CT}
     ],
-    connection_data: %ConnectionData.IP4{
-      ttl: 127,
-      value: {224, 2, 17, 12}
+    connection_data: %ConnectionData{
+      addresses: [
+        %ConnectionData.IP4{
+          ttl: 127,
+          value: {224, 2, 17, 12}
+        }
+      ]
     },
-    email: "j.doe@example.com (Jane Doe)",
+    email: %Email{value: "j.doe@example.com (Jane Doe)"},
     encryption: %Encryption{key: "key", method: :clear},
     media: [
       %Media{
@@ -58,9 +69,13 @@ defmodule Membrane.Protocol.SDPTest do
         bandwidth: [
           %Bandwidth{bandwidth: 256, type: :CT}
         ],
-        connection_data: %ConnectionData.IP4{
-          ttl: 127,
-          value: {224, 2, 17, 12}
+        connection_data: %ConnectionData{
+          addresses: [
+            %ConnectionData.IP4{
+              ttl: 127,
+              value: {224, 2, 17, 12}
+            }
+          ]
         },
         encryption: %Encryption{key: nil, method: :prompt},
         fmt: [0],
@@ -71,20 +86,26 @@ defmodule Membrane.Protocol.SDPTest do
       },
       %Media{
         attributes: [
-          {:rtpmap,
-           %Attribute.RTPMapping{
-             clock_rate: 90_000,
-             encoding: "h263-1998",
-             params: [],
-             payload_type: 99
-           }}
+          %Attribute{
+            key: :rtpmap,
+            value: %Attribute.RTPMapping{
+              clock_rate: 90_000,
+              encoding: "h263-1998",
+              params: nil,
+              payload_type: 99
+            }
+          }
         ],
         bandwidth: [
           %Bandwidth{bandwidth: 256, type: :CT}
         ],
-        connection_data: %ConnectionData.IP4{
-          ttl: 127,
-          value: {224, 2, 17, 12}
+        connection_data: %ConnectionData{
+          addresses: [
+            %ConnectionData.IP4{
+              ttl: 127,
+              value: {224, 2, 17, 12}
+            }
+          ]
         },
         encryption: %Encryption{key: "key", method: :clear},
         fmt: [99],
@@ -102,9 +123,11 @@ defmodule Membrane.Protocol.SDPTest do
       session_version: "2890842807",
       username: "jdoe"
     },
-    phone_number: "111 111 111",
-    session_information: "A Seminar on the session description protocol",
-    session_name: "Very fancy session name",
+    phone_number: %PhoneNumber{value: "111 111 111"},
+    session_information: %SessionInformation{
+      value: "A Seminar on the session description protocol"
+    },
+    session_name: %SessionName{value: "Very fancy session name"},
     time_repeats: [
       %RepeatTimes{
         active_duration: 3600,
@@ -117,16 +140,18 @@ defmodule Membrane.Protocol.SDPTest do
         repeat_interval: 604_800
       }
     ],
-    time_zones_adjustments: [
-      %Timezone{adjustment_time: 2_882_844_526, offset: -1},
-      %Timezone{adjustment_time: 2_898_848_070, offset: 2}
-    ],
+    time_zones_adjustments: %Timezone{
+      corrections: [
+        %Correction{adjustment_time: 2_882_844_526, offset: -1},
+        %Correction{adjustment_time: 2_898_848_070, offset: 2}
+      ]
+    },
     timing: %Timing{
       start_time: 2_873_397_496,
       stop_time: 2_873_404_696
     },
-    uri: "http://www.example.com/seminars/sdp.pdf",
-    version: "0"
+    uri: %URI{value: "http://www.example.com/seminars/sdp.pdf"},
+    version: %Version{value: 0}
   }
 
   describe "Parser parse/1" do
@@ -155,7 +180,7 @@ defmodule Membrane.Protocol.SDPTest do
   end
 
   describe "Parser parse!/1" do
-    test "returns Session spec when parsing valid input" do
+    test "returns SDP spec when parsing valid input" do
       assert @expected_output == SDP.parse!(@input)
     end
 

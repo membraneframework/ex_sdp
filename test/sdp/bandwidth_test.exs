@@ -1,7 +1,7 @@
 defmodule Membrane.Protocol.SDP.BandwidthTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP.Bandwidth
+  alias Membrane.Protocol.SDP.{Bandwidth, Serializer}
 
   describe "Bandwidth parses" do
     test "valid property" do
@@ -11,6 +11,13 @@ defmodule Membrane.Protocol.SDP.BandwidthTest do
 
     test "returns error when property is invalid" do
       assert {:error, :invalid_bandwidth} == Bandwidth.parse("gibberish")
+    end
+  end
+
+  describe "Bandwidth serializer" do
+    test "serializes valid bandwidth" do
+      bandwidth = %Bandwidth{type: :CT, bandwidth: 128}
+      assert Serializer.serialize(bandwidth) == "b=CT:128"
     end
   end
 end

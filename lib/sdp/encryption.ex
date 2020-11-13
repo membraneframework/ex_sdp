@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Encryption do
   @moduledoc """
-  This module represents Encryption field of SDP that
+  This module represents the Encryption field of SDP that
   stores encryption key or acquisition method of such key.
 
   Session key should be present IFF the transport medium
@@ -11,7 +11,7 @@ defmodule Membrane.Protocol.SDP.Encryption do
   @enforce_keys [:method]
   defstruct @enforce_keys ++ [:key]
 
-  @type methods :: :prompt | :base64 | :clear | :prompt
+  @type methods :: :prompt | :base64 | :clear | :prompt | :uri
 
   @type t :: %__MODULE__{
           method: methods(),
@@ -44,4 +44,13 @@ defmodule Membrane.Protocol.SDP.Encryption do
   defp method_to_atom("base64"), do: {:ok, :base64}
   defp method_to_atom("uri"), do: {:ok, :uri}
   defp method_to_atom(_), do: {:error, :unsupported_method}
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Encryption do
+  def serialize(encryption) do
+    method = "k=" <> Atom.to_string(encryption.method)
+    key = if encryption.key, do: ":" <> encryption.key, else: ""
+
+    method <> key
+  end
 end

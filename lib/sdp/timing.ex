@@ -1,7 +1,7 @@
 defmodule Membrane.Protocol.SDP.Timing do
   @moduledoc """
-  This module represents Timing field of SDP that specifies
-  start and end time of the session.
+  This module represents the Timing field of SDP that specifies
+  the start and end time of the session.
 
   For more details please see [RFC4566 Section 5.9](https://tools.ietf.org/html/rfc4566#section-5.9)
   """
@@ -31,4 +31,9 @@ defmodule Membrane.Protocol.SDP.Timing do
       parse_stop: _ -> {:error, :time_nan}
     end
   end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Timing do
+  def serialize(timing),
+    do: "t=" <> Integer.to_string(timing.start_time) <> " " <> Integer.to_string(timing.stop_time)
 end

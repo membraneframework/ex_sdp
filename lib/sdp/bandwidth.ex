@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Bandwidth do
   @moduledoc """
-  This module represents bandwidth, field of SDP that
+  This module represents the bandwidth, a field of SDP that
   denotes the proposed bandwidth to be used by the session or media.
 
   For more details please see [RFC4566 Section 5.8](https://tools.ietf.org/html/rfc4566#section-5.8).
@@ -43,4 +43,9 @@ defmodule Membrane.Protocol.SDP.Bandwidth do
       {:ok, value}
     end
   end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Bandwidth do
+  def serialize(bandwidth),
+    do: "b=" <> Atom.to_string(bandwidth.type) <> ":" <> Integer.to_string(bandwidth.bandwidth)
 end

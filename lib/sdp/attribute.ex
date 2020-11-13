@@ -1,6 +1,6 @@
 defmodule Membrane.Protocol.SDP.Attribute do
   @moduledoc """
-  This module is responsible for parsing SDP Attributes.
+  This module represents Attributes fields of SDP.
   """
   alias __MODULE__.RTPMapping
   use Bunch.Typespec
@@ -20,13 +20,15 @@ defmodule Membrane.Protocol.SDP.Attribute do
 
   @list_type numeric_attributes :: [:maxptime, :ptime, :quality]
 
-  @type t ::
-          binary()
-          | flag_attributes
-          | {binary()
-             | value_attributes
-             | numeric_attributes
-             | :framerate, binary()}
+  @type key :: binary() | value_attributes() | numeric_attributes() | :framerate | :rtpmap
+  @type value :: binary() | flag_attributes()
+
+  @enforce_keys [:value]
+  @optional_keys [:key]
+
+  defstruct @enforce_keys ++ @optional_keys
+
+  @type t :: %__MODULE__{key: key(), value: value()}
 
   @flag_values @flag_attributes |> Enum.map(&to_string/1)
   @directly_assignable_values @value_attributes |> Enum.map(&to_string/1)
@@ -46,44 +48,40 @@ defmodule Membrane.Protocol.SDP.Attribute do
     |> handle_known_attribute()
   end
 
-  @spec parse_media_attribute({binary() | atom, binary()}, atom() | binary()) ::
-          {:error, :invalid_attribute}
-          | {:ok, {atom(), any()}}
-  def parse_media_attribute({:rtpmap, value}, media) do
+  @spec parse_media_attribute(t(), atom() | binary()) :: {:error, :invalid_attribute} | {:ok, t()}
+  def parse_media_attribute(%__MODULE__{key: :rtpmap, value: value}, media) do
     with {:ok, %RTPMapping{} = mapping} <- RTPMapping.parse(value, media) do
-      {:ok, {:rtpmap, mapping}}
+      {:ok, %__MODULE__{key: :rtpmap, value: mapping}}
     end
   end
 
+  @spec parse_media_attribute(t(), atom() | binary()) :: {:error, :invalid_attribute} | {:ok, t()}
   def parse_media_attribute(other, _), do: {:ok, other}
-
-  defp handle_known_attribute(attr)
 
   defp handle_known_attribute(["framerate", framerate]) do
     with {:ok, framerate} <- parse_framerate(framerate) do
-      {:ok, {:framerate, framerate}}
+      {:ok, %__MODULE__{key: :framerate, value: framerate}}
     end
   end
 
   defp handle_known_attribute([flag]) when is_binary(flag) and flag in @flag_values do
-    {:ok, String.to_atom(flag)}
+    {:ok, %__MODULE__{value: String.to_atom(flag)}}
   end
 
   defp handle_known_attribute([prop, value])
        when is_binary(prop) and prop in @directly_assignable_values do
-    {:ok, {String.to_atom(prop), value}}
+    {:ok, %__MODULE__{key: String.to_atom(prop), value: value}}
   end
 
   defp handle_known_attribute([prop, value]) when is_binary(prop) and prop in @numeric_values do
-    with {number, ""} <- Integer.parse(value) do
-      {:ok, {String.to_atom(prop), number}}
-    else
+    case Integer.parse(value) do
+      {number, ""} -> {:ok, %__MODULE__{key: String.to_atom(prop), value: number}}
       _ -> {:error, :invalid_attribute}
     end
   end
 
-  defp handle_known_attribute([name, value]), do: {:ok, {name, value}}
-  defp handle_known_attribute([other]), do: {:ok, other}
+  defp handle_known_attribute([name, value]), do: {:ok, %__MODULE__{key: name, value: value}}
+  defp handle_known_attribute([other]), do: {:ok, %__MODULE__{value: other}}
 
   defp parse_framerate(framerate) do
     case Float.parse(framerate) do
@@ -100,4 +98,30 @@ defmodule Membrane.Protocol.SDP.Attribute do
       _ -> {:error, :invalid_framerate}
     end
   end
+end
+
+defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Attribute do
+  alias Membrane.Protocol.SDP.{Attribute, Serializer}
+
+  @spec serialize(Attribute.t()) :: binary()
+  def serialize(attribute) do
+    "a=" <> serialize_attribute(attribute)
+  end
+
+  defp serialize_attribute(%Attribute{key: nil, value: attribute}) when is_binary(attribute),
+    do: attribute
+
+  defp serialize_attribute(%Attribute{key: nil, value: attribute}) when is_atom(attribute),
+    do: Atom.to_string(attribute)
+
+  defp serialize_attribute(%Attribute{key: :rtpmap, value: mapping}),
+    do: Serializer.serialize(mapping)
+
+  defp serialize_attribute(%Attribute{key: :framerate, value: value}), do: "framerate:" <> value
+
+  defp serialize_attribute(%Attribute{key: key, value: value}) when is_atom(key),
+    do: to_string(key) <> ":" <> value
+
+  defp serialize_attribute(%Attribute{key: key, value: value}) when is_binary(key),
+    do: key <> ":" <> value
 end
