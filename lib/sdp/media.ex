@@ -174,7 +174,7 @@ defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Media do
   def serialize(media) do
     serialized_header = media |> header_fields |> Enum.join(" ") |> String.trim()
 
-    optional = media |> other_fields |> Enum.join("\r\n")
+    optional = media |> other_fields() |> Enum.join("\r\n")
 
     String.trim("m=" <> serialized_header <> "\r\n" <> optional)
   end
@@ -196,27 +196,19 @@ defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP.Media do
       {"k", :encryption},
       {"a", :attributes}
     ]
-    |> Enum.map(&add_types(&1, media))
-    |> Enum.reject(&(&1 == ""))
+    |> Enum.flat_map(&add_types(&1, media))
   end
 
-  def add_types({type_string, key}, media) do
-    case Map.get(media, key) do
-      nil ->
-        ""
-
-      list when is_list(list) ->
-        list
-        |> Enum.map(&serialize_optional(&1, key))
-        |> Enum.map_join("\r\n", &add_type(&1, type_string))
-
-      single_field ->
-        single_field |> serialize_optional(key) |> add_type(type_string)
-    end
+  defp add_types({type_string, key}, media) do
+    Map.get(media, key)
+    |> List.wrap()
+    |> Enum.map(&serialize_optional(&1, key))
+    |> Enum.map(&add_type(&1, type_string))
   end
 
-  defp add_type(string, type),
-    do: if(String.at(string, 1) == "=", do: string, else: type <> "=" <> string)
+  defp add_type(string, type) do
+    if String.at(string, 1) == "=", do: string, else: type <> "=" <> string
+  end
 
   defp serialize_optional(value, :title), do: to_string(value)
   defp serialize_optional(value, _key), do: Serializer.serialize(value)
