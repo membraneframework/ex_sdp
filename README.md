@@ -1,6 +1,7 @@
 # Membrane Protocol SDP
 
 [![Hex.pm](https://img.shields.io/hexpm/v/membrane_protocol_sdp.svg)](https://hex.pm/packages/membrane_protocol_sdp)
+[![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/membrane_protocol_sdp/)
 [![CircleCI](https://circleci.com/gh/membraneframework/membrane-protocol-sdp.svg?style=svg)](https://circleci.com/gh/membraneframework/membrane-protocol-sdp)
 
 Parser and serializer for Session Description Protocol. Based on [RFC4566](https://tools.ietf.org/html/rfc4566)
