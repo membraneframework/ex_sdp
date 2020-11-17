@@ -346,7 +346,6 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         a=rtpmap:99 h263-1998/90000
         """
         |> String.replace("\n", "\r\n")
-        |> String.trim()
 
       assert expected ==
                SDP.serialize(%SDP{
@@ -425,7 +424,6 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         a=rtpmap:32 MPV/90000
         """
         |> String.replace("\n", "\r\n")
-        |> String.trim()
 
       assert expected ==
                SDP.serialize(%SDP{
@@ -535,7 +533,6 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         a=rtpmap:32 MPV/90000
         """
         |> String.replace("\n", "\r\n")
-        |> String.trim()
 
       assert expected ==
                SDP.serialize(%SDP{

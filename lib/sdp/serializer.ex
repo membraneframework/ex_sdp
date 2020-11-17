@@ -10,7 +10,7 @@ defprotocol Membrane.Protocol.SDP.Serializer do
 end
 
 defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP do
-  @preffered_eol "\r\n"
+  @preferred_eol "\r\n"
 
   alias Membrane.Protocol.SDP.{Serializer, Timezone}
 
@@ -34,13 +34,15 @@ defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP do
     ]
     |> Enum.map(&Map.get(session, &1))
     |> Enum.reject(&(&1 == [] or &1 == nil))
-    |> Enum.map_join(@preffered_eol, &serialize_field/1)
+    |> Enum.map(&serialize_field/1)
+    |> Enum.map(&(&1 <> @preferred_eol))
+    |> Enum.join()
   end
 
   defp serialize_field([%Timezone{} | _rest] = adjustments), do: Serializer.serialize(adjustments)
 
   defp serialize_field(list) when is_list(list),
-    do: Enum.map_join(list, @preffered_eol, &Serializer.serialize/1)
+    do: Enum.map_join(list, @preferred_eol, &Serializer.serialize/1)
 
   defp serialize_field(value), do: Serializer.serialize(value)
 end
