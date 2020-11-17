@@ -34,8 +34,9 @@ defimpl Membrane.Protocol.SDP.Serializer, for: Membrane.Protocol.SDP do
     ]
     |> Enum.map(&Map.get(session, &1))
     |> Enum.reject(&(&1 == [] or &1 == nil))
-    |> Enum.map_join(@preffered_eol, &serialize_field/1)
-    |> (&(&1 <> @preffered_eol)).()
+    |> Enum.map(&serialize_field/1)
+    |> Enum.map(&(&1 <> @preferred_eol))
+    |> Enum.join()
   end
 
   defp serialize_field([%Timezone{} | _rest] = adjustments), do: Serializer.serialize(adjustments)
