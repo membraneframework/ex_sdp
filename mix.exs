@@ -1,4 +1,4 @@
-defmodule Membrane.Protocol.SDP.MixProject do
+defmodule ExSDP.MixProject do
   use Mix.Project
 
   @version "0.1.0"
@@ -6,13 +6,13 @@ defmodule Membrane.Protocol.SDP.MixProject do
 
   def project do
     [
-      app: :membrane_protocol_sdp,
+      app: :ex_sdp,
       version: @version,
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      name: "Membrane Protocol SDP",
-      description: "Membrane Multimedia Framework (SDP protocol)",
+      name: "ExSDP",
+      description: "Parser and serializer for Session Description Protocol",
       source_url: @github_url,
       deps: deps(),
       docs: docs(),
@@ -34,9 +34,7 @@ defmodule Membrane.Protocol.SDP.MixProject do
       main: "readme",
       extras: ["README.md"],
       source_ref: "v#{@version}",
-      nest_modules_by_prefix: [
-        Membrane.Protocol.SDP
-      ]
+      nest_modules_by_prefix: [ExSDP]
     ]
   end
 

@@ -1,4 +1,4 @@
-defmodule Membrane.Protocol.SDP.RFCTest do
+defmodule ExSDP.RFCTest do
   @moduledoc """
   This test suit contains specs from RFC [4566](https://tools.ietf.org/html/rfc4566)
   and [4317](https://tools.ietf.org/html/rfc4317)
@@ -6,9 +6,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
   """
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP
+  alias ExSDP
 
-  alias SDP.{
+  alias ExSDP.{
     Attribute,
     ConnectionData,
     Email,
@@ -42,9 +42,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                a=rtpmap:99 h263-1998/90000
                """
                |> String.replace("\n", "\r\n")
-               |> SDP.parse()
+               |> ExSDP.parse()
 
-      assert session_spec == %SDP{
+      assert session_spec == %ExSDP{
                attributes: [%Attribute{value: :recvonly}],
                connection_data: %ConnectionData{
                  addresses: [
@@ -136,9 +136,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                a=rtpmap:32 MPV/90000
                """
                |> String.replace("\n", "\r\n")
-               |> SDP.parse()
+               |> ExSDP.parse()
 
-      assert result == %SDP{
+      assert result == %ExSDP{
                attributes: [],
                bandwidth: [],
                connection_data: %ConnectionData{
@@ -251,9 +251,9 @@ defmodule Membrane.Protocol.SDP.RFCTest do
                a=rtpmap:32 MPV/90000
                """
                |> String.replace("\n", "\r\n")
-               |> SDP.parse()
+               |> ExSDP.parse()
 
-      assert %SDP{
+      assert %ExSDP{
                attributes: [],
                bandwidth: [],
                connection_data: %ConnectionData{
@@ -348,7 +348,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               SDP.serialize(%SDP{
+               ExSDP.serialize(%ExSDP{
                  attributes: [%Attribute{value: :recvonly}],
                  connection_data: %ConnectionData{
                    addresses: [
@@ -426,7 +426,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               SDP.serialize(%SDP{
+               ExSDP.serialize(%ExSDP{
                  attributes: [],
                  bandwidth: [],
                  connection_data: %ConnectionData{
@@ -535,7 +535,7 @@ defmodule Membrane.Protocol.SDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               SDP.serialize(%SDP{
+               ExSDP.serialize(%ExSDP{
                  attributes: [],
                  bandwidth: [],
                  connection_data: %ConnectionData{

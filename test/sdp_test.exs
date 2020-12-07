@@ -1,9 +1,9 @@
-defmodule Membrane.Protocol.SDPTest do
+defmodule ExSDPTest do
   use ExUnit.Case
 
-  alias Membrane.Protocol.SDP
+  alias ExSDP
 
-  alias SDP.{
+  alias ExSDP.{
     Attribute,
     Bandwidth,
     ConnectionData,
@@ -48,7 +48,7 @@ defmodule Membrane.Protocol.SDPTest do
          """
          |> String.replace("\n", "\r\n")
 
-  @expected_output %SDP{
+  @expected_output %ExSDP{
     attributes: [%Attribute{key: "key", value: "value"}, %Attribute{value: :recvonly}],
     bandwidth: [
       %Bandwidth{bandwidth: 256, type: :CT}
@@ -156,7 +156,7 @@ defmodule Membrane.Protocol.SDPTest do
 
   describe "Parser parse/1" do
     test "parses long and complex session description" do
-      assert {:ok, result} = SDP.parse(@input)
+      assert {:ok, result} = ExSDP.parse(@input)
       assert result == @expected_output
     end
 
@@ -175,13 +175,13 @@ defmodule Membrane.Protocol.SDPTest do
         """
         |> String.replace("\n", "\r\n")
 
-      assert {:error, {:invalid_bandwidth, "b=X-YZ:256"}} == assert(SDP.parse(input))
+      assert {:error, {:invalid_bandwidth, "b=X-YZ:256"}} == assert(ExSDP.parse(input))
     end
   end
 
   describe "Parser parse!/1" do
     test "returns SDP spec when parsing valid input" do
-      assert @expected_output == SDP.parse!(@input)
+      assert @expected_output == ExSDP.parse!(@input)
     end
 
     test "raises an error when parsing invalid media" do
@@ -203,7 +203,7 @@ defmodule Membrane.Protocol.SDPTest do
         c=invalid data
         """
         |> String.replace("\n", "\r\n")
-        |> SDP.parse!()
+        |> ExSDP.parse!()
       end
     end
 
@@ -217,7 +217,7 @@ defmodule Membrane.Protocol.SDPTest do
       assert_raise RuntimeError, expected, fn ->
         "o=jdoe 2890844526 2890842807 IN"
         |> String.replace("\n", "\r\n")
-        |> SDP.parse!()
+        |> ExSDP.parse!()
       end
     end
   end

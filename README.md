@@ -1,19 +1,19 @@
-# Membrane Protocol SDP
+# ExSDP
 
-[![Hex.pm](https://img.shields.io/hexpm/v/membrane_protocol_sdp.svg)](https://hex.pm/packages/membrane_protocol_sdp)
-[![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/membrane_protocol_sdp/)
-[![CircleCI](https://circleci.com/gh/membraneframework/membrane-protocol-sdp.svg?style=svg)](https://circleci.com/gh/membraneframework/membrane-protocol-sdp)
+[![Hex.pm](https://img.shields.io/hexpm/v/ex_sdp.svg)](https://hex.pm/packages/ex_sdp)
+[![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/ex_sdp/)
+[![CircleCI](https://circleci.com/gh/membraneframework/ex_sdp.svg?style=svg)](https://circleci.com/gh/membraneframework/ex_sdp)
 
 Parser and serializer for Session Description Protocol. Based on [RFC4566](https://tools.ietf.org/html/rfc4566)
 
 ## Installation
 
-The package can be installed by adding `membrane_protocol_sdp` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `ex_sdp` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:membrane_protocol_sdp, "~> 0.1.0"}
+    {:ex_sdp, "~> 0.1.0"}
   ]
 end
 ```
@@ -50,52 +50,52 @@ m=video 51372 RTP/AVP 99
 a=rtpmap:99 h263-1998/90000
 """
 |> String.replace("\n", "\r\n")
-|> Membrane.Protocol.SDP.parse()
+|> ExSDP.parse()
 
 # =>
 {:ok,
- %Membrane.Protocol.SDP{
+ %ExSDP{
    attributes: [
-     %Membrane.Protocol.SDP.Attribute{key: "key", value: "value"},
-     %Membrane.Protocol.SDP.Attribute{key: nil, value: :recvonly}
+     %ExSDP.Attribute{key: "key", value: "value"},
+     %ExSDP.Attribute{key: nil, value: :recvonly}
    ],
-   bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
-   connection_data: %Membrane.Protocol.SDP.ConnectionData{
+   bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
+   connection_data: %ExSDP.ConnectionData{
      addresses: [
-       %Membrane.Protocol.SDP.ConnectionData.IP4{
+       %ExSDP.ConnectionData.IP4{
          ttl: 127,
          value: {224, 2, 17, 12}
        }
      ],
      network_type: "IN"
    },
-   email: %Membrane.Protocol.SDP.Email{value: "j.doe@example.com (Jane Doe)"},
-   encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: :clear},
+   email: %ExSDP.Email{value: "j.doe@example.com (Jane Doe)"},
+   encryption: %ExSDP.Encryption{key: "key", method: :clear},
    media: [
-     %Membrane.Protocol.SDP.Media{
+     %ExSDP.Media{
        attributes: [],
-       bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
-       connection_data: %Membrane.Protocol.SDP.ConnectionData{
+       bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
+       connection_data: %ExSDP.ConnectionData{
          addresses: [
-           %Membrane.Protocol.SDP.ConnectionData.IP4{
+           %ExSDP.ConnectionData.IP4{
              ttl: 127,
              value: {224, 2, 17, 12}
            }
          ],
          network_type: "IN"
        },
-       encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: :prompt},
+       encryption: %ExSDP.Encryption{key: nil, method: :prompt},
        fmt: [0],
        ports: [49170],
        protocol: "RTP/AVP",
        title: "Sample media title",
        type: :audio
      },
-     %Membrane.Protocol.SDP.Media{
+     %ExSDP.Media{
        attributes: [
-         %Membrane.Protocol.SDP.Attribute{
+         %ExSDP.Attribute{
            key: :rtpmap,
-           value: %Membrane.Protocol.SDP.Attribute.RTPMapping{
+           value: %ExSDP.Attribute.RTPMapping{
              clock_rate: 90000,
              encoding: "h263-1998",
              params: nil,
@@ -103,17 +103,17 @@ a=rtpmap:99 h263-1998/90000
            }
          }
        ],
-       bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
-       connection_data: %Membrane.Protocol.SDP.ConnectionData{
+       bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
+       connection_data: %ExSDP.ConnectionData{
          addresses: [
-           %Membrane.Protocol.SDP.ConnectionData.IP4{
+           %ExSDP.ConnectionData.IP4{
              ttl: 127,
              value: {224, 2, 17, 12}
            }
          ],
          network_type: "IN"
        },
-       encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: :clear},
+       encryption: %ExSDP.Encryption{key: "key", method: :clear},
        fmt: 'c',
        ports: [51372],
        protocol: "RTP/AVP",
@@ -121,8 +121,8 @@ a=rtpmap:99 h263-1998/90000
        type: :video
      }
    ],
-   origin: %Membrane.Protocol.SDP.Origin{
-     address: %Membrane.Protocol.SDP.ConnectionData.IP4{
+   origin: %ExSDP.Origin{
+     address: %ExSDP.ConnectionData.IP4{
        ttl: nil,
        value: {10, 47, 16, 5}
      },
@@ -130,95 +130,95 @@ a=rtpmap:99 h263-1998/90000
      session_version: "2890842807",
      username: "jdoe"
    },
-   phone_number: %Membrane.Protocol.SDP.PhoneNumber{value: "111 111 111"},
-   session_information: %Membrane.Protocol.SDP.SessionInformation{
+   phone_number: %ExSDP.PhoneNumber{value: "111 111 111"},
+   session_information: %ExSDP.SessionInformation{
      value: "A Seminar on the session description protocol"
    },
-   session_name: %Membrane.Protocol.SDP.SessionName{
+   session_name: %ExSDP.SessionName{
      value: "Very fancy session name"
    },
    time_repeats: [
-     %Membrane.Protocol.SDP.RepeatTimes{
+     %ExSDP.RepeatTimes{
        active_duration: 3600,
        offsets: [0, 90000],
        repeat_interval: 604800
      },
-     %Membrane.Protocol.SDP.RepeatTimes{
+     %ExSDP.RepeatTimes{
        active_duration: 3600,
        offsets: [0, 90000],
        repeat_interval: 604800
      }
    ],
-   time_zones_adjustments: %Membrane.Protocol.SDP.Timezone{
+   time_zones_adjustments: %ExSDP.Timezone{
      corrections: [
-       %Membrane.Protocol.SDP.Timezone.Correction{
+       %ExSDP.Timezone.Correction{
          adjustment_time: 2882844526,
          offset: -1
        },
-       %Membrane.Protocol.SDP.Timezone.Correction{
+       %ExSDP.Timezone.Correction{
          adjustment_time: 2898848070,
          offset: 0
        }
      ]
    },
-   timing: %Membrane.Protocol.SDP.Timing{
+   timing: %ExSDP.Timing{
      start_time: 2873397496,
      stop_time: 2873404696
    },
-   uri: %Membrane.Protocol.SDP.URI{
+   uri: %ExSDP.URI{
      value: "http://www.example.com/seminars/sdp.pdf"
    },
-   version: %Membrane.Protocol.SDP.Version{value: 0}
+   version: %ExSDP.Version{value: 0}
  }}
 ```
 
 ### Serializer
 
-Serializer serializes `Membrane.Protocol.SDP` struct to a string with `\r\n` terminated lines.
+Serializer serializes `ExSDP` struct to a string with `\r\n` terminated lines.
 
 ```elixir
-%Membrane.Protocol.SDP{
+%ExSDP{
    attributes: [
-     %Membrane.Protocol.SDP.Attribute{key: "key", value: "value"},
-     %Membrane.Protocol.SDP.Attribute{key: nil, value: :recvonly}
+     %ExSDP.Attribute{key: "key", value: "value"},
+     %ExSDP.Attribute{key: nil, value: :recvonly}
    ],
-   bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
-   connection_data: %Membrane.Protocol.SDP.ConnectionData{
+   bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
+   connection_data: %ExSDP.ConnectionData{
      addresses: [
-       %Membrane.Protocol.SDP.ConnectionData.IP4{
+       %ExSDP.ConnectionData.IP4{
          ttl: 127,
          value: {224, 2, 17, 12}
        }
      ],
      network_type: "IN"
    },
-   email: %Membrane.Protocol.SDP.Email{value: "j.doe@example.com (Jane Doe)"},
-   encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: :clear},
+   email: %ExSDP.Email{value: "j.doe@example.com (Jane Doe)"},
+   encryption: %ExSDP.Encryption{key: "key", method: :clear},
    media: [
-     %Membrane.Protocol.SDP.Media{
+     %ExSDP.Media{
        attributes: [],
-       bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
-       connection_data: %Membrane.Protocol.SDP.ConnectionData{
+       bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
+       connection_data: %ExSDP.ConnectionData{
          addresses: [
-           %Membrane.Protocol.SDP.ConnectionData.IP4{
+           %ExSDP.ConnectionData.IP4{
              ttl: 127,
              value: {224, 2, 17, 12}
            }
          ],
          network_type: "IN"
        },
-       encryption: %Membrane.Protocol.SDP.Encryption{key: nil, method: :prompt},
+       encryption: %ExSDP.Encryption{key: nil, method: :prompt},
        fmt: [0],
        ports: [49170],
        protocol: "RTP/AVP",
        title: "Sample media title",
        type: :audio
      },
-     %Membrane.Protocol.SDP.Media{
+     %ExSDP.Media{
        attributes: [
-         %Membrane.Protocol.SDP.Attribute{
+         %ExSDP.Attribute{
            key: :rtpmap,
-           value: %Membrane.Protocol.SDP.Attribute.RTPMapping{
+           value: %ExSDP.Attribute.RTPMapping{
              clock_rate: 90000,
              encoding: "h263-1998",
              params: nil,
@@ -226,17 +226,17 @@ Serializer serializes `Membrane.Protocol.SDP` struct to a string with `\r\n` ter
            }
          }
        ],
-       bandwidth: [%Membrane.Protocol.SDP.Bandwidth{bandwidth: 256, type: :AS}],
-       connection_data: %Membrane.Protocol.SDP.ConnectionData{
+       bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
+       connection_data: %ExSDP.ConnectionData{
          addresses: [
-           %Membrane.Protocol.SDP.ConnectionData.IP4{
+           %ExSDP.ConnectionData.IP4{
              ttl: 127,
              value: {224, 2, 17, 12}
            }
          ],
          network_type: "IN"
        },
-       encryption: %Membrane.Protocol.SDP.Encryption{key: "key", method: :clear},
+       encryption: %ExSDP.Encryption{key: "key", method: :clear},
        fmt: 'c',
        ports: [51372],
        protocol: "RTP/AVP",
@@ -244,8 +244,8 @@ Serializer serializes `Membrane.Protocol.SDP` struct to a string with `\r\n` ter
        type: :video
      }
    ],
-   origin: %Membrane.Protocol.SDP.Origin{
-     address: %Membrane.Protocol.SDP.ConnectionData.IP4{
+   origin: %ExSDP.Origin{
+     address: %ExSDP.ConnectionData.IP4{
        ttl: nil,
        value: {10, 47, 16, 5}
      },
@@ -253,47 +253,47 @@ Serializer serializes `Membrane.Protocol.SDP` struct to a string with `\r\n` ter
      session_version: "2890842807",
      username: "jdoe"
    },
-   phone_number: %Membrane.Protocol.SDP.PhoneNumber{value: "111 111 111"},
-   session_information: %Membrane.Protocol.SDP.SessionInformation{
+   phone_number: %ExSDP.PhoneNumber{value: "111 111 111"},
+   session_information: %ExSDP.SessionInformation{
      value: "A Seminar on the session description protocol"
    },
-   session_name: %Membrane.Protocol.SDP.SessionName{
+   session_name: %ExSDP.SessionName{
      value: "Very fancy session name"
    },
    time_repeats: [
-     %Membrane.Protocol.SDP.RepeatTimes{
+     %ExSDP.RepeatTimes{
        active_duration: 3600,
        offsets: [0, 90000],
        repeat_interval: 604800
      },
-     %Membrane.Protocol.SDP.RepeatTimes{
+     %ExSDP.RepeatTimes{
        active_duration: 3600,
        offsets: [0, 90000],
        repeat_interval: 604800
      }
    ],
-   time_zones_adjustments: %Membrane.Protocol.SDP.Timezone{
+   time_zones_adjustments: %ExSDP.Timezone{
      corrections: [
-       %Membrane.Protocol.SDP.Timezone.Correction{
+       %ExSDP.Timezone.Correction{
          adjustment_time: 2882844526,
          offset: -1
        },
-       %Membrane.Protocol.SDP.Timezone.Correction{
+       %ExSDP.Timezone.Correction{
          adjustment_time: 2898848070,
          offset: 0
        }
      ]
    },
-   timing: %Membrane.Protocol.SDP.Timing{
+   timing: %ExSDP.Timing{
      start_time: 2873397496,
      stop_time: 2873404696
    },
-   uri: %Membrane.Protocol.SDP.URI{
+   uri: %ExSDP.URI{
      value: "http://www.example.com/seminars/sdp.pdf"
    },
-   version: %Membrane.Protocol.SDP.Version{value: 0}
+   version: %ExSDP.Version{value: 0}
 }
-|> Membrane.Protocol.SDP.serialize
+|> ExSDP.serialize
 |> String.replace("\r\n", "\n")
 
 # =>
