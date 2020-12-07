@@ -89,7 +89,8 @@ defmodule ExSDP.Parser do
     do: {rest, %ExSDP{spec | session_name: %SessionName{value: session_name}}}
 
   defp parse_line(["i=" <> session_information | rest], spec),
-    do: {rest, %ExSDP{spec | session_information: %SessionInformation{value: session_information}}}
+    do:
+      {rest, %ExSDP{spec | session_information: %SessionInformation{value: session_information}}}
 
   defp parse_line(["u=" <> uri | rest], spec),
     do: {rest, %ExSDP{spec | uri: %URI{value: uri}}}
