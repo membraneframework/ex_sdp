@@ -1,10 +1,10 @@
-defmodule Membrane.Protocol.SDP.LineEndingTest do
+defmodule ExSDP.LineEndingTest do
   use ExUnit.Case
-  alias Membrane.Protocol.SDP
+  alias ExSDP
 
-  alias SDP.{ConnectionData, Origin, SessionName, Timing, Version}
+  alias ExSDP.{ConnectionData, Origin, SessionName, Timing, Version}
 
-  @expected_output %SDP{
+  @expected_output %ExSDP{
     origin: %Origin{
       address: %ConnectionData.IP4{
         value: {10, 47, 16, 5}
@@ -21,49 +21,49 @@ defmodule Membrane.Protocol.SDP.LineEndingTest do
     version: %Version{value: 0}
   }
 
-  describe "SDP.parse handles" do
+  describe "ExSDP.parse handles" do
     test "CR line ending" do
       assert {:ok, @expected_output} ==
                "\r"
                |> test_input()
-               |> SDP.parse()
+               |> ExSDP.parse()
     end
 
     test "LF line ending" do
       assert {:ok, @expected_output} ==
                "\n"
                |> test_input()
-               |> SDP.parse()
+               |> ExSDP.parse()
     end
 
     test "CRLF line ending" do
       assert {:ok, @expected_output} ==
                "\r\n"
                |> test_input()
-               |> SDP.parse()
+               |> ExSDP.parse()
     end
   end
 
-  describe "SDP.parse! handles" do
+  describe "ExSDP.parse! handles" do
     test "CR line ending" do
       assert @expected_output ==
                "\r"
                |> test_input()
-               |> SDP.parse!()
+               |> ExSDP.parse!()
     end
 
     test "LF line ending" do
       assert @expected_output ==
                "\n"
                |> test_input()
-               |> SDP.parse!()
+               |> ExSDP.parse!()
     end
 
     test "CRLF line ending" do
       assert @expected_output ==
                "\r\n"
                |> test_input()
-               |> SDP.parse!()
+               |> ExSDP.parse!()
     end
   end
 

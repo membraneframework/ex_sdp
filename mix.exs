@@ -1,18 +1,18 @@
-defmodule Membrane.Protocol.SDP.MixProject do
+defmodule ExSDP.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
   @github_url "https://github.com/membraneframework/membrane-protocol-sdp"
 
   def project do
     [
-      app: :membrane_protocol_sdp,
+      app: :ex_sdp,
       version: @version,
-      elixir: "~> 1.7",
+      elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      name: "Membrane Protocol SDP",
-      description: "Membrane Multimedia Framework (SDP protocol)",
+      name: "ExSDP",
+      description: "Parser and serializer for Session Description Protocol",
       source_url: @github_url,
       deps: deps(),
       docs: docs(),
@@ -34,9 +34,7 @@ defmodule Membrane.Protocol.SDP.MixProject do
       main: "readme",
       extras: ["README.md"],
       source_ref: "v#{@version}",
-      nest_modules_by_prefix: [
-        Membrane.Protocol.SDP
-      ]
+      nest_modules_by_prefix: [ExSDP]
     ]
   end
 
@@ -55,9 +53,9 @@ defmodule Membrane.Protocol.SDP.MixProject do
     [
       {:bunch, "~> 1.3"},
       {:dialyxir, "~> 1.0.0", only: [:dev], runtime: false},
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.23", only: :dev, runtime: false},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
-      {:credo, "~> 1.2", only: [:dev], runtime: false}
+      {:credo, "~> 1.5", only: [:dev], runtime: false}
     ]
   end
 end
