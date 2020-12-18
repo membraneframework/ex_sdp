@@ -14,7 +14,7 @@ defmodule ExSDP.ConnectionData do
   a time to live (TTL) value present in addition to the multicast
   address.
 
-  For more details please see [RFC4566 Section 5.7]|(https://tools.ietf.org/html/rfc4566#section-5.7
+  For more details please see [RFC4566 Section 5.7](https://tools.ietf.org/html/rfc4566#section-5.7)
   """
   use Bunch
 
@@ -22,7 +22,6 @@ defmodule ExSDP.ConnectionData do
   @ipv6_max_value 65_535
 
   defmodule IP4 do
-    @moduledoc false
     @enforce_keys [:value]
     defstruct @enforce_keys ++ [:ttl]
 
@@ -33,7 +32,6 @@ defmodule ExSDP.ConnectionData do
   end
 
   defmodule IP6 do
-    @moduledoc false
     @enforce_keys [:value]
     defstruct @enforce_keys
 
@@ -43,7 +41,6 @@ defmodule ExSDP.ConnectionData do
   end
 
   defmodule FQDN do
-    @moduledoc false
     @enforce_keys [:value]
     defstruct @enforce_keys
 
