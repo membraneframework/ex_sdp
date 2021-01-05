@@ -44,6 +44,38 @@ defmodule ExSDP.Media do
           attributes: [binary()]
         }
 
+  @spec new(
+          type :: type(),
+          ports :: [:inet.port_number()],
+          protocol :: binary(),
+          fmt :: binary() | [0..127]
+        ) :: t()
+  def new(type, ports, protocol, fmt) do
+    %__MODULE__{
+      type: type,
+      ports: ports,
+      protocol: protocol,
+      fmt: fmt
+    }
+  end
+
+  @spec set_connection_data(media :: t(), connection_data :: ConnectionData.t()) :: t()
+  def set_connection_data(media, connection_data) do
+    Bunch.Struct.put_in(media, :connection_data, connection_data)
+  end
+
+  @spec add_attribute(media :: t(), attribute :: Attribute.t()) :: t()
+  def add_attribute(media, attribute) do
+    attributes = media.attributes ++ [attribute]
+    Bunch.Struct.put_in(media, :attributes, attributes)
+  end
+
+  @spec get_attribute(media :: t(), key :: String.t()) :: Attribute.t()
+  def get_attribute(media, key) do
+    media.attributes
+    |> Enum.find(fn %ExSDP.Attribute{key: k} -> k == key end)
+  end
+
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),

@@ -34,6 +34,14 @@ defmodule ExSDP.Attribute do
   @directly_assignable_values @value_attributes |> Enum.map(&to_string/1)
   @numeric_values @numeric_attributes |> Enum.map(&to_string/1)
 
+  def new(key, value) do
+    %__MODULE__{key: key, value: value}
+  end
+
+  def new(value) do
+    %__MODULE__{value: value}
+  end
+
   @doc """
   Parses SDP Attribute.
 

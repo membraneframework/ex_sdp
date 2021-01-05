@@ -69,4 +69,30 @@ defmodule ExSDP do
   defdelegate parse(text), to: Parser
   defdelegate parse!(text), to: Parser
   defdelegate serialize(session), to: Serializer
+
+  @spec new(version :: Version.t(), origin :: Origin.t(), session_name :: SessionName.t()) :: t()
+  def new(version, origin, session_name) do
+    %__MODULE__{
+      version: version,
+      origin: origin,
+      session_name: session_name
+    }
+  end
+
+  @spec set_timing(sdp :: t(), timing :: Timing.t()) :: t()
+  def set_timing(sdp, timing) do
+    Bunch.Struct.put_in(sdp, :timing, timing)
+  end
+
+  @spec add_media(sdp :: t(), media :: Media.t() | [Media.t()]) :: t()
+  def add_media(sdp, media) do
+    media = sdp.media ++ Bunch.listify(media)
+    Bunch.Struct.put_in(sdp, :media, media)
+  end
+
+  @spec add_attribute(sdp :: t(), attribute :: Attribute.t()) :: t()
+  def add_attribute(sdp, attribute) do
+    attributes = sdp.attributes ++ [attribute]
+    Bunch.Struct.put_in(sdp, :attributes, attributes)
+  end
 end
