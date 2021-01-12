@@ -7,18 +7,12 @@ defmodule ExSDPTest do
     Attribute,
     Bandwidth,
     ConnectionData,
-    Email,
     Encryption,
     Media,
     Origin,
-    PhoneNumber,
     RepeatTimes,
-    SessionInformation,
-    SessionName,
     Timezone,
-    Timing,
-    URI,
-    Version
+    Timing
   }
 
   alias Timezone.Correction
@@ -61,7 +55,7 @@ defmodule ExSDPTest do
         }
       ]
     },
-    email: %Email{value: "j.doe@example.com (Jane Doe)"},
+    email: "j.doe@example.com (Jane Doe)",
     encryption: %Encryption{key: "key", method: :clear},
     media: [
       %Media{
@@ -123,11 +117,9 @@ defmodule ExSDPTest do
       session_version: "2890842807",
       username: "jdoe"
     },
-    phone_number: %PhoneNumber{value: "111 111 111"},
-    session_information: %SessionInformation{
-      value: "A Seminar on the session description protocol"
-    },
-    session_name: %SessionName{value: "Very fancy session name"},
+    phone_number: "111 111 111",
+    session_information: "A Seminar on the session description protocol",
+    session_name: "Very fancy session name",
     time_repeats: [
       %RepeatTimes{
         active_duration: 3600,
@@ -150,8 +142,8 @@ defmodule ExSDPTest do
       start_time: 2_873_397_496,
       stop_time: 2_873_404_696
     },
-    uri: %URI{value: "http://www.example.com/seminars/sdp.pdf"},
-    version: %Version{value: 0}
+    uri: "http://www.example.com/seminars/sdp.pdf",
+    version: 0
   }
 
   describe "Parser parse/1" do

@@ -11,17 +11,11 @@ defmodule ExSDP.Parser do
     Bandwidth,
     ConnectionData,
     Encryption,
-    Email,
     Media,
     Origin,
-    PhoneNumber,
     RepeatTimes,
-    SessionInformation,
-    SessionName,
     Timezone,
-    Timing,
-    URI,
-    Version
+    Timing
   }
 
   @line_ending ["\r\n", "\r", "\n"]
@@ -77,7 +71,7 @@ defmodule ExSDP.Parser do
   defp parse_line(lines, session)
 
   defp parse_line(["v=" <> version | rest], spec),
-    do: {rest, %ExSDP{spec | version: %Version{value: String.to_integer(version)}}}
+    do: {rest, %ExSDP{spec | version: String.to_integer(version)}}
 
   defp parse_line(["o=" <> origin | rest], spec) do
     with {:ok, %Origin{} = origin} <- Origin.parse(origin) do
@@ -86,20 +80,19 @@ defmodule ExSDP.Parser do
   end
 
   defp parse_line(["s=" <> session_name | rest], spec),
-    do: {rest, %ExSDP{spec | session_name: %SessionName{value: session_name}}}
+    do: {rest, %ExSDP{spec | session_name: session_name}}
 
   defp parse_line(["i=" <> session_information | rest], spec),
-    do:
-      {rest, %ExSDP{spec | session_information: %SessionInformation{value: session_information}}}
+    do: {rest, %ExSDP{spec | session_information: session_information}}
 
   defp parse_line(["u=" <> uri | rest], spec),
-    do: {rest, %ExSDP{spec | uri: %URI{value: uri}}}
+    do: {rest, %ExSDP{spec | uri: uri}}
 
   defp parse_line(["e=" <> email | rest], spec),
-    do: {rest, %ExSDP{spec | email: %Email{value: email}}}
+    do: {rest, %ExSDP{spec | email: email}}
 
   defp parse_line(["p=" <> phone_number | rest], spec),
-    do: {rest, %ExSDP{spec | phone_number: %PhoneNumber{value: phone_number}}}
+    do: {rest, %ExSDP{spec | phone_number: phone_number}}
 
   defp parse_line(["c=" <> connection_data | rest], spec) do
     with {:ok, addresses} <- ConnectionData.parse(connection_data) do

@@ -2,7 +2,7 @@ defmodule ExSDP.LineEndingTest do
   use ExUnit.Case
   alias ExSDP
 
-  alias ExSDP.{ConnectionData, Origin, SessionName, Timing, Version}
+  alias ExSDP.{ConnectionData, Origin, Timing}
 
   @expected_output %ExSDP{
     origin: %Origin{
@@ -13,12 +13,12 @@ defmodule ExSDP.LineEndingTest do
       session_version: "2890842807",
       username: "jdoe"
     },
-    session_name: %SessionName{value: "Very fancy session name"},
+    session_name: "Very fancy session name",
     timing: %Timing{
       start_time: 2_873_397_496,
       stop_time: 2_873_404_696
     },
-    version: %Version{value: 0}
+    version: 0
   }
 
   describe "ExSDP.parse handles" do

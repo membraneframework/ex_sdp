@@ -10,19 +10,17 @@ defprotocol ExSDP.Serializer do
 end
 
 defimpl ExSDP.Serializer, for: ExSDP do
-  alias ExSDP.{Serializer, Timezone}
-
-  def default_eol(), do: @default_eol
+  alias ExSDP.Serializer
 
   def serialize(session, eol) do
     """
-    v=#{Integer.to_string(session.version)}#{eol}\
+    v=#{session.version}#{eol}\
     #{Serializer.serialize(session.origin, eol)}\
-    #{Serializer.serialize(session.session_name, eol)}\
-    #{maybe_serialize(Map.get(session, :session_information), eol)}\
-    #{maybe_serialize(Map.get(session, :uri), eol)}\
-    #{maybe_serialize(Map.get(session, :email), eol)}\
-    #{maybe_serialize(Map.get(session, :phone_number), eol)}\
+    #{maybe_serialize_string("s", session.session_name, eol)}\
+    #{maybe_serialize_string("i", Map.get(session, :session_information), eol)}\
+    #{maybe_serialize_string("u", Map.get(session, :uri), eol)}\
+    #{maybe_serialize_string("e", Map.get(session, :email), eol)}\
+    #{maybe_serialize_string("p", Map.get(session, :phone_number), eol)}\
     #{maybe_serialize(Map.get(session, :connection_data), eol)}\
     #{maybe_serialize(Map.get(session, :bandwidth), eol)}\
     #{maybe_serialize(Map.get(session, :timing), eol)}\
@@ -33,6 +31,11 @@ defimpl ExSDP.Serializer, for: ExSDP do
     #{maybe_serialize(Map.get(session, :media), eol)}\
     """
   end
+
+  defp maybe_serialize_string(_type, nil, _eol), do: ""
+
+  defp maybe_serialize_string(type, value, eol) when is_binary(value),
+    do: "#{type}=#{value}#{eol}"
 
   def maybe_serialize(nil, _eol), do: ""
   def maybe_serialize([], _eol), do: ""
