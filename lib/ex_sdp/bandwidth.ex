@@ -45,9 +45,6 @@ defmodule ExSDP.Bandwidth do
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Bandwidth do
-  def serialize(bandwidth, eol),
-    do:
-      "b=" <>
-        Atom.to_string(bandwidth.type) <> ":" <> Integer.to_string(bandwidth.bandwidth) <> eol
+defimpl String.Chars, for: ExSDP.Bandwidth do
+  def to_string(bandwidth), do: "#{bandwidth.type}:#{bandwidth.bandwidth}"
 end

@@ -200,61 +200,39 @@ defmodule ExSDP.Media do
   defp gen_ports(port_no, _), do: [port_no]
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Media do
-  alias ExSDP.Serializer
+defimpl String.Chars, for: ExSDP.Media do
+  def to_string(media) do
+    import ExSDP.Sigil
 
-  def serialize(media, eol) do
-    serialized_header = media |> header_fields |> Enum.join(" ") |> String.trim()
-    serialized_header = serialized_header <> eol
+    serialized_header = media |> header_fields |> String.trim()
 
-    optional = media |> other_fields(eol) |> Enum.join()
-
-    "m=" <> serialized_header <> optional
+    ~n"""
+    #{serialized_header}
+    #{ExSDP.Serializer.maybe_serialize("i", Map.get(media, :title))}
+    #{ExSDP.Serializer.maybe_serialize("c", Map.get(media, :connection_data))}
+    #{ExSDP.Serializer.maybe_serialize("b", Map.get(media, :bandwidth))}
+    #{ExSDP.Serializer.maybe_serialize("k", Map.get(media, :encryption))}
+    #{ExSDP.Serializer.maybe_serialize("a", Map.get(media, :attributes))}
+    """
+    # to_string has to return string without `\r\n` at the end
+    |> String.trim()
   end
 
   defp header_fields(media) do
-    [
-      serialize_type(media.type),
-      serialize_ports(media.ports),
-      media.protocol,
-      serialize_fmt(media.fmt)
-    ]
+    """
+    #{serialize_type(media.type)} \
+    #{serialize_ports(media.ports)} \
+    #{media.protocol} \
+    #{serialize_fmt(media.fmt)} \
+    """
   end
 
-  defp other_fields(media, eol) do
-    [
-      {"i", :title},
-      {"c", :connection_data},
-      {"b", :bandwidth},
-      {"k", :encryption},
-      {"a", :attributes}
-    ]
-    |> Enum.flat_map(&add_types(&1, media, eol))
-  end
+  defp serialize_type(type), do: "#{type}"
 
-  defp add_types({type_string, key}, media, eol) do
-    Map.get(media, key)
-    |> List.wrap()
-    |> Enum.map(&serialize_optional(&1, key, eol))
-    |> Enum.map(&add_type(&1, type_string))
-  end
+  defp serialize_ports([port]), do: "#{port}"
 
-  defp add_type(string, type) do
-    if String.at(string, 1) == "=", do: string, else: type <> "=" <> string
-  end
-
-  defp serialize_optional(value, :title, eol), do: to_string(value) <> eol
-  defp serialize_optional(value, _key, eol), do: Serializer.serialize(value, eol)
-
-  defp serialize_type(type) when is_binary(type), do: type
-  defp serialize_type(type) when is_atom(type), do: Atom.to_string(type)
-
-  defp serialize_ports([port]),
-    do: Integer.to_string(port)
-
-  defp serialize_ports([port | _rest] = ports),
-    do: Integer.to_string(port) <> "/" <> Integer.to_string(length(ports))
+  defp serialize_ports([port | _rest] = ports), do: "#{port}/#{length(ports)}"
 
   defp serialize_fmt(fmt) when is_binary(fmt), do: fmt
-  defp serialize_fmt(fmt), do: Enum.map_join(fmt, " ", &Integer.to_string/1)
+  defp serialize_fmt(fmt), do: Enum.map_join(fmt, " ", &Kernel.to_string/1)
 end

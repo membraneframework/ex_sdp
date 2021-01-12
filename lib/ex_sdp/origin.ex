@@ -19,9 +19,10 @@ defmodule ExSDP.Origin do
   defstruct @enforce_keys ++ [:username]
 
   @type t :: %__MODULE__{
-          username: binary() | nil,
+          username: binary(),
           session_id: binary(),
           session_version: binary(),
+          # FIXME this cannot be ConnectionData.sdp_address() as it has no ttl field for IPv4
           address: ConnectionData.sdp_address()
         }
 
@@ -48,22 +49,8 @@ defmodule ExSDP.Origin do
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Origin do
-  alias ExSDP.Serializer
-
-  def serialize(origin, eol) do
-    serialized_address = Serializer.serialize(origin.address)
-
-    origin_serialized_fields = [
-      serialize_username(origin.username),
-      origin.session_id,
-      origin.session_version,
-      serialized_address
-    ]
-
-    "o=" <> Enum.join(origin_serialized_fields, " ") <> eol
+defimpl String.Chars, for: ExSDP.Origin do
+  def to_string(origin) do
+    "#{origin.username} #{origin.session_id} #{origin.session_version} #{origin.address}"
   end
-
-  defp serialize_username(nil), do: "-"
-  defp serialize_username(username), do: username
 end

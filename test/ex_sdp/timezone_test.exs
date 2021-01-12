@@ -1,10 +1,8 @@
 defmodule ExSDP.TimezoneTest do
   use ExUnit.Case
 
-  alias ExSDP.{Serializer, Timezone, Fixtures}
+  alias ExSDP.Timezone
   alias ExSDP.Timezone.Correction
-
-  @eol Fixtures.default_eol()
 
   describe "Timezone parser" do
     test "processes valid timezone correction description" do
@@ -29,7 +27,8 @@ defmodule ExSDP.TimezoneTest do
 
   describe "Timezone serializer" do
     test "serializes empty list" do
-      assert Serializer.serialize(%Timezone{corrections: []}) == ""
+      timezone = %Timezone{corrections: []}
+      assert "#{timezone}" == ""
     end
 
     test "serializes multiple corrections" do
@@ -40,7 +39,7 @@ defmodule ExSDP.TimezoneTest do
         ]
       }
 
-      assert Serializer.serialize(timezone) == "z=1 -1h 2 0#{@eol}"
+      assert "#{timezone}" == "1 -1h 2 0"
     end
   end
 end

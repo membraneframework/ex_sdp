@@ -341,7 +341,7 @@ defmodule ExSDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               ExSDP.serialize(%ExSDP{
+               to_string(%ExSDP{
                  attributes: [%Attribute{value: :recvonly}],
                  connection_data: %ConnectionData{
                    addresses: [
@@ -414,7 +414,7 @@ defmodule ExSDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               ExSDP.serialize(%ExSDP{
+               to_string(%ExSDP{
                  attributes: [],
                  bandwidth: [],
                  connection_data: %ConnectionData{
@@ -508,7 +508,7 @@ defmodule ExSDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               ExSDP.serialize(%ExSDP{
+               to_string(%ExSDP{
                  attributes: [],
                  bandwidth: [],
                  connection_data: %ConnectionData{

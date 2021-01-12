@@ -1,9 +1,7 @@
 defmodule ExSDP.EncryptionTest do
   use ExUnit.Case
 
-  alias ExSDP.{Encryption, Serializer, Fixtures}
-
-  @eol Fixtures.default_eol()
+  alias ExSDP.Encryption
 
   describe "Encryption parser" do
     test "processes valid method only string" do
@@ -43,12 +41,12 @@ defmodule ExSDP.EncryptionTest do
   describe "Encryption serializer" do
     test "serializes encryption description without key" do
       encryption = %Encryption{method: :prompt}
-      assert Serializer.serialize(encryption) == "k=prompt#{@eol}"
+      assert "#{encryption}" == "prompt"
     end
 
     test "serializes encryption description with key" do
       encryption = %Encryption{method: :uri, key: "https://some.url.net"}
-      assert Serializer.serialize(encryption) == "k=uri:https://some.url.net#{@eol}"
+      assert "#{encryption}" == "uri:https://some.url.net"
     end
   end
 end

@@ -62,7 +62,6 @@ defmodule ExSDP do
 
   defdelegate parse(text), to: Parser
   defdelegate parse!(text), to: Parser
-  defdelegate serialize(session), to: Serializer
 
   @spec new(version :: Version.t(), origin :: Origin.t(), session_name :: SessionName.t()) :: t()
   def new(version, origin, session_name) do
@@ -88,5 +87,30 @@ defmodule ExSDP do
   def add_attribute(sdp, attribute) do
     attributes = sdp.attributes ++ [attribute]
     Bunch.Struct.put_in(sdp, :attributes, attributes)
+  end
+end
+
+defimpl String.Chars, for: ExSDP do
+  def to_string(session) do
+    import ExSDP.Sigil
+    alias ExSDP.Serializer
+
+    ~n"""
+    v=#{session.version}
+    o=#{session.origin}
+    s=#{session.session_name}
+    #{Serializer.maybe_serialize("i", Map.get(session, :session_information))}
+    #{Serializer.maybe_serialize("u", Map.get(session, :uri))}
+    #{Serializer.maybe_serialize("e", Map.get(session, :email))}
+    #{Serializer.maybe_serialize("p", Map.get(session, :phone_number))}
+    #{Serializer.maybe_serialize("c", Map.get(session, :connection_data))}
+    #{Serializer.maybe_serialize("b", Map.get(session, :bandwidth))}
+    #{Serializer.maybe_serialize("t", Map.get(session, :timing))}
+    #{Serializer.maybe_serialize("r", Map.get(session, :time_repeats))}
+    #{Serializer.maybe_serialize("z", Map.get(session, :time_zones_adjustments))}
+    #{Serializer.maybe_serialize("k", Map.get(session, :encryption))}
+    #{Serializer.maybe_serialize("a", Map.get(session, :attributes))}
+    #{Serializer.maybe_serialize("m", Map.get(session, :media))}
+    """
   end
 end

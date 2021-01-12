@@ -1,10 +1,8 @@
 defmodule ExSDP.OriginTest do
   use ExUnit.Case
 
-  alias ExSDP.{ConnectionData, Origin, Serializer, Fixtures}
+  alias ExSDP.{ConnectionData, Origin}
   alias ConnectionData.FQDN
-
-  @eol Fixtures.default_eol()
 
   describe "Origin parser" do
     test "processes valid origin declaration" do
@@ -54,17 +52,7 @@ defmodule ExSDP.OriginTest do
   end
 
   describe "Origin serializer" do
-    test "serializes origin with unknown username" do
-      origin = %Origin{
-        session_version: "0",
-        address: %FQDN{value: "some.origin.address"},
-        session_id: "222"
-      }
-
-      assert Serializer.serialize(origin) == "o=- 222 0 IN IP4 some.origin.address#{@eol}"
-    end
-
-    test "serializes origin with given username" do
+    test "serializes origin" do
       origin = %Origin{
         session_version: "0",
         address: %FQDN{value: "some.origin.address"},
@@ -72,8 +60,7 @@ defmodule ExSDP.OriginTest do
         username: "username_id"
       }
 
-      assert Serializer.serialize(origin) ==
-               "o=username_id 222 0 IN IP4 some.origin.address#{@eol}"
+      assert "#{origin}" == "username_id 222 0 IN IP4 some.origin.address"
     end
   end
 end

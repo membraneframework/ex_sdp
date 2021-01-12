@@ -1,9 +1,7 @@
 defmodule ExSDP.TimingTest do
   use ExUnit.Case
 
-  alias ExSDP.{Serializer, Timing, Fixtures}
-
-  @eol Fixtures.default_eol()
+  alias ExSDP.Timing
 
   describe "Timing parser" do
     test "processes valid description" do
@@ -24,7 +22,7 @@ defmodule ExSDP.TimingTest do
   describe "Timing serializer" do
     test "serializes valid timing" do
       timing = %Timing{start_time: 2_208_988_800, stop_time: 2_208_988_898}
-      assert Serializer.serialize(timing) == "t=2208988800 2208988898#{@eol}"
+      assert "#{timing}" == "2208988800 2208988898"
     end
   end
 end

@@ -45,19 +45,16 @@ defmodule ExSDP.Attribute.RTPMapping do
   defp parse_params(_, []), do: nil
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Attribute.RTPMapping do
+defimpl String.Chars, for: ExSDP.Attribute.RTPMapping do
   alias ExSDP.Attribute.RTPMapping
 
-  def serialize(mapping, eol) do
-    "rtpmap:" <>
-      Integer.to_string(mapping.payload_type) <>
-      " " <>
-      mapping.encoding <>
-      "/" <>
-      Integer.to_string(mapping.clock_rate) <> serialize_params(mapping) <> eol
+  def to_string(mapping) do
+    "rtpmap:#{mapping.payload_type} #{mapping.encoding}/#{mapping.clock_rate}#{
+      serialize_params(mapping)
+    }"
   end
 
   defp serialize_params(%RTPMapping{params: nil}), do: ""
   defp serialize_params(%RTPMapping{params: 1}), do: ""
-  defp serialize_params(%RTPMapping{params: params}), do: "/" <> to_string(params)
+  defp serialize_params(%RTPMapping{params: params}), do: "/" <> Kernel.to_string(params)
 end

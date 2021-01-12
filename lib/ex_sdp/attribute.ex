@@ -108,28 +108,10 @@ defmodule ExSDP.Attribute do
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Attribute do
-  alias ExSDP.{Attribute, Serializer}
+defimpl String.Chars, for: ExSDP.Attribute do
+  alias ExSDP.Attribute
 
-  @spec serialize(Attribute.t(), eol :: binary()) :: binary()
-  def serialize(attribute, eol) do
-    "a=" <> serialize_attribute(attribute) <> eol
-  end
+  def to_string(%Attribute{key: nil, value: value}), do: "#{value}"
 
-  defp serialize_attribute(%Attribute{key: nil, value: attribute}) when is_binary(attribute),
-    do: attribute
-
-  defp serialize_attribute(%Attribute{key: nil, value: attribute}) when is_atom(attribute),
-    do: Atom.to_string(attribute)
-
-  defp serialize_attribute(%Attribute{key: :rtpmap, value: mapping}),
-    do: Serializer.serialize(mapping)
-
-  defp serialize_attribute(%Attribute{key: :framerate, value: value}), do: "framerate:" <> value
-
-  defp serialize_attribute(%Attribute{key: key, value: value}) when is_atom(key),
-    do: to_string(key) <> ":" <> value
-
-  defp serialize_attribute(%Attribute{key: key, value: value}) when is_binary(key),
-    do: key <> ":" <> value
+  def to_string(%Attribute{key: key, value: value}), do: "#{key}:#{value}"
 end

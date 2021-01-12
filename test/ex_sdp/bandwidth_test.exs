@@ -1,9 +1,7 @@
 defmodule ExSDP.BandwidthTest do
   use ExUnit.Case
 
-  alias ExSDP.{Bandwidth, Serializer, Fixtures}
-
-  @eol Fixtures.default_eol()
+  alias ExSDP.Bandwidth
 
   describe "Bandwidth parses" do
     test "valid property" do
@@ -19,7 +17,7 @@ defmodule ExSDP.BandwidthTest do
   describe "Bandwidth serializer" do
     test "serializes valid bandwidth" do
       bandwidth = %Bandwidth{type: :CT, bandwidth: 128}
-      assert Serializer.serialize(bandwidth) == "b=CT:128#{@eol}"
+      assert "#{bandwidth}" == "CT:128"
     end
   end
 end

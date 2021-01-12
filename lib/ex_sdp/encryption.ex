@@ -46,11 +46,9 @@ defmodule ExSDP.Encryption do
   defp method_to_atom(_), do: {:error, :unsupported_method}
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Encryption do
-  def serialize(encryption, eol) do
-    method = "k=" <> Atom.to_string(encryption.method)
+defimpl String.Chars, for: ExSDP.Encryption do
+  def to_string(encryption) do
     key = if encryption.key, do: ":" <> encryption.key, else: ""
-
-    method <> key <> eol
+    "#{encryption.method}#{key}"
   end
 end
