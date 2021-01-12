@@ -1,7 +1,8 @@
 defmodule ExSDP.AttributeTest do
   use ExUnit.Case
 
-  alias ExSDP.{Attribute, Serializer}
+  alias ExSDP.{Attribute, Serializer, Fixtures}
+  @eol Fixtures.default_eol()
 
   describe "Attribute parser" do
     test "handles framerate" do
@@ -48,25 +49,26 @@ defmodule ExSDP.AttributeTest do
   describe "Attribute serializer" do
     test "serializes framerate attribute" do
       assert Serializer.serialize(%Attribute{key: :framerate, value: "value"}) ==
-               "a=framerate:value"
+               "a=framerate:value#{@eol}"
     end
 
     test "serializes flag attributes" do
-      assert Serializer.serialize(%Attribute{value: :sendrecv}) == "a=sendrecv"
+      assert Serializer.serialize(%Attribute{value: :sendrecv}) == "a=sendrecv#{@eol}"
     end
 
     test "serializes numeric attributes" do
-      assert Serializer.serialize(%Attribute{key: :maxptime, value: "100"}) == "a=maxptime:100"
+      assert Serializer.serialize(%Attribute{key: :maxptime, value: "100"}) ==
+               "a=maxptime:100#{@eol}"
     end
 
     test "serializes value attributes" do
       assert Serializer.serialize(%Attribute{key: :type, value: "some-type"}) ==
-               "a=type:some-type"
+               "a=type:some-type#{@eol}"
     end
 
     test "serializes custom attributes" do
       assert Serializer.serialize(%Attribute{key: "custom", value: "attribute"}) ==
-               "a=custom:attribute"
+               "a=custom:attribute#{@eol}"
     end
   end
 end

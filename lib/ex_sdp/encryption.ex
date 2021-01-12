@@ -47,10 +47,10 @@ defmodule ExSDP.Encryption do
 end
 
 defimpl ExSDP.Serializer, for: ExSDP.Encryption do
-  def serialize(encryption) do
+  def serialize(encryption, eol) do
     method = "k=" <> Atom.to_string(encryption.method)
     key = if encryption.key, do: ":" <> encryption.key, else: ""
 
-    method <> key
+    method <> key <> eol
   end
 end

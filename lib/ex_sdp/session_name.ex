@@ -14,5 +14,5 @@ end
 
 defimpl ExSDP.Serializer, for: ExSDP.SessionName do
   alias ExSDP.SessionName
-  def serialize(%SessionName{value: name}), do: "s=" <> name
+  def serialize(%SessionName{value: name}, eol), do: "s=" <> name <> eol
 end

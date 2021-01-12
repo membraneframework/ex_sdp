@@ -14,5 +14,5 @@ end
 
 defimpl ExSDP.Serializer, for: ExSDP.Email do
   alias ExSDP.Email
-  def serialize(%Email{value: email}), do: "e=" <> email
+  def serialize(%Email{value: email}, eol), do: "e=" <> email <> eol
 end

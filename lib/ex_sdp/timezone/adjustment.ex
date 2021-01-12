@@ -38,7 +38,7 @@ defmodule ExSDP.Timezone.Correction do
 end
 
 defimpl ExSDP.Serializer, for: ExSDP.Timezone.Correction do
-  def serialize(correction) do
+  def serialize(correction, _eol) do
     serialized_offset =
       if correction.offset == 0 do
         Integer.to_string(correction.offset)

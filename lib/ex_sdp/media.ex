@@ -203,12 +203,13 @@ end
 defimpl ExSDP.Serializer, for: ExSDP.Media do
   alias ExSDP.Serializer
 
-  def serialize(media) do
+  def serialize(media, eol) do
     serialized_header = media |> header_fields |> Enum.join(" ") |> String.trim()
+    serialized_header = serialized_header <> eol
 
-    optional = media |> other_fields() |> Enum.join("\r\n")
+    optional = media |> other_fields(eol) |> Enum.join()
 
-    String.trim("m=" <> serialized_header <> "\r\n" <> optional)
+    "m=" <> serialized_header <> optional
   end
 
   defp header_fields(media) do
@@ -220,7 +221,7 @@ defimpl ExSDP.Serializer, for: ExSDP.Media do
     ]
   end
 
-  defp other_fields(media) do
+  defp other_fields(media, eol) do
     [
       {"i", :title},
       {"c", :connection_data},
@@ -228,13 +229,13 @@ defimpl ExSDP.Serializer, for: ExSDP.Media do
       {"k", :encryption},
       {"a", :attributes}
     ]
-    |> Enum.flat_map(&add_types(&1, media))
+    |> Enum.flat_map(&add_types(&1, media, eol))
   end
 
-  defp add_types({type_string, key}, media) do
+  defp add_types({type_string, key}, media, eol) do
     Map.get(media, key)
     |> List.wrap()
-    |> Enum.map(&serialize_optional(&1, key))
+    |> Enum.map(&serialize_optional(&1, key, eol))
     |> Enum.map(&add_type(&1, type_string))
   end
 
@@ -242,8 +243,8 @@ defimpl ExSDP.Serializer, for: ExSDP.Media do
     if String.at(string, 1) == "=", do: string, else: type <> "=" <> string
   end
 
-  defp serialize_optional(value, :title), do: to_string(value)
-  defp serialize_optional(value, _key), do: Serializer.serialize(value)
+  defp serialize_optional(value, :title, eol), do: to_string(value) <> eol
+  defp serialize_optional(value, _key, eol), do: Serializer.serialize(value, eol)
 
   defp serialize_type(type) when is_binary(type), do: type
   defp serialize_type(type) when is_atom(type), do: Atom.to_string(type)

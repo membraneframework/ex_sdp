@@ -111,9 +111,9 @@ end
 defimpl ExSDP.Serializer, for: ExSDP.Attribute do
   alias ExSDP.{Attribute, Serializer}
 
-  @spec serialize(Attribute.t()) :: binary()
-  def serialize(attribute) do
-    "a=" <> serialize_attribute(attribute)
+  @spec serialize(Attribute.t(), eol :: binary()) :: binary()
+  def serialize(attribute, eol) do
+    "a=" <> serialize_attribute(attribute) <> eol
   end
 
   defp serialize_attribute(%Attribute{key: nil, value: attribute}) when is_binary(attribute),

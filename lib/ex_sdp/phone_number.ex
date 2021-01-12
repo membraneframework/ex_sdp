@@ -14,5 +14,5 @@ end
 
 defimpl ExSDP.Serializer, for: ExSDP.PhoneNumber do
   alias ExSDP.PhoneNumber
-  def serialize(%PhoneNumber{value: number}), do: "p=" <> number
+  def serialize(%PhoneNumber{value: number}, eol), do: "p=" <> number <> eol
 end

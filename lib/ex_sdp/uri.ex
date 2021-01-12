@@ -15,5 +15,5 @@ end
 defimpl ExSDP.Serializer, for: ExSDP.URI do
   alias ExSDP.URI
 
-  def serialize(%URI{value: uri}), do: "u=" <> uri
+  def serialize(%URI{value: uri}, eol), do: "u=" <> uri <> eol
 end

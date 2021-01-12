@@ -151,12 +151,12 @@ end
 defimpl ExSDP.Serializer, for: ExSDP.ConnectionData.IP4 do
   alias ExSDP.ConnectionData.IP4
 
-  def serialize(%IP4{ttl: nil, value: value}) do
+  def serialize(%IP4{ttl: nil, value: value}, _eol) do
     address = value |> :inet.ntoa() |> to_string()
     "IN IP4 " <> address
   end
 
-  def serialize(%IP4{ttl: ttl, value: value}) do
+  def serialize(%IP4{ttl: ttl, value: value}, _eol) do
     address = value |> :inet.ntoa() |> to_string()
     "IN IP4 " <> address <> "/" <> Integer.to_string(ttl)
   end
@@ -166,7 +166,7 @@ defimpl ExSDP.Serializer, for: ExSDP.ConnectionData.IP6 do
   alias ExSDP.ConnectionData
   alias ConnectionData.IP6
 
-  def serialize(%IP6{value: value}) do
+  def serialize(%IP6{value: value}, _eol) do
     address = value |> :inet.ntoa() |> to_string()
     "IN IP6 " <> address
   end
@@ -174,19 +174,19 @@ end
 
 defimpl ExSDP.Serializer, for: ExSDP.ConnectionData.FQDN do
   alias ExSDP.ConnectionData.FQDN
-  def serialize(%FQDN{value: address}), do: "IN IP4 " <> address
+  def serialize(%FQDN{value: address}, _eol), do: "IN IP4 " <> address
 end
 
 defimpl ExSDP.Serializer, for: ExSDP.ConnectionData do
   alias ExSDP.ConnectionData
   alias ExSDP.Serializer
 
-  def serialize(%ConnectionData{addresses: []}), do: ""
+  def serialize(%ConnectionData{addresses: []}, _eol), do: ""
 
-  def serialize(%ConnectionData{addresses: list}) do
+  def serialize(%ConnectionData{addresses: list}, eol) do
     serialized = list |> hd |> Serializer.serialize()
     size = list |> length |> serialize_size
-    "c=" <> serialized <> size
+    "c=" <> serialized <> size <> eol
   end
 
   defp serialize_size(0), do: ""

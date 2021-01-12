@@ -12,8 +12,11 @@ defmodule ExSDP.MediaTest do
     Media,
     Origin,
     Serializer,
-    Timing
+    Timing,
+    Fixtures
   }
+
+  @eol Fixtures.default_eol()
 
   describe "Media parser" do
     test "processes valid media description" do
@@ -217,20 +220,17 @@ defmodule ExSDP.MediaTest do
   describe "Media serializer" do
     test "serializes audio description" do
       media = %Media{type: :audio, protocol: "RTP/AVP", fmt: [0], ports: [49_170]}
-      assert Serializer.serialize(media) == "m=audio 49170 RTP/AVP 0"
+      assert Serializer.serialize(media) == "m=audio 49170 RTP/AVP 0#{@eol}"
     end
 
     test "serializes video description with an attribute" do
       # attribute = "rtpmap:99 h263-1998/90000"
 
-      attribute = %Attribute{
-        key: :rtpmap,
-        value: %Attribute.RTPMapping{
-          clock_rate: 90_000,
-          encoding: "h263-1998",
-          params: nil,
-          payload_type: 99
-        }
+      attribute = %Attribute.RTPMapping{
+        clock_rate: 90_000,
+        encoding: "h263-1998",
+        params: nil,
+        payload_type: 99
       }
 
       media = %Media{
@@ -242,7 +242,7 @@ defmodule ExSDP.MediaTest do
       }
 
       assert Serializer.serialize(media) ==
-               "m=video 51372 RTP/AVP 99\r\na=rtpmap:99 h263-1998/90000"
+               "m=video 51372 RTP/AVP 99#{@eol}a=rtpmap:99 h263-1998/90000#{@eol}"
     end
 
     test "serializes media description with title, bandwidth and encryption description" do
@@ -257,7 +257,7 @@ defmodule ExSDP.MediaTest do
       }
 
       assert Serializer.serialize(media) ==
-               "m=type 12345 some_protocol 100\r\ni=title\r\nb=CT:64\r\nk=prompt"
+               "m=type 12345 some_protocol 100#{@eol}i=title#{@eol}b=CT:64#{@eol}k=prompt#{@eol}"
     end
 
     test "serializes media with connection_data description" do
@@ -287,13 +287,13 @@ defmodule ExSDP.MediaTest do
         fmt: [99]
       }
 
-      serialized_media = "m=video 51372 RTP/AVP 99"
+      serialized_media = "m=video 51372 RTP/AVP 99#{@eol}"
 
       addresses
       |> Enum.zip(serialized_addresses)
       |> Enum.each(fn {address, serialized_address} ->
         media = %Media{media | connection_data: address}
-        expected = serialized_media <> "\r\nc=" <> serialized_address
+        expected = serialized_media <> "c=" <> serialized_address
         assert Serializer.serialize(media) == expected
       end)
     end

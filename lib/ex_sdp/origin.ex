@@ -51,7 +51,7 @@ end
 defimpl ExSDP.Serializer, for: ExSDP.Origin do
   alias ExSDP.Serializer
 
-  def serialize(origin) do
+  def serialize(origin, eol) do
     serialized_address = Serializer.serialize(origin.address)
 
     origin_serialized_fields = [
@@ -61,7 +61,7 @@ defimpl ExSDP.Serializer, for: ExSDP.Origin do
       serialized_address
     ]
 
-    "o=" <> Enum.join(origin_serialized_fields, " ")
+    "o=" <> Enum.join(origin_serialized_fields, " ") <> eol
   end
 
   defp serialize_username(nil), do: "-"

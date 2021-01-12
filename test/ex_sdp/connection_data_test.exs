@@ -1,8 +1,10 @@
 defmodule ExSDP.ConnectionDataTest do
   use ExUnit.Case
 
-  alias ExSDP.{ConnectionData, Serializer}
+  alias ExSDP.{ConnectionData, Serializer, Fixtures}
   alias ConnectionData.{IP4, IP6}
+
+  @eol Fixtures.default_eol()
 
   describe "Connection information parser when working with ip4" do
     test "parses valid connection with ttl and count params" do
@@ -111,7 +113,7 @@ defmodule ExSDP.ConnectionDataTest do
         ]
       }
 
-      assert Serializer.serialize(data) == "c=IN IP4 28.0.0.1/3"
+      assert Serializer.serialize(data) == "c=IN IP4 28.0.0.1/3#{@eol}"
     end
   end
 
@@ -132,7 +134,7 @@ defmodule ExSDP.ConnectionDataTest do
         ]
       }
 
-      assert Serializer.serialize(connection_data) == "c=IN IP6 3:48:c:4:3:7:5:0/5"
+      assert Serializer.serialize(connection_data) == "c=IN IP6 3:48:c:4:3:7:5:0/5#{@eol}"
     end
   end
 end

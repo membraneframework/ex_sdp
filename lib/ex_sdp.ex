@@ -49,7 +49,7 @@ defmodule ExSDP do
   }
 
   @type t :: %__MODULE__{
-          version: Version.t(),
+          version: non_neg_integer(),
           origin: Origin.t(),
           session_name: SessionName.t(),
           session_information: SessionInformation.t() | nil,

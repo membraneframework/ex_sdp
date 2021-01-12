@@ -16,5 +16,5 @@ end
 defimpl ExSDP.Serializer, for: ExSDP.Version do
   alias ExSDP.Version
 
-  def serialize(%Version{value: version}), do: "v=" <> Integer.to_string(version)
+  def serialize(%Version{value: version}, eol), do: "v=" <> Integer.to_string(version) <> eol
 end

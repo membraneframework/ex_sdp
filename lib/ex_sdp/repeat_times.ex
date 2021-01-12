@@ -131,7 +131,7 @@ defmodule ExSDP.RepeatTimes do
 end
 
 defimpl ExSDP.Serializer, for: ExSDP.RepeatTimes do
-  def serialize(repeat_times) do
+  def serialize(repeat_times, eol) do
     serialized_fields =
       [
         Integer.to_string(repeat_times.repeat_interval),
@@ -139,6 +139,6 @@ defimpl ExSDP.Serializer, for: ExSDP.RepeatTimes do
       ] ++
         Enum.map(repeat_times.offsets, &Integer.to_string/1)
 
-    "r=" <> Enum.join(serialized_fields, " ")
+    "r=" <> Enum.join(serialized_fields, " ") <> eol
   end
 end

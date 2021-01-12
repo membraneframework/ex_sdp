@@ -36,8 +36,8 @@ end
 defimpl ExSDP.Serializer, for: ExSDP.Timezone do
   alias ExSDP.{Serializer, Timezone}
 
-  def serialize(%Timezone{corrections: []}), do: ""
+  def serialize(%Timezone{corrections: []}, _eol), do: ""
 
-  def serialize(%Timezone{corrections: corrections}),
-    do: "z=" <> Enum.map_join(corrections, " ", &Serializer.serialize/1)
+  def serialize(%Timezone{corrections: corrections}, eol),
+    do: "z=" <> Enum.map_join(corrections, " ", &Serializer.serialize/1) <> eol
 end

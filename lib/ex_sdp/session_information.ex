@@ -13,6 +13,6 @@ defmodule ExSDP.SessionInformation do
 
   defimpl ExSDP.Serializer, for: ExSDP.SessionInformation do
     alias ExSDP.SessionInformation
-    def serialize(%SessionInformation{value: information}), do: "i=" <> information
+    def serialize(%SessionInformation{value: information}, eol), do: "i=" <> information <> eol
   end
 end

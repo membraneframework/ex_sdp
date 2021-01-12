@@ -2,7 +2,9 @@ defmodule ExSDP.Attribute.RTPMappingTest do
   use ExUnit.Case
 
   alias ExSDP.Attribute.RTPMapping
-  alias ExSDP.Serializer
+  alias ExSDP.{Serializer, Fixtures}
+
+  @eol Fixtures.default_eol()
 
   describe "RTP Mapping parser" do
     test "parses valid rtp mapping for video media" do
@@ -50,7 +52,7 @@ defmodule ExSDP.Attribute.RTPMappingTest do
         clock_rate: 90_000
       }
 
-      assert Serializer.serialize(mapping) == "rtpmap:101 h263-1998/90000"
+      assert Serializer.serialize(mapping) == "rtpmap:101 h263-1998/90000#{@eol}"
     end
 
     test "serializes mapping with parameter" do
@@ -61,7 +63,7 @@ defmodule ExSDP.Attribute.RTPMappingTest do
         params: 2
       }
 
-      assert Serializer.serialize(mapping) == "rtpmap:98 L16/11025/2"
+      assert Serializer.serialize(mapping) == "rtpmap:98 L16/11025/2#{@eol}"
     end
   end
 end

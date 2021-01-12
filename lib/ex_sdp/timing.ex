@@ -34,6 +34,8 @@ defmodule ExSDP.Timing do
 end
 
 defimpl ExSDP.Serializer, for: ExSDP.Timing do
-  def serialize(timing),
-    do: "t=" <> Integer.to_string(timing.start_time) <> " " <> Integer.to_string(timing.stop_time)
+  def serialize(timing, eol),
+    do:
+      "t=" <>
+        Integer.to_string(timing.start_time) <> " " <> Integer.to_string(timing.stop_time) <> eol
 end

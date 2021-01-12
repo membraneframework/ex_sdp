@@ -5,44 +5,40 @@ defprotocol ExSDP.Serializer do
   @doc """
   Serializes struct to SDP string
   """
-  @spec serialize(t()) :: binary()
-  def serialize(struct)
+  @spec serialize(t(), eol :: binary()) :: binary()
+  def serialize(struct, eol \\ "\r\n")
 end
 
 defimpl ExSDP.Serializer, for: ExSDP do
-  @preferred_eol "\r\n"
-
   alias ExSDP.{Serializer, Timezone}
 
-  def serialize(session) do
-    [
-      :version,
-      :origin,
-      :session_name,
-      :session_information,
-      :uri,
-      :email,
-      :phone_number,
-      :connection_data,
-      :bandwidth,
-      :timing,
-      :time_repeats,
-      :time_zones_adjustments,
-      :encryption,
-      :attributes,
-      :media
-    ]
-    |> Enum.map(&Map.get(session, &1))
-    |> Enum.reject(&(&1 == [] or &1 == nil))
-    |> Enum.map(&serialize_field/1)
-    |> Enum.map(&(&1 <> @preferred_eol))
-    |> Enum.join()
+  def default_eol(), do: @default_eol
+
+  def serialize(session, eol) do
+    """
+    v=#{Integer.to_string(session.version)}#{eol}\
+    #{Serializer.serialize(session.origin, eol)}\
+    #{Serializer.serialize(session.session_name, eol)}\
+    #{maybe_serialize(Map.get(session, :session_information), eol)}\
+    #{maybe_serialize(Map.get(session, :uri), eol)}\
+    #{maybe_serialize(Map.get(session, :email), eol)}\
+    #{maybe_serialize(Map.get(session, :phone_number), eol)}\
+    #{maybe_serialize(Map.get(session, :connection_data), eol)}\
+    #{maybe_serialize(Map.get(session, :bandwidth), eol)}\
+    #{maybe_serialize(Map.get(session, :timing), eol)}\
+    #{maybe_serialize(Map.get(session, :time_repeats), eol)}\
+    #{maybe_serialize(Map.get(session, :time_zones_adjustments), eol)}\
+    #{maybe_serialize(Map.get(session, :encryption), eol)}\
+    #{maybe_serialize(Map.get(session, :attributes), eol)}\
+    #{maybe_serialize(Map.get(session, :media), eol)}\
+    """
   end
 
-  defp serialize_field([%Timezone{} | _rest] = adjustments), do: Serializer.serialize(adjustments)
+  def maybe_serialize(nil, _eol), do: ""
+  def maybe_serialize([], _eol), do: ""
 
-  defp serialize_field(list) when is_list(list),
-    do: Enum.map_join(list, @preferred_eol, &Serializer.serialize/1)
+  def maybe_serialize(sdp, eol) when is_list(sdp),
+    do: Enum.map_join(sdp, fn x -> ExSDP.Serializer.serialize(x, eol) end)
 
-  defp serialize_field(value), do: Serializer.serialize(value)
+  def maybe_serialize(sdp, eol), do: ExSDP.Serializer.serialize(sdp, eol)
 end
