@@ -43,7 +43,7 @@ defmodule ExSDPTest do
          |> String.replace("\n", "\r\n")
 
   @expected_output %ExSDP{
-    attributes: [%Attribute{key: "key", value: "value"}, %Attribute{value: :recvonly}],
+    attributes: [{:key, "value"}, :recvonly],
     bandwidth: [
       %Bandwidth{bandwidth: 256, type: :CT}
     ],
@@ -80,14 +80,11 @@ defmodule ExSDPTest do
       },
       %Media{
         attributes: [
-          %Attribute{
-            key: :rtpmap,
-            value: %Attribute.RTPMapping{
-              clock_rate: 90_000,
-              encoding: "h263-1998",
-              params: nil,
-              payload_type: 99
-            }
+          %Attribute.RTPMapping{
+            clock_rate: 90_000,
+            encoding: "h263-1998",
+            params: nil,
+            payload_type: 99
           }
         ],
         bandwidth: [

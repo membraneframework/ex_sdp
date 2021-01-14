@@ -53,32 +53,23 @@ defmodule ExSDP.MediaTest do
         |> String.split("\n")
 
       parsed_attributes = [
-        %Attribute{
-          key: :rtpmap,
-          value: %Attribute.RTPMapping{
-            clock_rate: 8000,
-            encoding: "L8",
-            params: 1,
-            payload_type: 96
-          }
+        %Attribute.RTPMapping{
+          clock_rate: 8000,
+          encoding: "L8",
+          params: 1,
+          payload_type: 96
         },
-        %Attribute{
-          key: :rtpmap,
-          value: %Attribute.RTPMapping{
-            clock_rate: 8000,
-            encoding: "L16",
-            params: 1,
-            payload_type: 97
-          }
+        %Attribute.RTPMapping{
+          clock_rate: 8000,
+          encoding: "L16",
+          params: 1,
+          payload_type: 97
         },
-        %Attribute{
-          key: :rtpmap,
-          value: %Attribute.RTPMapping{
-            clock_rate: 11_025,
-            encoding: "L16",
-            params: 2,
-            payload_type: 98
-          }
+        %Attribute.RTPMapping{
+          clock_rate: 11_025,
+          encoding: "L16",
+          params: 2,
+          payload_type: 98
         }
       ]
 

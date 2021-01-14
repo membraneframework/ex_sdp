@@ -40,7 +40,7 @@ defmodule ExSDP.RFCTest do
                |> ExSDP.parse()
 
       assert session_spec == %ExSDP{
-               attributes: [%Attribute{value: :recvonly}],
+               attributes: [:recvonly],
                connection_data: %ConnectionData{
                  addresses: [
                    %IP4{
@@ -69,13 +69,10 @@ defmodule ExSDP.RFCTest do
                  },
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 90_000,
-                         encoding: "h263-1998",
-                         payload_type: 99
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 90_000,
+                       encoding: "h263-1998",
+                       payload_type: 99
                      }
                    ],
                    connection_data: %ConnectionData{
@@ -142,32 +139,23 @@ defmodule ExSDP.RFCTest do
                media: [
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 8000,
-                         encoding: "PCMU",
-                         params: 1,
-                         payload_type: 0
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMU",
+                       params: 1,
+                       payload_type: 0
                      },
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 8000,
-                         encoding: "PCMA",
-                         params: 1,
-                         payload_type: 8
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMA",
+                       params: 1,
+                       payload_type: 8
                      },
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 8000,
-                         encoding: "iLBC",
-                         params: 1,
-                         payload_type: 97
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "iLBC",
+                       params: 1,
+                       payload_type: 97
                      }
                    ],
                    bandwidth: [],
@@ -183,21 +171,15 @@ defmodule ExSDP.RFCTest do
                  },
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 90_000,
-                         encoding: "H261",
-                         payload_type: 31
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 90_000,
+                       encoding: "H261",
+                       payload_type: 31
                      },
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 90_000,
-                         encoding: "MPV",
-                         payload_type: 32
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 90_000,
+                       encoding: "MPV",
+                       payload_type: 32
                      }
                    ],
                    bandwidth: [],
@@ -257,14 +239,11 @@ defmodule ExSDP.RFCTest do
                media: [
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 8000,
-                         encoding: "PCMU",
-                         params: 1,
-                         payload_type: 0
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMU",
+                       params: 1,
+                       payload_type: 0
                      }
                    ],
                    bandwidth: [],
@@ -280,14 +259,11 @@ defmodule ExSDP.RFCTest do
                  },
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 90_000,
-                         encoding: "MPV",
-                         payload_type: 32,
-                         params: nil
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 90_000,
+                       encoding: "MPV",
+                       payload_type: 32,
+                       params: nil
                      }
                    ],
                    bandwidth: [],
@@ -342,7 +318,7 @@ defmodule ExSDP.RFCTest do
 
       assert expected ==
                to_string(%ExSDP{
-                 attributes: [%Attribute{value: :recvonly}],
+                 attributes: [:recvonly],
                  connection_data: %ConnectionData{
                    addresses: [
                      %IP4{

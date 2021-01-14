@@ -12,106 +12,53 @@ defmodule ExSDP.Attribute do
                :keywds,
                :orient,
                :lang,
-               :rtpmap,
                :sdplang,
                :tool,
-               :type
+               :type,
+               :framerate,
+               :maxptime,
+               :ptime,
+               :quality
              ]
 
-  @list_type numeric_attributes :: [:maxptime, :ptime, :quality]
-
-  @type key :: binary() | value_attributes() | numeric_attributes() | :framerate | :rtpmap
+  @type key :: binary() | value_attributes()
   @type value :: binary() | flag_attributes()
-
-  @enforce_keys [:value]
-  @optional_keys [:key]
-
-  defstruct @enforce_keys ++ @optional_keys
-
-  @type t :: %__MODULE__{key: key(), value: value()}
-
-  @flag_values @flag_attributes |> Enum.map(&to_string/1)
-  @directly_assignable_values @value_attributes |> Enum.map(&to_string/1)
-  @numeric_values @numeric_attributes |> Enum.map(&to_string/1)
-
-  def new(key, value) do
-    %__MODULE__{key: key, value: value}
-  end
-
-  def new(value) do
-    %__MODULE__{value: value}
-  end
+  @type attribute :: __MODULE__.RTPMapping.t() | {key(), value()} | value()
 
   @doc """
-  Parses SDP Attribute.
+  Parses SDP Attribute line.
 
-  `t:value_attributes/0` and `t:numeric_attributes/0` formatted as `name:value`
-  are be parsed as `{name, value}` other values are treated as
-  `t:flag_attributes/0`. Known attribute names are converted into atoms.
+  `line` is a string in form of `a=attribute` or `a=attribute:value`.
+  `opts` is a keyword list that can contain some information for parsers.
+
+  Unknown attributes keys are returned as strings, known ones as atoms.
   """
-  @spec parse(binary()) :: {:ok, t} | {:error, atom()}
-  def parse(line) do
-    line
-    |> String.split(":", parts: 2)
-    |> handle_known_attribute()
+  @spec parse(binary(), opts :: []) :: {:ok, attribute()} | {:error, atom()}
+  def parse(line, opts \\ []) do
+    [attribute | value] = String.split(line, ":", parts: 2)
+    attribute = String.to_atom(attribute)
+    do_parse(attribute, List.first(value), opts)
   end
 
-  @spec parse_media_attribute(t(), atom() | binary()) :: {:error, :invalid_attribute} | {:ok, t()}
-  def parse_media_attribute(%__MODULE__{key: :rtpmap, value: value}, media) do
-    with {:ok, %RTPMapping{} = mapping} <- RTPMapping.parse(value, media) do
-      {:ok, %__MODULE__{key: :rtpmap, value: mapping}}
+  defp do_parse(flag, nil, _opts) when flag in @flag_attributes, do: {:ok, flag}
+
+  defp do_parse(flag, nil, _opts), do: {:ok, "#{flag}"}
+
+  defp do_parse(:rtpmap, value, opts), do: RTPMapping.parse(value, opts)
+
+  defp do_parse(:framerate, value, _opts) do
+    case String.split(value, "/") do
+      [framerate] -> {:ok, {:framerate, String.to_float(framerate)}}
+      [left, right] -> {:ok, {:framerate, {String.to_integer(left), String.to_integer(right)}}}
     end
   end
 
-  @spec parse_media_attribute(t(), atom() | binary()) :: {:error, :invalid_attribute} | {:ok, t()}
-  def parse_media_attribute(other, _), do: {:ok, other}
-
-  defp handle_known_attribute(["framerate", framerate]) do
-    with {:ok, framerate} <- parse_framerate(framerate) do
-      {:ok, %__MODULE__{key: :framerate, value: framerate}}
-    end
-  end
-
-  defp handle_known_attribute([flag]) when is_binary(flag) and flag in @flag_values do
-    {:ok, %__MODULE__{value: String.to_atom(flag)}}
-  end
-
-  defp handle_known_attribute([prop, value])
-       when is_binary(prop) and prop in @directly_assignable_values do
-    {:ok, %__MODULE__{key: String.to_atom(prop), value: value}}
-  end
-
-  defp handle_known_attribute([prop, value]) when is_binary(prop) and prop in @numeric_values do
+  defp do_parse(attribute, value, _opts) when attribute in [:maxptime, :ptime, :quality] do
     case Integer.parse(value) do
-      {number, ""} -> {:ok, %__MODULE__{key: String.to_atom(prop), value: number}}
+      {number, ""} -> {:ok, {attribute, number}}
       _ -> {:error, :invalid_attribute}
     end
   end
 
-  defp handle_known_attribute([name, value]), do: {:ok, %__MODULE__{key: name, value: value}}
-  defp handle_known_attribute([other]), do: {:ok, %__MODULE__{value: other}}
-
-  defp parse_framerate(framerate) do
-    case Float.parse(framerate) do
-      {float_framerate, ""} -> {:ok, float_framerate}
-      _ -> parse_compound_framerate(framerate)
-    end
-  end
-
-  defp parse_compound_framerate(framerate) do
-    with {left, "/" <> right} <- Integer.parse(framerate),
-         {right, ""} <- Integer.parse(right) do
-      {:ok, {left, right}}
-    else
-      _ -> {:error, :invalid_framerate}
-    end
-  end
-end
-
-defimpl String.Chars, for: ExSDP.Attribute do
-  alias ExSDP.Attribute
-
-  def to_string(%Attribute{key: nil, value: value}), do: "#{value}"
-
-  def to_string(%Attribute{key: key, value: value}), do: "#{key}:#{value}"
+  defp do_parse(attribute, value, _opts), do: {:ok, {attribute, value}}
 end

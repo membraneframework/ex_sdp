@@ -13,9 +13,8 @@ defmodule ExSDP.Attribute.RTPMapping do
           params: non_neg_integer() | nil
         }
 
-  @spec parse(binary(), atom | binary()) ::
-          {:ok, t()} | {:error, :invalid_attribute | :invalid_param}
-  def parse(mapping, type) do
+  @spec parse(binary(), opts :: []) :: {:ok, t()} | {:error, :invalid_attribute | :invalid_param}
+  def parse(mapping, opts) do
     with [payload_type, encoding | _] <- String.split(mapping, " "),
          [encoding_name, clock_rate | params] <- String.split(encoding, "/"),
          {payload_type, ""} <- Integer.parse(payload_type),
@@ -24,7 +23,7 @@ defmodule ExSDP.Attribute.RTPMapping do
         payload_type: payload_type,
         encoding: encoding_name,
         clock_rate: clock_rate,
-        params: parse_params(type, params)
+        params: parse_params(params, opts)
       }
 
       {:ok, mapping}
@@ -33,16 +32,12 @@ defmodule ExSDP.Attribute.RTPMapping do
     end
   end
 
-  defp parse_params(:audio, [raw_channels]) do
-    case Integer.parse(raw_channels) do
-      {channels, ""} -> channels
-      _ -> {:error, :invalid_param}
-    end
-  end
+  defp parse_params([channels], media_type: :audio), do: String.to_integer(channels)
+  defp parse_params([], media_type: :audio), do: 1
+  defp parse_params([], media_type: _media_type), do: nil
 
-  defp parse_params(:audio, []), do: 1
-  defp parse_params(_, [params]), do: params
-  defp parse_params(_, []), do: nil
+  defp parse_params(_params, media_type: _media_type),
+    do: raise("Only audio attributes can specify parameters")
 end
 
 defimpl String.Chars, for: ExSDP.Attribute.RTPMapping do

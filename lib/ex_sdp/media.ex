@@ -73,7 +73,7 @@ defmodule ExSDP.Media do
   @spec get_attribute(media :: t(), key :: String.t()) :: Attribute.t()
   def get_attribute(media, key) do
     media.attributes
-    |> Enum.find(fn %ExSDP.Attribute{key: k} -> k == key end)
+    |> Enum.find(fn {k, _v} -> k == key end)
   end
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
@@ -131,8 +131,7 @@ defmodule ExSDP.Media do
   end
 
   def parse_optional(["a=" <> attribute | rest], %__MODULE__{attributes: attrs} = media) do
-    with {:ok, attribute} <- Attribute.parse(attribute),
-         {:ok, attribute} <- Attribute.parse_media_attribute(attribute, media.type) do
+    with {:ok, attribute} <- Attribute.parse(attribute, media_type: media.type) do
       media = %__MODULE__{media | attributes: [attribute | attrs]}
       parse_optional(rest, media)
     end
