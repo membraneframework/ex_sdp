@@ -63,7 +63,7 @@ defmodule ExSDP do
   defdelegate parse(text), to: Parser
   defdelegate parse!(text), to: Parser
 
-  @spec new(version :: Version.t(), origin :: Origin.t(), session_name :: SessionName.t()) :: t()
+  @spec new(version :: non_neg_integer(), origin :: binary(), session_name :: binary()) :: t()
   def new(version, origin, session_name) do
     %__MODULE__{
       version: version,

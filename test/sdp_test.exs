@@ -43,7 +43,7 @@ defmodule ExSDPTest do
          |> String.replace("\n", "\r\n")
 
   @expected_output %ExSDP{
-    attributes: [{:key, "value"}, :recvonly],
+    attributes: [{"key", "value"}, :recvonly],
     bandwidth: [
       %Bandwidth{bandwidth: 256, type: :CT}
     ],

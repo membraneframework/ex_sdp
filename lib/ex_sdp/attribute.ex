@@ -23,7 +23,7 @@ defmodule ExSDP.Attribute do
 
   @type key :: binary() | value_attributes()
   @type value :: binary() | flag_attributes()
-  @type attribute :: __MODULE__.RTPMapping.t() | {key(), value()} | value()
+  @type t :: __MODULE__.RTPMapping.t() | {key(), value()} | value()
 
   @doc """
   Parses SDP Attribute line.
@@ -33,7 +33,7 @@ defmodule ExSDP.Attribute do
 
   Unknown attributes keys are returned as strings, known ones as atoms.
   """
-  @spec parse(binary(), opts :: []) :: {:ok, attribute()} | {:error, atom()}
+  @spec parse(binary(), opts :: []) :: {:ok, t()} | {:error, atom()}
   def parse(line, opts \\ []) do
     [attribute | value] = String.split(line, ":", parts: 2)
     attribute = String.to_atom(attribute)
@@ -60,5 +60,8 @@ defmodule ExSDP.Attribute do
     end
   end
 
-  defp do_parse(attribute, value, _opts), do: {:ok, {attribute, value}}
+  defp do_parse(attribute, value, _opts) when attribute in @value_attributes,
+    do: {:ok, {attribute, value}}
+
+  defp do_parse(attribute, value, _opts), do: {:ok, {"#{attribute}", value}}
 end

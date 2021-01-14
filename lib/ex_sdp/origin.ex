@@ -12,11 +12,12 @@ defmodule ExSDP.Origin do
   alias ExSDP.ConnectionData
 
   @enforce_keys [
+    :username,
     :session_id,
     :session_version,
     :address
   ]
-  defstruct @enforce_keys ++ [:username]
+  defstruct @enforce_keys
 
   @type t :: %__MODULE__{
           username: binary(),

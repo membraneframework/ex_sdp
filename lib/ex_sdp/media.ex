@@ -73,7 +73,11 @@ defmodule ExSDP.Media do
   @spec get_attribute(media :: t(), key :: String.t()) :: Attribute.t()
   def get_attribute(media, key) do
     media.attributes
-    |> Enum.find(fn {k, _v} -> k == key end)
+    |> Enum.find(fn
+      {k, _v} -> k == key
+      # for flag attributes
+      k -> k == key
+    end)
   end
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
