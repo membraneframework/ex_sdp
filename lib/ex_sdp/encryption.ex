@@ -8,6 +8,8 @@ defmodule ExSDP.Encryption do
 
   For more details please see [RFC4566 Section 5.12](https://tools.ietf.org/html/rfc4566#section-5.12)
   """
+  use Bunch.Access
+
   @enforce_keys [:method]
   defstruct @enforce_keys ++ [:key]
 

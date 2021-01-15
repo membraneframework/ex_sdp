@@ -3,6 +3,8 @@ defmodule ExSDP.Timezone do
   This module groups multiple SDP Timezone Correction used
   for translating base time for rebroadcasts.
   """
+  use Bunch.Access
+
   alias __MODULE__.Correction
 
   defstruct corrections: []

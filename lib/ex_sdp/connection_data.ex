@@ -17,6 +17,7 @@ defmodule ExSDP.ConnectionData do
   For more details please see [RFC4566 Section 5.7](https://tools.ietf.org/html/rfc4566#section-5.7)
   """
   use Bunch
+  use Bunch.Access
 
   @ipv4_max_value 255
   @ipv6_max_value 65_535

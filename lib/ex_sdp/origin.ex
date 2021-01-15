@@ -8,26 +8,50 @@ defmodule ExSDP.Origin do
 
   For more details please see [RFC4566 Section 5.2](https://tools.ietf.org/html/rfc4566#section-5.2)
   """
+  use Bunch.Access
 
   alias ExSDP.ConnectionData
 
   @enforce_keys [
-    :username,
     :session_id,
     :session_version,
     :address
   ]
-  defstruct @enforce_keys
+  defstruct [username: "-"] ++ @enforce_keys
 
   @type t :: %__MODULE__{
           username: binary(),
           session_id: binary(),
           session_version: binary(),
-          # FIXME this cannot be ConnectionData.sdp_address() as it has no ttl field for IPv4
+          # FIXME this cannot be ConnectionData.sdp_address() as it can't have ttl field
           address: ConnectionData.sdp_address()
         }
 
   @type reason :: :invalid_address | ConnectionData.reason()
+
+  @doc """
+  Return new `%__MODULE{}` struct. `session_id` and `session_version` are strings representing
+  random 64 bit numbers.
+  """
+  @spec new_random(
+          username :: binary(),
+          session_id :: binary(),
+          session_version :: binary(),
+          address :: ConnectionData.sdp_address()
+        ) :: t()
+  def new_random(
+        username \\ "-",
+        session_id \\ generate_random(),
+        session_version \\ generate_random(),
+        address
+      ) do
+    %__MODULE__{
+      username: username,
+      session_id: session_id,
+      session_version: session_version,
+      address: address
+    }
+  end
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason}
   def parse(origin) do
@@ -48,6 +72,8 @@ defmodule ExSDP.Origin do
       _ -> {:error, :invalid_origin}
     end
   end
+
+  defp generate_random(), do: :crypto.strong_rand_bytes(8) |> :binary.decode_unsigned()
 end
 
 defimpl String.Chars, for: ExSDP.Origin do

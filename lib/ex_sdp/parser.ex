@@ -2,6 +2,8 @@ defmodule ExSDP.Parser do
   @moduledoc """
   This module is responsible for parsing SDP multimedia session.
   """
+  use Bunch.Access
+
   require Logger
 
   alias ExSDP

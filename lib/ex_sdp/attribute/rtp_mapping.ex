@@ -2,6 +2,7 @@ defmodule ExSDP.Attribute.RTPMapping do
   @moduledoc """
   This module represents RTP mapping.
   """
+  use Bunch.Access
 
   @enforce_keys [:payload_type, :encoding, :clock_rate]
   defstruct @enforce_keys ++ [:params]

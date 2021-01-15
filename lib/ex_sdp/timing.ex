@@ -6,6 +6,8 @@ defmodule ExSDP.Timing do
   For more details please see [RFC4566 Section 5.9](https://tools.ietf.org/html/rfc4566#section-5.9)
   """
   use Bunch
+  use Bunch.Access
+
   @enforce_keys [:start_time, :stop_time]
   defstruct @enforce_keys
 

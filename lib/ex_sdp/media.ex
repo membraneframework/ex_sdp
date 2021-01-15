@@ -5,6 +5,8 @@ defmodule ExSDP.Media do
   For more details please see [RFC4566 Section 5.14](https://tools.ietf.org/html/rfc4566#section-5.14)
   """
   use Bunch
+  use Bunch.Access
+
   @enforce_keys [:type, :ports, :protocol, :fmt]
   defstruct @enforce_keys ++
               [
@@ -65,15 +67,14 @@ defmodule ExSDP.Media do
   end
 
   @spec add_attribute(media :: t(), attribute :: Attribute.t()) :: t()
-  def add_attribute(media, attribute) do
-    attributes = media.attributes ++ [attribute]
-    Bunch.Struct.put_in(media, :attributes, attributes)
-  end
+  def add_attribute(media, attribute), do: Map.update!(media, :attributes, &(&1 ++ [attribute]))
 
-  @spec get_attribute(media :: t(), key :: String.t()) :: Attribute.t()
+  @spec get_attribute(media :: t(), key :: ExSDP.Attribute.RTPMapping.t() | Attribute.key()) ::
+          Attribute.t()
   def get_attribute(media, key) do
     media.attributes
     |> Enum.find(fn
+      %ExSDP.Attribute.RTPMapping{} -> true
       {k, _v} -> k == key
       # for flag attributes
       k -> k == key
@@ -205,17 +206,17 @@ end
 
 defimpl String.Chars, for: ExSDP.Media do
   def to_string(media) do
-    import ExSDP.Sigil
+    import ExSDP.Serializer
 
     serialized_header = media |> header_fields |> String.trim()
 
     ~n"""
     #{serialized_header}
-    #{ExSDP.Serializer.maybe_serialize("i", Map.get(media, :title))}
-    #{ExSDP.Serializer.maybe_serialize("c", Map.get(media, :connection_data))}
-    #{ExSDP.Serializer.maybe_serialize("b", Map.get(media, :bandwidth))}
-    #{ExSDP.Serializer.maybe_serialize("k", Map.get(media, :encryption))}
-    #{ExSDP.Serializer.maybe_serialize("a", Map.get(media, :attributes))}
+    #{ExSDP.Serializer.maybe_serialize("i", media.title)}
+    #{ExSDP.Serializer.maybe_serialize("c", media.connection_data)}
+    #{ExSDP.Serializer.maybe_serialize("b", media.bandwidth)}
+    #{ExSDP.Serializer.maybe_serialize("k", media.encryption)}
+    #{ExSDP.Serializer.maybe_serialize("a", media.attributes)}
     """
     # to_string has to return string without `\r\n` at the end
     |> String.trim()

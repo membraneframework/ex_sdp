@@ -5,11 +5,9 @@ defmodule ExSDP do
   Its fields directly correspond to those defined in
   [RFC4566](https://tools.ietf.org/html/rfc4566#section-5)
   """
-  @enforce_keys [
-    :version,
-    :origin,
-    :session_name
-  ]
+  use Bunch.Access
+
+  @enforce_keys [:origin]
 
   @optional_keys [
     :email,
@@ -26,7 +24,10 @@ defmodule ExSDP do
     time_repeats: []
   ]
 
-  defstruct @enforce_keys ++ @optional_keys
+  defstruct [
+              version: 0,
+              session_name: " "
+            ] ++ @enforce_keys ++ @optional_keys
 
   alias ExSDP.{
     Attribute,
@@ -64,7 +65,7 @@ defmodule ExSDP do
   defdelegate parse!(text), to: Parser
 
   @spec new(version :: non_neg_integer(), origin :: binary(), session_name :: binary()) :: t()
-  def new(version, origin, session_name) do
+  def new(version \\ 0, origin, session_name \\ " ") do
     %__MODULE__{
       version: version,
       origin: origin,
@@ -73,44 +74,37 @@ defmodule ExSDP do
   end
 
   @spec set_timing(sdp :: t(), timing :: Timing.t()) :: t()
-  def set_timing(sdp, timing) do
-    Bunch.Struct.put_in(sdp, :timing, timing)
-  end
+  def set_timing(sdp, timing), do: Bunch.Struct.put_in(sdp, :timing, timing)
 
   @spec add_media(sdp :: t(), media :: Media.t() | [Media.t()]) :: t()
-  def add_media(sdp, media) do
-    media = sdp.media ++ Bunch.listify(media)
-    Bunch.Struct.put_in(sdp, :media, media)
-  end
+  def add_media(sdp, media), do: Map.update!(sdp, :media, &(&1 ++ Bunch.listify(media)))
 
   @spec add_attribute(sdp :: t(), attribute :: Attribute.t()) :: t()
-  def add_attribute(sdp, attribute) do
-    attributes = sdp.attributes ++ [attribute]
-    Bunch.Struct.put_in(sdp, :attributes, attributes)
-  end
+  def add_attribute(sdp, attribute),
+    do: Map.update!(sdp, :attributes, &(&1 ++ Bunch.listify(attribute)))
 end
 
 defimpl String.Chars, for: ExSDP do
   def to_string(session) do
-    import ExSDP.Sigil
+    import ExSDP.Serializer
     alias ExSDP.Serializer
 
     ~n"""
     v=#{session.version}
     o=#{session.origin}
     s=#{session.session_name}
-    #{Serializer.maybe_serialize("i", Map.get(session, :session_information))}
-    #{Serializer.maybe_serialize("u", Map.get(session, :uri))}
-    #{Serializer.maybe_serialize("e", Map.get(session, :email))}
-    #{Serializer.maybe_serialize("p", Map.get(session, :phone_number))}
-    #{Serializer.maybe_serialize("c", Map.get(session, :connection_data))}
-    #{Serializer.maybe_serialize("b", Map.get(session, :bandwidth))}
-    #{Serializer.maybe_serialize("t", Map.get(session, :timing))}
-    #{Serializer.maybe_serialize("r", Map.get(session, :time_repeats))}
-    #{Serializer.maybe_serialize("z", Map.get(session, :time_zones_adjustments))}
-    #{Serializer.maybe_serialize("k", Map.get(session, :encryption))}
-    #{Serializer.maybe_serialize("a", Map.get(session, :attributes))}
-    #{Serializer.maybe_serialize("m", Map.get(session, :media))}
+    #{Serializer.maybe_serialize("i", session.session_information)}
+    #{Serializer.maybe_serialize("u", session.uri)}
+    #{Serializer.maybe_serialize("e", session.email)}
+    #{Serializer.maybe_serialize("p", session.phone_number)}
+    #{Serializer.maybe_serialize("c", session.connection_data)}
+    #{Serializer.maybe_serialize("b", session.bandwidth)}
+    #{Serializer.maybe_serialize("t", session.timing)}
+    #{Serializer.maybe_serialize("r", session.time_repeats)}
+    #{Serializer.maybe_serialize("z", session.time_zones_adjustments)}
+    #{Serializer.maybe_serialize("k", session.encryption)}
+    #{Serializer.maybe_serialize("a", session.attributes)}
+    #{Serializer.maybe_serialize("m", session.media)}
     """
   end
 end
