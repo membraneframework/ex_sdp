@@ -74,7 +74,7 @@ defmodule ExSDP.Media do
   def get_attribute(media, key) do
     media.attributes
     |> Enum.find(fn
-      %ExSDP.Attribute.RTPMapping{} -> true
+      %module{} -> module == key
       {k, _v} -> k == key
       # for flag attributes
       k -> k == key
@@ -206,7 +206,7 @@ end
 
 defimpl String.Chars, for: ExSDP.Media do
   def to_string(media) do
-    import ExSDP.Serializer
+    import ExSDP.Sigil
 
     serialized_header = media |> header_fields |> String.trim()
 

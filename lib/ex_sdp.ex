@@ -26,7 +26,7 @@ defmodule ExSDP do
 
   defstruct [
               version: 0,
-              session_name: " "
+              session_name: "-"
             ] ++ @enforce_keys ++ @optional_keys
 
   alias ExSDP.{
@@ -64,17 +64,14 @@ defmodule ExSDP do
   defdelegate parse(text), to: Parser
   defdelegate parse!(text), to: Parser
 
-  @spec new(version :: non_neg_integer(), origin :: binary(), session_name :: binary()) :: t()
-  def new(version \\ 0, origin, session_name \\ " ") do
+  @spec new(origin :: binary(), version: non_neg_integer(), session_name: binary()) :: t()
+  def new(origin, opts) do
     %__MODULE__{
-      version: version,
+      version: Keyword.get(opts, :version, 0),
       origin: origin,
-      session_name: session_name
+      session_name: Keyword.get(opts, :session_name, "-")
     }
   end
-
-  @spec set_timing(sdp :: t(), timing :: Timing.t()) :: t()
-  def set_timing(sdp, timing), do: Bunch.Struct.put_in(sdp, :timing, timing)
 
   @spec add_media(sdp :: t(), media :: Media.t() | [Media.t()]) :: t()
   def add_media(sdp, media), do: Map.update!(sdp, :media, &(&1 ++ Bunch.listify(media)))
@@ -86,7 +83,7 @@ end
 
 defimpl String.Chars, for: ExSDP do
   def to_string(session) do
-    import ExSDP.Serializer
+    import ExSDP.Sigil
     alias ExSDP.Serializer
 
     ~n"""

@@ -2,8 +2,6 @@ defmodule ExSDP.MediaTest do
   use ExUnit.Case
   use Bunch
 
-  alias ExSDP
-
   alias ExSDP.{
     Attribute,
     Bandwidth,
@@ -13,6 +11,8 @@ defmodule ExSDP.MediaTest do
     Origin,
     Timing
   }
+
+  alias ExSDP.Attribute.RTPMapping
 
   describe "Media parser" do
     test "processes valid media description" do
@@ -281,6 +281,24 @@ defmodule ExSDP.MediaTest do
         expected = "#{serialized_media}\r\nc=#{serialized_address}"
         assert "#{media}" == expected
       end)
+    end
+  end
+
+  describe "Utils functions" do
+    test "gets attribute by module" do
+      rtpmap = %RTPMapping{
+        clock_rate: 8000,
+        encoding: "L8",
+        params: 1,
+        payload_type: 96
+      }
+
+      media =
+        Media.new(:video, [51_372], "RTP/AVP", [99])
+        |> Media.add_attribute(rtpmap)
+
+      attr = Media.get_attribute(media, RTPMapping)
+      assert attr == rtpmap
     end
   end
 end

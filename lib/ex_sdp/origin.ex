@@ -30,26 +30,23 @@ defmodule ExSDP.Origin do
   @type reason :: :invalid_address | ConnectionData.reason()
 
   @doc """
-  Return new `%__MODULE{}` struct. `session_id` and `session_version` are strings representing
-  random 64 bit numbers.
+  Returns new `%__MODULE{}` struct. By default:
+  * `username` is `-`
+  * `session_id` and `session_version` are generated as strings representing random 64 bit numbers
+  * `address` is `ExSDP.ConnectionData.IP4` with `127.0.0.1` address
   """
-  @spec new_random(
-          username :: binary(),
-          session_id :: binary(),
-          session_version :: binary(),
-          address :: ConnectionData.sdp_address()
+  @spec new(
+          username: binary(),
+          session_id: binary(),
+          session_version: binary(),
+          address: ConnectionData.sdp_address()
         ) :: t()
-  def new_random(
-        username \\ "-",
-        session_id \\ generate_random(),
-        session_version \\ generate_random(),
-        address
-      ) do
+  def new(opts) do
     %__MODULE__{
-      username: username,
-      session_id: session_id,
-      session_version: session_version,
-      address: address
+      username: Keyword.get(opts, :username, "-"),
+      session_id: Keyword.get(opts, :session_id, generate_random()),
+      session_version: Keyword.get(opts, :session_version, generate_random()),
+      address: Keyword.get(opts, :address, %ExSDP.ConnectionData.IP4{value: {127, 0, 0, 1}})
     }
   end
 

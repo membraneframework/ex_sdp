@@ -26,9 +26,9 @@ defmodule ExSDP.Attribute do
   @flag_attributes_strings @flag_attributes |> Enum.map(&to_string/1)
   @value_attributes_strings @value_attributes |> Enum.map(&to_string/1)
 
-  @type framerate :: Float.t() | {Integer.t(), Integer.t()}
+  @type framerate :: float() | {integer(), integer()}
   @type key :: binary() | value_attributes()
-  @type value :: binary() | Integer.t() | framerate() | flag_attributes()
+  @type value :: binary() | integer() | framerate() | flag_attributes()
   @type t :: __MODULE__.RTPMapping.t() | {key(), value()} | flag_attributes() | binary()
 
   @doc """
@@ -38,8 +38,8 @@ defmodule ExSDP.Attribute do
   `opts` is a keyword list that can contain some information for parsers.
 
   Unknown attributes keys are returned as strings, known ones as atoms.
-  Values for keys `:maxptime`, `:ptime` and `:quality` are converted into `Integer`.
-  Values for key `:framerate` is converted into `Float` or tuple of Integers.
+  Values for keys `:maxptime`, `:ptime` and `:quality` are converted into `integer()`.
+  Values for key `:framerate` is converted into `float()` or tuple of Integers.
   """
   @spec parse(binary(), opts :: []) :: {:ok, t()} | {:error, atom()}
   def parse(line, opts \\ []) do
