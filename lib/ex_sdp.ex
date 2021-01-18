@@ -64,6 +64,11 @@ defmodule ExSDP do
   defdelegate parse(text), to: Parser
   defdelegate parse!(text), to: Parser
 
+  @doc """
+  Returns new `%__MODULE{}` struct. By default:
+  * `version` is `0`
+  * `session_name` is `-`
+  """
   @spec new(origin :: binary(), version: non_neg_integer(), session_name: binary()) :: t()
   def new(origin, opts) do
     %__MODULE__{
