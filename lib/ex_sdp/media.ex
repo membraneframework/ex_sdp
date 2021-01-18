@@ -17,14 +17,14 @@ defmodule ExSDP.Media do
                 attributes: []
               ]
 
-  alias ExSDP
-
   alias ExSDP.{
     Attribute,
     Bandwidth,
     ConnectionData,
     Encryption
   }
+
+  alias ExSDP.Attribute.RTPMapping
 
   @typedoc """
   Represents type of media. In [RFC4566](https://tools.ietf.org/html/rfc4566#section-5.14)
@@ -40,10 +40,10 @@ defmodule ExSDP.Media do
           protocol: binary(),
           fmt: binary() | [0..127],
           title: binary() | nil,
-          connection_data: ConnectionData.t(),
+          connection_data: [ConnectionData.t()],
           bandwidth: [Bandwidth.t()],
           encryption: Encryption.t() | nil,
-          attributes: [binary()]
+          attributes: [Attribute.t()]
         }
 
   @spec new(
@@ -69,7 +69,10 @@ defmodule ExSDP.Media do
   @spec add_attribute(media :: t(), attribute :: Attribute.t()) :: t()
   def add_attribute(media, attribute), do: Map.update!(media, :attributes, &(&1 ++ [attribute]))
 
-  @spec get_attribute(media :: t(), key :: ExSDP.Attribute.RTPMapping.t() | Attribute.key()) ::
+  @spec get_attribute(
+          media :: t(),
+          key :: RTPMapping.t() | Attribute.key() | Attribute.flag_attributes()
+        ) ::
           Attribute.t()
   def get_attribute(media, key) do
     media.attributes

@@ -17,9 +17,9 @@ defmodule ExSDP do
     :session_information,
     :timing,
     :time_zones_adjustments,
+    :connection_data,
     attributes: [],
     bandwidth: [],
-    connection_data: [],
     media: [],
     time_repeats: []
   ]
@@ -51,9 +51,9 @@ defmodule ExSDP do
           uri: binary() | nil,
           email: binary() | nil,
           phone_number: binary() | nil,
-          connection_data: ConnectionData.t(),
+          connection_data: ConnectionData.t() | nil,
           bandwidth: [Bandwidth.t()],
-          time_zones_adjustments: Timezone.t(),
+          time_zones_adjustments: Timezone.t() | nil,
           encryption: Encryption.t() | nil,
           attributes: [Attribute.t()],
           timing: Timing.t() | nil,

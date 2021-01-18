@@ -41,7 +41,7 @@ defmodule ExSDP.Attribute do
   Values for keys `:maxptime`, `:ptime` and `:quality` are converted into `integer()`.
   Values for key `:framerate` is converted into `float()` or tuple of Integers.
   """
-  @spec parse(binary(), opts :: []) :: {:ok, t()} | {:error, atom()}
+  @spec parse(binary(), opts :: Keyword.t()) :: {:ok, t()} | {:error, atom()}
   def parse(line, opts \\ []) do
     [attribute | value] = String.split(line, ":", parts: 2)
     do_parse(attribute, List.first(value), opts)
