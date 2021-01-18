@@ -1,4 +1,8 @@
 defmodule ExSDP.Sigil do
+  @moduledoc """
+  Module containing sigil for deleting empty lines and replacing `\n` with `\r\n`.
+  """
+
   @doc """
   Deletes empty lines and replaces `\n` with `\r\n`
   """

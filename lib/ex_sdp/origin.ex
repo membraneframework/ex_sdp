@@ -23,7 +23,6 @@ defmodule ExSDP.Origin do
           username: binary(),
           session_id: binary(),
           session_version: binary(),
-          # FIXME this cannot be ConnectionData.sdp_address() as it can't have ttl field
           address: ConnectionData.sdp_address()
         }
 

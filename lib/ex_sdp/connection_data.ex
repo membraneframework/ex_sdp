@@ -23,6 +23,9 @@ defmodule ExSDP.ConnectionData do
   @ipv6_max_value 65_535
 
   defmodule IP4 do
+    @moduledoc """
+    Module representing IPv4 address.
+    """
     @enforce_keys [:value]
     defstruct @enforce_keys ++ [:ttl]
 
@@ -33,6 +36,9 @@ defmodule ExSDP.ConnectionData do
   end
 
   defmodule IP6 do
+    @moduledoc """
+    Module representing IPv6 address.
+    """
     @enforce_keys [:value]
     defstruct @enforce_keys
 
@@ -42,6 +48,9 @@ defmodule ExSDP.ConnectionData do
   end
 
   defmodule FQDN do
+    @moduledoc """
+    Module representing Fully Qualified Domain Name.
+    """
     @enforce_keys [:value]
     defstruct @enforce_keys
 
