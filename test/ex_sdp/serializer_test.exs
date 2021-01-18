@@ -6,7 +6,11 @@ defmodule ExSDP.SerializerTest do
 
   describe "Attribute serialization" do
     test "serializes framerate attribute" do
-      assert Serializer.maybe_serialize("a", {:framerate, "value"}) == "a=framerate:value"
+      assert Serializer.maybe_serialize("a", {:framerate, 30}) == "a=framerate:30"
+    end
+
+    test "serializes framerate attribute with \"/\"" do
+      assert Serializer.maybe_serialize("a", {:framerate, {30, 1}}) == "a=framerate:30/1"
     end
 
     test "serializes flag attributes" do

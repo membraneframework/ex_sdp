@@ -15,6 +15,8 @@ defmodule ExSDP.Serializer do
   def maybe_serialize(type, values) when is_list(values),
     do: Enum.map_join(values, "\n", fn value -> maybe_serialize(type, value) end)
 
+  def maybe_serialize(type, {key, {frames, sec}}), do: "#{type}=#{key}:#{frames}/#{sec}"
+
   def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
 
   def maybe_serialize(type, value), do: "#{type}=#{value}"
