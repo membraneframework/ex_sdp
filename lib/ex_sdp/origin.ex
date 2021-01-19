@@ -21,30 +21,33 @@ defmodule ExSDP.Origin do
 
   @type t :: %__MODULE__{
           username: binary(),
-          session_id: binary(),
-          session_version: binary(),
+          session_id: integer(),
+          session_version: integer(),
           address: ConnectionData.sdp_address()
         }
 
   @type reason :: :invalid_address | ConnectionData.reason()
 
   @doc """
-  Returns new `%__MODULE{}` struct. By default:
+  Returns new origin struct.
+
+  By default:
   * `username` is `-`
-  * `session_id` and `session_version` are generated as strings representing random 64 bit numbers
+  * `session_id` is random 64 bit number
+  * `session_version` is `0`
   * `address` is `ExSDP.ConnectionData.IP4` with `127.0.0.1` address
   """
   @spec new(
           username: binary(),
-          session_id: binary(),
-          session_version: binary(),
+          session_id: integer(),
+          session_version: integer(),
           address: ConnectionData.sdp_address()
         ) :: t()
-  def new(opts) do
+  def new(opts \\ []) do
     %__MODULE__{
       username: Keyword.get(opts, :username, "-"),
       session_id: Keyword.get(opts, :session_id, generate_random()),
-      session_version: Keyword.get(opts, :session_version, generate_random()),
+      session_version: Keyword.get(opts, :session_version, 0),
       address: Keyword.get(opts, :address, %ExSDP.ConnectionData.IP4{value: {127, 0, 0, 1}})
     }
   end
@@ -57,8 +60,8 @@ defmodule ExSDP.Origin do
 
       origin = %__MODULE__{
         username: username,
-        session_id: sess_id,
-        session_version: sess_version,
+        session_id: String.to_integer(sess_id),
+        session_version: String.to_integer(sess_version),
         address: conn_info
       }
 
@@ -68,6 +71,14 @@ defmodule ExSDP.Origin do
       _ -> {:error, :invalid_origin}
     end
   end
+
+  @doc """
+  Increments `session_version` field.
+
+  Can be used while sending offer/answer again.
+  """
+  @spec bump_version(t()) :: {:ok, t()}
+  def bump_version(origin), do: {:ok, %{origin | session_version: origin.session_version + 1}}
 
   defp generate_random(), do: :crypto.strong_rand_bytes(8) |> :binary.decode_unsigned()
 end

@@ -112,7 +112,7 @@ defmodule ExSDP.MediaTest do
       session = %ExSDP{
         connection_data: connection_data,
         origin: %Origin{
-          session_id: "2890844526",
+          session_id: 2_890_844_526,
           address: %ConnectionData{
             addresses: [
               %ConnectionData.IP4{
@@ -121,7 +121,7 @@ defmodule ExSDP.MediaTest do
             ]
           },
           username: "-",
-          session_version: "2890842807"
+          session_version: 2_890_842_807
         },
         timing: %Timing{
           start_time: 2_873_397_496,

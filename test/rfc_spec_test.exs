@@ -93,8 +93,8 @@ defmodule ExSDP.RFCTest do
                  address: %IP4{
                    value: {10, 47, 16, 5}
                  },
-                 session_id: "2890844526",
-                 session_version: "2890842807",
+                 session_id: 2_890_844_526,
+                 session_version: 2_890_842_807,
                  username: "jdoe"
                },
                session_information: "A Seminar on the session description protocol",
@@ -196,8 +196,8 @@ defmodule ExSDP.RFCTest do
                ],
                origin: %Origin{
                  address: %FQDN{value: "host.atlanta.example.com"},
-                 session_id: "2890844526",
-                 session_version: "2890844526",
+                 session_id: 2_890_844_526,
+                 session_version: 2_890_844_526,
                  username: "alice"
                },
                phone_number: nil,
@@ -280,8 +280,8 @@ defmodule ExSDP.RFCTest do
                ],
                origin: %Origin{
                  username: "bob",
-                 session_id: "2808844564",
-                 session_version: "2808844564",
+                 session_id: 2_808_844_564,
+                 session_version: 2_808_844_564,
                  address: %FQDN{value: "host.biloxi.example.com"}
                },
                phone_number: nil,
@@ -355,8 +355,8 @@ defmodule ExSDP.RFCTest do
                    address: %IP4{
                      value: {10, 47, 16, 5}
                    },
-                   session_id: "2890844526",
-                   session_version: "2890842807",
+                   session_id: 2_890_844_526,
+                   session_version: 2_890_842_807,
                    username: "jdoe"
                  },
                  session_information: "A Seminar on the session description protocol",
@@ -452,8 +452,8 @@ defmodule ExSDP.RFCTest do
                  ],
                  origin: %Origin{
                    address: %FQDN{value: "host.atlanta.example.com"},
-                   session_id: "2890844526",
-                   session_version: "2890844526",
+                   session_id: 2_890_844_526,
+                   session_version: 2_890_844_526,
                    username: "alice"
                  },
                  phone_number: nil,
@@ -530,8 +530,8 @@ defmodule ExSDP.RFCTest do
                  ],
                  origin: %Origin{
                    username: "bob",
-                   session_id: "2808844564",
-                   session_version: "2808844564",
+                   session_id: 2_808_844_564,
+                   session_version: 2_808_844_564,
                    address: %FQDN{value: "host.biloxi.example.com"}
                  },
                  phone_number: nil,

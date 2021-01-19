@@ -14,6 +14,11 @@ defmodule ExSDP.Attribute.RTPMapping do
           params: non_neg_integer() | nil
         }
 
+  @typedoc """
+  Key that can be used for searching this attribute using `ExSDP.Media.get_attribute/2`.
+  """
+  @type attr_key :: :rtpmap
+
   @spec parse(binary(), opts :: []) :: {:ok, t()} | {:error, :invalid_attribute | :invalid_param}
   def parse(mapping, opts) do
     with [payload_type, encoding | _] <- String.split(mapping, " "),

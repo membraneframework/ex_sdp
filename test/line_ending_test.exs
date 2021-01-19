@@ -9,8 +9,8 @@ defmodule ExSDP.LineEndingTest do
       address: %ConnectionData.IP4{
         value: {10, 47, 16, 5}
       },
-      session_id: "2890844526",
-      session_version: "2890842807",
+      session_id: 2_890_844_526,
+      session_version: 2_890_842_807,
       username: "jdoe"
     },
     session_name: "Very fancy session name",

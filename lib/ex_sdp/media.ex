@@ -7,16 +7,6 @@ defmodule ExSDP.Media do
   use Bunch
   use Bunch.Access
 
-  @enforce_keys [:type, :ports, :protocol, :fmt]
-  defstruct @enforce_keys ++
-              [
-                :title,
-                :encryption,
-                connection_data: [],
-                bandwidth: [],
-                attributes: []
-              ]
-
   alias ExSDP.{
     Attribute,
     Bandwidth,
@@ -26,13 +16,15 @@ defmodule ExSDP.Media do
 
   alias ExSDP.Attribute.RTPMapping
 
-  @typedoc """
-  Represents type of media. In [RFC4566](https://tools.ietf.org/html/rfc4566#section-5.14)
-  there are defined "audio", "video", "text", "application", and "message" types.
-
-  Known types are represented as atoms others are binaries.
-  """
-  @type type :: :audio | :video | :text | :application | :message | binary()
+  @enforce_keys [:type, :ports, :protocol, :fmt]
+  defstruct @enforce_keys ++
+              [
+                :title,
+                :encryption,
+                connection_data: [],
+                bandwidth: [],
+                attributes: []
+              ]
 
   @type t :: %__MODULE__{
           type: type(),
@@ -45,6 +37,17 @@ defmodule ExSDP.Media do
           encryption: Encryption.t() | nil,
           attributes: [Attribute.t()]
         }
+
+  @typedoc """
+  Represents type of media. In [RFC4566](https://tools.ietf.org/html/rfc4566#section-5.14)
+  there are defined "audio", "video", "text", "application", and "message" types.
+
+  Known types are represented as atoms others are binaries.
+  """
+  @type type :: :audio | :video | :text | :application | :message | binary()
+
+  # For searching struct attributes by atoms
+  @struct_attr_keys %{:rtpmap => RTPMapping}
 
   @spec new(
           type :: type(),
@@ -61,20 +64,13 @@ defmodule ExSDP.Media do
     }
   end
 
-  @spec set_connection_data(media :: t(), connection_data :: ConnectionData.t()) :: t()
-  def set_connection_data(media, connection_data) do
-    Bunch.Struct.put_in(media, :connection_data, connection_data)
-  end
-
   @spec add_attribute(media :: t(), attribute :: Attribute.t()) :: t()
   def add_attribute(media, attribute), do: Map.update!(media, :attributes, &(&1 ++ [attribute]))
 
-  @spec get_attribute(
-          media :: t(),
-          key :: RTPMapping.t() | Attribute.key() | Attribute.flag_attributes()
-        ) ::
-          Attribute.t()
+  @spec get_attribute(media :: t(), key :: module() | atom() | binary()) :: Attribute.t()
   def get_attribute(media, key) do
+    key = Map.get(@struct_attr_keys, key, key)
+
     media.attributes
     |> Enum.find(fn
       %module{} -> module == key
