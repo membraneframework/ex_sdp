@@ -63,7 +63,7 @@ defmodule ExSDP.RFCTest do
                      ]
                    },
                    fmt: [0],
-                   ports: [49_170],
+                   port: 49_170,
                    protocol: "RTP/AVP",
                    type: :audio
                  },
@@ -84,7 +84,7 @@ defmodule ExSDP.RFCTest do
                      ]
                    },
                    fmt: [99],
-                   ports: [51_372],
+                   port: 51_372,
                    protocol: "RTP/AVP",
                    type: :video
                  }
@@ -164,7 +164,7 @@ defmodule ExSDP.RFCTest do
                    },
                    encryption: nil,
                    fmt: [0, 8, 97],
-                   ports: [49_170],
+                   port: 49_170,
                    protocol: "RTP/AVP",
                    title: nil,
                    type: :audio
@@ -188,7 +188,7 @@ defmodule ExSDP.RFCTest do
                    },
                    encryption: nil,
                    fmt: [31, 32],
-                   ports: [51_372],
+                   port: 51_372,
                    protocol: "RTP/AVP",
                    title: nil,
                    type: :video
@@ -252,7 +252,7 @@ defmodule ExSDP.RFCTest do
                    },
                    encryption: nil,
                    fmt: [0],
-                   ports: [49_174],
+                   port: 49_174,
                    protocol: "RTP/AVP",
                    title: nil,
                    type: :audio
@@ -272,7 +272,7 @@ defmodule ExSDP.RFCTest do
                    },
                    encryption: nil,
                    fmt: [32],
-                   ports: [49_170],
+                   port: 49_170,
                    protocol: "RTP/AVP",
                    title: nil,
                    type: :video
@@ -333,7 +333,7 @@ defmodule ExSDP.RFCTest do
                      attributes: [],
                      bandwidth: [],
                      fmt: [0],
-                     ports: [49_170],
+                     port: 49_170,
                      protocol: "RTP/AVP",
                      type: :audio
                    },
@@ -346,7 +346,7 @@ defmodule ExSDP.RFCTest do
                        }
                      ],
                      fmt: [99],
-                     ports: [51_372],
+                     port: 51_372,
                      protocol: "RTP/AVP",
                      type: :video
                    }
@@ -423,7 +423,7 @@ defmodule ExSDP.RFCTest do
                      bandwidth: [],
                      encryption: nil,
                      fmt: [0, 8, 97],
-                     ports: [49_170],
+                     port: 49_170,
                      protocol: "RTP/AVP",
                      title: nil,
                      type: :audio
@@ -444,7 +444,7 @@ defmodule ExSDP.RFCTest do
                      bandwidth: [],
                      encryption: nil,
                      fmt: [31, 32],
-                     ports: [51_372],
+                     port: 51_372,
                      protocol: "RTP/AVP",
                      title: nil,
                      type: :video
@@ -505,7 +505,7 @@ defmodule ExSDP.RFCTest do
                      bandwidth: [],
                      encryption: nil,
                      fmt: [0],
-                     ports: [49_174],
+                     port: 49_174,
                      protocol: "RTP/AVP",
                      title: nil,
                      type: :audio
@@ -522,7 +522,7 @@ defmodule ExSDP.RFCTest do
                      bandwidth: [],
                      encryption: nil,
                      fmt: [32],
-                     ports: [49_170],
+                     port: 49_170,
                      protocol: "RTP/AVP",
                      title: nil,
                      type: :video

@@ -73,7 +73,7 @@ defmodule ExSDPTest do
         },
         encryption: %Encryption{key: nil, method: :prompt},
         fmt: [0],
-        ports: [49_170],
+        port: 49_170,
         protocol: "RTP/AVP",
         title: "Sample media title",
         type: :audio
@@ -100,7 +100,7 @@ defmodule ExSDPTest do
         },
         encryption: %Encryption{key: "key", method: :clear},
         fmt: [99],
-        ports: [51_372],
+        port: 51_372,
         protocol: "RTP/AVP",
         title: nil,
         type: :video
