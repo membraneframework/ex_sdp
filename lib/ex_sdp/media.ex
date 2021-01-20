@@ -49,7 +49,10 @@ defmodule ExSDP.Media do
   @type type :: :audio | :video | :text | :application | :message | binary()
 
   # For searching struct attributes by atoms
-  @struct_attr_keys %{:rtpmap => RTPMapping}
+  @struct_attr_keys %{
+    :rtpmap => RTPMapping,
+    :msid => Msid
+  }
 
   @spec new(
           type :: type(),

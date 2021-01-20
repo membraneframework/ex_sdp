@@ -5,7 +5,7 @@ defmodule ExSDP.Attribute do
   use Bunch.Typespec
   use Bunch.Access
 
-  alias __MODULE__.RTPMapping
+  alias __MODULE__.{RTPMapping, Msid}
 
   @list_type flag_attributes :: [:recvonly, :sendrecv, :sendonly, :inactive]
   @list_type value_attributes :: [
@@ -53,6 +53,8 @@ defmodule ExSDP.Attribute do
   defp do_parse(flag, nil, _opts), do: {:ok, flag}
 
   defp do_parse("rtpmap", value, opts), do: RTPMapping.parse(value, opts)
+
+  defp do_parse("msid", value, _opts), do: Msid.parse(value)
 
   defp do_parse("framerate", value, _opts) do
     case String.split(value, "/") do
