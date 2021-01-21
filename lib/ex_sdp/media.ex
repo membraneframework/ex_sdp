@@ -5,6 +5,17 @@ defmodule ExSDP.Media do
   For more details please see [RFC4566 Section 5.14](https://tools.ietf.org/html/rfc4566#section-5.14)
   """
   use Bunch
+  use Bunch.Access
+
+  alias ExSDP.{
+    Attribute,
+    Bandwidth,
+    ConnectionData,
+    Encryption
+  }
+
+  alias ExSDP.Attribute.RTPMapping
+
   @enforce_keys [:type, :ports, :protocol, :fmt]
   defstruct @enforce_keys ++
               [
@@ -15,14 +26,17 @@ defmodule ExSDP.Media do
                 attributes: []
               ]
 
-  alias ExSDP
-
-  alias ExSDP.{
-    Attribute,
-    Bandwidth,
-    ConnectionData,
-    Encryption
-  }
+  @type t :: %__MODULE__{
+          type: type(),
+          ports: [:inet.port_number()],
+          protocol: binary(),
+          fmt: binary() | [0..127],
+          title: binary() | nil,
+          connection_data: [ConnectionData.t()],
+          bandwidth: [Bandwidth.t()],
+          encryption: Encryption.t() | nil,
+          attributes: [Attribute.t()]
+        }
 
   @typedoc """
   Represents type of media. In [RFC4566](https://tools.ietf.org/html/rfc4566#section-5.14)
@@ -32,17 +46,39 @@ defmodule ExSDP.Media do
   """
   @type type :: :audio | :video | :text | :application | :message | binary()
 
-  @type t :: %__MODULE__{
-          type: type(),
-          ports: [:inet.port_number()],
-          protocol: binary(),
-          fmt: binary() | [0..127],
-          title: binary() | nil,
-          connection_data: ConnectionData.t(),
-          bandwidth: [Bandwidth.t()],
-          encryption: Encryption.t() | nil,
-          attributes: [binary()]
-        }
+  # For searching struct attributes by atoms
+  @struct_attr_keys %{:rtpmap => RTPMapping}
+
+  @spec new(
+          type :: type(),
+          ports :: [:inet.port_number()],
+          protocol :: binary(),
+          fmt :: binary() | [0..127]
+        ) :: t()
+  def new(type, ports, protocol, fmt) do
+    %__MODULE__{
+      type: type,
+      ports: ports,
+      protocol: protocol,
+      fmt: fmt
+    }
+  end
+
+  @spec add_attribute(media :: t(), attribute :: Attribute.t()) :: t()
+  def add_attribute(media, attribute), do: Map.update!(media, :attributes, &(&1 ++ [attribute]))
+
+  @spec get_attribute(media :: t(), key :: module() | atom() | binary()) :: Attribute.t()
+  def get_attribute(media, key) do
+    key = Map.get(@struct_attr_keys, key, key)
+
+    media.attributes
+    |> Enum.find(fn
+      %module{} -> module == key
+      {k, _v} -> k == key
+      # for flag attributes
+      k -> k == key
+    end)
+  end
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
@@ -99,8 +135,7 @@ defmodule ExSDP.Media do
   end
 
   def parse_optional(["a=" <> attribute | rest], %__MODULE__{attributes: attrs} = media) do
-    with {:ok, attribute} <- Attribute.parse(attribute),
-         {:ok, attribute} <- Attribute.parse_media_attribute(attribute, media.type) do
+    with {:ok, attribute} <- Attribute.parse(attribute, media_type: media.type) do
       media = %__MODULE__{media | attributes: [attribute | attrs]}
       parse_optional(rest, media)
     end
@@ -168,60 +203,39 @@ defmodule ExSDP.Media do
   defp gen_ports(port_no, _), do: [port_no]
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Media do
-  alias ExSDP.Serializer
+defimpl String.Chars, for: ExSDP.Media do
+  def to_string(media) do
+    import ExSDP.Sigil
 
-  def serialize(media) do
-    serialized_header = media |> header_fields |> Enum.join(" ") |> String.trim()
+    serialized_header = media |> header_fields |> String.trim()
 
-    optional = media |> other_fields() |> Enum.join("\r\n")
-
-    String.trim("m=" <> serialized_header <> "\r\n" <> optional)
+    ~n"""
+    #{serialized_header}
+    #{ExSDP.Serializer.maybe_serialize("i", media.title)}
+    #{ExSDP.Serializer.maybe_serialize("c", media.connection_data)}
+    #{ExSDP.Serializer.maybe_serialize("b", media.bandwidth)}
+    #{ExSDP.Serializer.maybe_serialize("k", media.encryption)}
+    #{ExSDP.Serializer.maybe_serialize("a", media.attributes)}
+    """
+    # to_string has to return string without `\r\n` at the end
+    |> String.trim()
   end
 
   defp header_fields(media) do
-    [
-      serialize_type(media.type),
-      serialize_ports(media.ports),
-      media.protocol,
-      serialize_fmt(media.fmt)
-    ]
+    """
+    #{serialize_type(media.type)} \
+    #{serialize_ports(media.ports)} \
+    #{media.protocol} \
+    #{serialize_fmt(media.fmt)} \
+    """
   end
 
-  defp other_fields(media) do
-    [
-      {"i", :title},
-      {"c", :connection_data},
-      {"b", :bandwidth},
-      {"k", :encryption},
-      {"a", :attributes}
-    ]
-    |> Enum.flat_map(&add_types(&1, media))
-  end
+  defp serialize_type(type), do: "#{type}"
 
-  defp add_types({type_string, key}, media) do
-    Map.get(media, key)
-    |> List.wrap()
-    |> Enum.map(&serialize_optional(&1, key))
-    |> Enum.map(&add_type(&1, type_string))
-  end
+  defp serialize_ports([port]), do: "#{port}"
 
-  defp add_type(string, type) do
-    if String.at(string, 1) == "=", do: string, else: type <> "=" <> string
-  end
-
-  defp serialize_optional(value, :title), do: to_string(value)
-  defp serialize_optional(value, _key), do: Serializer.serialize(value)
-
-  defp serialize_type(type) when is_binary(type), do: type
-  defp serialize_type(type) when is_atom(type), do: Atom.to_string(type)
-
-  defp serialize_ports([port]),
-    do: Integer.to_string(port)
-
-  defp serialize_ports([port | _rest] = ports),
-    do: Integer.to_string(port) <> "/" <> Integer.to_string(length(ports))
+  defp serialize_ports([port | _rest] = ports), do: "#{port}/#{length(ports)}"
 
   defp serialize_fmt(fmt) when is_binary(fmt), do: fmt
-  defp serialize_fmt(fmt), do: Enum.map_join(fmt, " ", &Integer.to_string/1)
+  defp serialize_fmt(fmt), do: Enum.map_join(fmt, " ", &Kernel.to_string/1)
 end

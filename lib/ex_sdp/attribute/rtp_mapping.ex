@@ -2,6 +2,7 @@ defmodule ExSDP.Attribute.RTPMapping do
   @moduledoc """
   This module represents RTP mapping.
   """
+  use Bunch.Access
 
   @enforce_keys [:payload_type, :encoding, :clock_rate]
   defstruct @enforce_keys ++ [:params]
@@ -13,9 +14,13 @@ defmodule ExSDP.Attribute.RTPMapping do
           params: non_neg_integer() | nil
         }
 
-  @spec parse(binary(), atom | binary()) ::
-          {:ok, t()} | {:error, :invalid_attribute | :invalid_param}
-  def parse(mapping, type) do
+  @typedoc """
+  Key that can be used for searching this attribute using `ExSDP.Media.get_attribute/2`.
+  """
+  @type attr_key :: :rtpmap
+
+  @spec parse(binary(), opts :: []) :: {:ok, t()} | {:error, :invalid_attribute | :invalid_param}
+  def parse(mapping, opts) do
     with [payload_type, encoding | _] <- String.split(mapping, " "),
          [encoding_name, clock_rate | params] <- String.split(encoding, "/"),
          {payload_type, ""} <- Integer.parse(payload_type),
@@ -24,7 +29,7 @@ defmodule ExSDP.Attribute.RTPMapping do
         payload_type: payload_type,
         encoding: encoding_name,
         clock_rate: clock_rate,
-        params: parse_params(type, params)
+        params: parse_params(params, opts)
       }
 
       {:ok, mapping}
@@ -33,31 +38,24 @@ defmodule ExSDP.Attribute.RTPMapping do
     end
   end
 
-  defp parse_params(:audio, [raw_channels]) do
-    case Integer.parse(raw_channels) do
-      {channels, ""} -> channels
-      _ -> {:error, :invalid_param}
-    end
-  end
+  defp parse_params([channels], media_type: :audio), do: String.to_integer(channels)
+  defp parse_params([], media_type: :audio), do: 1
+  defp parse_params([], media_type: _media_type), do: nil
 
-  defp parse_params(:audio, []), do: 1
-  defp parse_params(_, [params]), do: params
-  defp parse_params(_, []), do: nil
+  defp parse_params(_params, media_type: _media_type),
+    do: raise("Only audio attributes can specify parameters")
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Attribute.RTPMapping do
+defimpl String.Chars, for: ExSDP.Attribute.RTPMapping do
   alias ExSDP.Attribute.RTPMapping
 
-  def serialize(mapping) do
-    "rtpmap:" <>
-      Integer.to_string(mapping.payload_type) <>
-      " " <>
-      mapping.encoding <>
-      "/" <>
-      Integer.to_string(mapping.clock_rate) <> serialize_params(mapping)
+  def to_string(mapping) do
+    "rtpmap:#{mapping.payload_type} #{mapping.encoding}/#{mapping.clock_rate}#{
+      serialize_params(mapping)
+    }"
   end
 
   defp serialize_params(%RTPMapping{params: nil}), do: ""
   defp serialize_params(%RTPMapping{params: 1}), do: ""
-  defp serialize_params(%RTPMapping{params: params}), do: "/" <> to_string(params)
+  defp serialize_params(%RTPMapping{params: params}), do: "/" <> Kernel.to_string(params)
 end

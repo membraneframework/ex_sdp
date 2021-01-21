@@ -3,6 +3,8 @@ defmodule ExSDP.Timezone do
   This module groups multiple SDP Timezone Correction used
   for translating base time for rebroadcasts.
   """
+  use Bunch.Access
+
   alias __MODULE__.Correction
 
   defstruct corrections: []
@@ -33,11 +35,11 @@ defmodule ExSDP.Timezone do
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Timezone do
-  alias ExSDP.{Serializer, Timezone}
+defimpl String.Chars, for: ExSDP.Timezone do
+  alias ExSDP.Timezone
 
-  def serialize(%Timezone{corrections: []}), do: ""
+  def to_string(%Timezone{corrections: []}), do: ""
 
-  def serialize(%Timezone{corrections: corrections}),
-    do: "z=" <> Enum.map_join(corrections, " ", &Serializer.serialize/1)
+  def to_string(%Timezone{corrections: corrections}),
+    do: Enum.map_join(corrections, " ", &Kernel.to_string/1)
 end

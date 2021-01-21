@@ -2,11 +2,10 @@ defmodule ExSDP.Attribute.RTPMappingTest do
   use ExUnit.Case
 
   alias ExSDP.Attribute.RTPMapping
-  alias ExSDP.Serializer
 
   describe "RTP Mapping parser" do
     test "parses valid rtp mapping for video media" do
-      assert {:ok, mapping} = RTPMapping.parse("99 h263-1998/90000", :video)
+      assert {:ok, mapping} = RTPMapping.parse("99 h263-1998/90000", media_type: :video)
 
       assert %RTPMapping{
                payload_type: 99,
@@ -16,7 +15,7 @@ defmodule ExSDP.Attribute.RTPMappingTest do
     end
 
     test "parses valid rtp mapping for audio media without specified channels" do
-      assert {:ok, mapping} = RTPMapping.parse("97 L16/8000", :audio)
+      assert {:ok, mapping} = RTPMapping.parse("97 L16/8000", media_type: :audio)
 
       assert %RTPMapping{
                payload_type: 97,
@@ -27,7 +26,7 @@ defmodule ExSDP.Attribute.RTPMappingTest do
     end
 
     test "parses valid rtp mapping for audio media with specified channels" do
-      assert {:ok, mapping} = RTPMapping.parse("112 L16/8000/2", :audio)
+      assert {:ok, mapping} = RTPMapping.parse("112 L16/8000/2", media_type: :audio)
 
       assert %RTPMapping{
                payload_type: 112,
@@ -38,7 +37,7 @@ defmodule ExSDP.Attribute.RTPMappingTest do
     end
 
     test "returns an error when clock_rate or payload type is not a number" do
-      assert {:error, :invalid_attribute} = RTPMapping.parse("9t9 h264/90000", :video)
+      assert {:error, :invalid_attribute} = RTPMapping.parse("9t9 h264/90000", media_type: :video)
     end
   end
 
@@ -50,7 +49,7 @@ defmodule ExSDP.Attribute.RTPMappingTest do
         clock_rate: 90_000
       }
 
-      assert Serializer.serialize(mapping) == "rtpmap:101 h263-1998/90000"
+      assert "#{mapping}" == "rtpmap:101 h263-1998/90000"
     end
 
     test "serializes mapping with parameter" do
@@ -61,7 +60,7 @@ defmodule ExSDP.Attribute.RTPMappingTest do
         params: 2
       }
 
-      assert Serializer.serialize(mapping) == "rtpmap:98 L16/11025/2"
+      assert "#{mapping}" == "rtpmap:98 L16/11025/2"
     end
   end
 end

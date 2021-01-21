@@ -15,6 +15,7 @@ defmodule ExSDP.RepeatTimes do
 
   For more details please see [RFC4566 Section 5.10](https://tools.ietf.org/html/rfc4566#section-5.10).
   """
+  use Bunch.Access
 
   @enforce_keys [:repeat_interval, :active_duration, :offsets]
   defstruct @enforce_keys
@@ -130,8 +131,8 @@ defmodule ExSDP.RepeatTimes do
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.RepeatTimes do
-  def serialize(repeat_times) do
+defimpl String.Chars, for: ExSDP.RepeatTimes do
+  def to_string(repeat_times) do
     serialized_fields =
       [
         Integer.to_string(repeat_times.repeat_interval),
@@ -139,6 +140,6 @@ defimpl ExSDP.Serializer, for: ExSDP.RepeatTimes do
       ] ++
         Enum.map(repeat_times.offsets, &Integer.to_string/1)
 
-    "r=" <> Enum.join(serialized_fields, " ")
+    Enum.join(serialized_fields, " ")
   end
 end

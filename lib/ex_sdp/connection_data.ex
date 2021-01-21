@@ -17,11 +17,15 @@ defmodule ExSDP.ConnectionData do
   For more details please see [RFC4566 Section 5.7](https://tools.ietf.org/html/rfc4566#section-5.7)
   """
   use Bunch
+  use Bunch.Access
 
   @ipv4_max_value 255
   @ipv6_max_value 65_535
 
   defmodule IP4 do
+    @moduledoc """
+    Module representing IPv4 address.
+    """
     @enforce_keys [:value]
     defstruct @enforce_keys ++ [:ttl]
 
@@ -32,6 +36,9 @@ defmodule ExSDP.ConnectionData do
   end
 
   defmodule IP6 do
+    @moduledoc """
+    Module representing IPv6 address.
+    """
     @enforce_keys [:value]
     defstruct @enforce_keys
 
@@ -41,6 +48,9 @@ defmodule ExSDP.ConnectionData do
   end
 
   defmodule FQDN do
+    @moduledoc """
+    Module representing Fully Qualified Domain Name.
+    """
     @enforce_keys [:value]
     defstruct @enforce_keys
 
@@ -148,45 +158,40 @@ defmodule ExSDP.ConnectionData do
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.ConnectionData.IP4 do
+defimpl String.Chars, for: ExSDP.ConnectionData.IP4 do
   alias ExSDP.ConnectionData.IP4
 
-  def serialize(%IP4{ttl: nil, value: value}) do
-    address = value |> :inet.ntoa() |> to_string()
-    "IN IP4 " <> address
+  def to_string(%IP4{ttl: nil, value: value}) do
+    "IN IP4 #{:inet.ntoa(value)}"
   end
 
-  def serialize(%IP4{ttl: ttl, value: value}) do
-    address = value |> :inet.ntoa() |> to_string()
-    "IN IP4 " <> address <> "/" <> Integer.to_string(ttl)
+  def to_string(%IP4{ttl: ttl, value: value}) do
+    "IN IP4 #{:inet.ntoa(value)}/#{ttl}"
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.ConnectionData.IP6 do
+defimpl String.Chars, for: ExSDP.ConnectionData.IP6 do
   alias ExSDP.ConnectionData
   alias ConnectionData.IP6
 
-  def serialize(%IP6{value: value}) do
-    address = value |> :inet.ntoa() |> to_string()
-    "IN IP6 " <> address
+  def to_string(%IP6{value: value}) do
+    "IN IP6 #{:inet.ntoa(value)}"
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.ConnectionData.FQDN do
+defimpl String.Chars, for: ExSDP.ConnectionData.FQDN do
   alias ExSDP.ConnectionData.FQDN
-  def serialize(%FQDN{value: address}), do: "IN IP4 " <> address
+  def to_string(%FQDN{value: address}), do: "IN IP4 #{address}"
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.ConnectionData do
+defimpl String.Chars, for: ExSDP.ConnectionData do
   alias ExSDP.ConnectionData
-  alias ExSDP.Serializer
 
-  def serialize(%ConnectionData{addresses: []}), do: ""
+  def to_string(%ConnectionData{addresses: []}), do: ""
 
-  def serialize(%ConnectionData{addresses: list}) do
-    serialized = list |> hd |> Serializer.serialize()
+  def to_string(%ConnectionData{addresses: list}) do
     size = list |> length |> serialize_size
-    "c=" <> serialized <> size
+    "#{hd(list)}#{size}"
   end
 
   defp serialize_size(0), do: ""

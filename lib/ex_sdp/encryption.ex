@@ -8,6 +8,8 @@ defmodule ExSDP.Encryption do
 
   For more details please see [RFC4566 Section 5.12](https://tools.ietf.org/html/rfc4566#section-5.12)
   """
+  use Bunch.Access
+
   @enforce_keys [:method]
   defstruct @enforce_keys ++ [:key]
 
@@ -46,11 +48,9 @@ defmodule ExSDP.Encryption do
   defp method_to_atom(_), do: {:error, :unsupported_method}
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Encryption do
-  def serialize(encryption) do
-    method = "k=" <> Atom.to_string(encryption.method)
+defimpl String.Chars, for: ExSDP.Encryption do
+  def to_string(encryption) do
     key = if encryption.key, do: ":" <> encryption.key, else: ""
-
-    method <> key
+    "#{encryption.method}#{key}"
   end
 end

@@ -1,48 +1,23 @@
-defprotocol ExSDP.Serializer do
+defmodule ExSDP.Serializer do
   @moduledoc """
-  This protocol is responsible for serializing structs into SDP strings.
+  Module providing helper functions for serialization.
   """
+
   @doc """
-  Serializes struct to SDP string
+  Each SDP line is of the following format:
+    <type>=<value>
+  Function parameters follows this description.
   """
-  @spec serialize(t()) :: binary()
-  def serialize(struct)
-end
+  @spec maybe_serialize(type :: binary(), value :: term()) :: binary()
+  def maybe_serialize(_type, nil), do: ""
+  def maybe_serialize(_type, []), do: ""
 
-defimpl ExSDP.Serializer, for: ExSDP do
-  @preferred_eol "\r\n"
+  def maybe_serialize(type, values) when is_list(values),
+    do: Enum.map_join(values, "\n", fn value -> maybe_serialize(type, value) end)
 
-  alias ExSDP.{Serializer, Timezone}
+  def maybe_serialize(type, {key, {frames, sec}}), do: "#{type}=#{key}:#{frames}/#{sec}"
 
-  def serialize(session) do
-    [
-      :version,
-      :origin,
-      :session_name,
-      :session_information,
-      :uri,
-      :email,
-      :phone_number,
-      :connection_data,
-      :bandwidth,
-      :timing,
-      :time_repeats,
-      :time_zones_adjustments,
-      :encryption,
-      :attributes,
-      :media
-    ]
-    |> Enum.map(&Map.get(session, &1))
-    |> Enum.reject(&(&1 == [] or &1 == nil))
-    |> Enum.map(&serialize_field/1)
-    |> Enum.map(&(&1 <> @preferred_eol))
-    |> Enum.join()
-  end
+  def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
 
-  defp serialize_field([%Timezone{} | _rest] = adjustments), do: Serializer.serialize(adjustments)
-
-  defp serialize_field(list) when is_list(list),
-    do: Enum.map_join(list, @preferred_eol, &Serializer.serialize/1)
-
-  defp serialize_field(value), do: Serializer.serialize(value)
+  def maybe_serialize(type, value), do: "#{type}=#{value}"
 end

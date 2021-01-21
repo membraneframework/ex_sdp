@@ -5,6 +5,7 @@ defmodule ExSDP.Bandwidth do
 
   For more details please see [RFC4566 Section 5.8](https://tools.ietf.org/html/rfc4566#section-5.8).
   """
+  use Bunch.Access
 
   @enforce_keys [:type, :bandwidth]
   defstruct @enforce_keys
@@ -45,7 +46,6 @@ defmodule ExSDP.Bandwidth do
   end
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Bandwidth do
-  def serialize(bandwidth),
-    do: "b=" <> Atom.to_string(bandwidth.type) <> ":" <> Integer.to_string(bandwidth.bandwidth)
+defimpl String.Chars, for: ExSDP.Bandwidth do
+  def to_string(bandwidth), do: "#{bandwidth.type}:#{bandwidth.bandwidth}"
 end

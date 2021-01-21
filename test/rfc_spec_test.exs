@@ -11,14 +11,9 @@ defmodule ExSDP.RFCTest do
   alias ExSDP.{
     Attribute,
     ConnectionData,
-    Email,
     Media,
     Origin,
-    SessionInformation,
-    SessionName,
-    Timing,
-    URI,
-    Version
+    Timing
   }
 
   alias ConnectionData.{FQDN, IP4}
@@ -45,7 +40,7 @@ defmodule ExSDP.RFCTest do
                |> ExSDP.parse()
 
       assert session_spec == %ExSDP{
-               attributes: [%Attribute{value: :recvonly}],
+               attributes: [:recvonly],
                connection_data: %ConnectionData{
                  addresses: [
                    %IP4{
@@ -54,7 +49,7 @@ defmodule ExSDP.RFCTest do
                    }
                  ]
                },
-               email: %Email{value: "j.doe@example.com (Jane Doe)"},
+               email: "j.doe@example.com (Jane Doe)",
                media: [
                  %Media{
                    attributes: [],
@@ -74,13 +69,10 @@ defmodule ExSDP.RFCTest do
                  },
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 90_000,
-                         encoding: "h263-1998",
-                         payload_type: 99
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 90_000,
+                       encoding: "h263-1998",
+                       payload_type: 99
                      }
                    ],
                    connection_data: %ConnectionData{
@@ -101,20 +93,18 @@ defmodule ExSDP.RFCTest do
                  address: %IP4{
                    value: {10, 47, 16, 5}
                  },
-                 session_id: "2890844526",
-                 session_version: "2890842807",
+                 session_id: 2_890_844_526,
+                 session_version: 2_890_842_807,
                  username: "jdoe"
                },
-               session_information: %SessionInformation{
-                 value: "A Seminar on the session description protocol"
-               },
-               session_name: %SessionName{value: "SDP Seminar"},
+               session_information: "A Seminar on the session description protocol",
+               session_name: "SDP Seminar",
                timing: %Timing{
                  start_time: 2_873_397_496,
                  stop_time: 2_873_404_696
                },
-               uri: %URI{value: "http://www.example.com/seminars/sdp.pdf"},
-               version: %Version{value: 0}
+               uri: "http://www.example.com/seminars/sdp.pdf",
+               version: 0
              }
     end
 
@@ -149,32 +139,23 @@ defmodule ExSDP.RFCTest do
                media: [
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 8000,
-                         encoding: "PCMU",
-                         params: 1,
-                         payload_type: 0
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMU",
+                       params: 1,
+                       payload_type: 0
                      },
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 8000,
-                         encoding: "PCMA",
-                         params: 1,
-                         payload_type: 8
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMA",
+                       params: 1,
+                       payload_type: 8
                      },
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 8000,
-                         encoding: "iLBC",
-                         params: 1,
-                         payload_type: 97
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "iLBC",
+                       params: 1,
+                       payload_type: 97
                      }
                    ],
                    bandwidth: [],
@@ -190,21 +171,15 @@ defmodule ExSDP.RFCTest do
                  },
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 90_000,
-                         encoding: "H261",
-                         payload_type: 31
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 90_000,
+                       encoding: "H261",
+                       payload_type: 31
                      },
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 90_000,
-                         encoding: "MPV",
-                         payload_type: 32
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 90_000,
+                       encoding: "MPV",
+                       payload_type: 32
                      }
                    ],
                    bandwidth: [],
@@ -221,18 +196,18 @@ defmodule ExSDP.RFCTest do
                ],
                origin: %Origin{
                  address: %FQDN{value: "host.atlanta.example.com"},
-                 session_id: "2890844526",
-                 session_version: "2890844526",
+                 session_id: 2_890_844_526,
+                 session_version: 2_890_844_526,
                  username: "alice"
                },
                phone_number: nil,
                session_information: nil,
-               session_name: %SessionName{value: "SDP Seminar"},
+               session_name: "SDP Seminar",
                time_repeats: [],
                time_zones_adjustments: nil,
                timing: %Timing{start_time: 0, stop_time: 0},
                uri: nil,
-               version: %Version{value: 0}
+               version: 0
              }
     end
 
@@ -264,14 +239,11 @@ defmodule ExSDP.RFCTest do
                media: [
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 8000,
-                         encoding: "PCMU",
-                         params: 1,
-                         payload_type: 0
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 8000,
+                       encoding: "PCMU",
+                       params: 1,
+                       payload_type: 0
                      }
                    ],
                    bandwidth: [],
@@ -287,14 +259,11 @@ defmodule ExSDP.RFCTest do
                  },
                  %Media{
                    attributes: [
-                     %Attribute{
-                       key: :rtpmap,
-                       value: %Attribute.RTPMapping{
-                         clock_rate: 90_000,
-                         encoding: "MPV",
-                         payload_type: 32,
-                         params: nil
-                       }
+                     %Attribute.RTPMapping{
+                       clock_rate: 90_000,
+                       encoding: "MPV",
+                       payload_type: 32,
+                       params: nil
                      }
                    ],
                    bandwidth: [],
@@ -311,18 +280,18 @@ defmodule ExSDP.RFCTest do
                ],
                origin: %Origin{
                  username: "bob",
-                 session_id: "2808844564",
-                 session_version: "2808844564",
+                 session_id: 2_808_844_564,
+                 session_version: 2_808_844_564,
                  address: %FQDN{value: "host.biloxi.example.com"}
                },
                phone_number: nil,
                session_information: nil,
-               session_name: %SessionName{value: "SDP Seminar"},
+               session_name: "SDP Seminar",
                time_repeats: [],
                time_zones_adjustments: nil,
                timing: %Timing{start_time: 0, stop_time: 0},
                uri: nil,
-               version: %Version{value: 0}
+               version: 0
              } = result
     end
   end
@@ -348,8 +317,8 @@ defmodule ExSDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               ExSDP.serialize(%ExSDP{
-                 attributes: [%Attribute{value: :recvonly}],
+               to_string(%ExSDP{
+                 attributes: [:recvonly],
                  connection_data: %ConnectionData{
                    addresses: [
                      %IP4{
@@ -358,7 +327,7 @@ defmodule ExSDP.RFCTest do
                      }
                    ]
                  },
-                 email: %Email{value: "j.doe@example.com (Jane Doe)"},
+                 email: "j.doe@example.com (Jane Doe)",
                  media: [
                    %Media{
                      attributes: [],
@@ -370,13 +339,10 @@ defmodule ExSDP.RFCTest do
                    },
                    %Media{
                      attributes: [
-                       %Attribute{
-                         key: :rtpmap,
-                         value: %Attribute.RTPMapping{
-                           clock_rate: 90_000,
-                           encoding: "h263-1998",
-                           payload_type: 99
-                         }
+                       %Attribute.RTPMapping{
+                         clock_rate: 90_000,
+                         encoding: "h263-1998",
+                         payload_type: 99
                        }
                      ],
                      fmt: [99],
@@ -389,20 +355,18 @@ defmodule ExSDP.RFCTest do
                    address: %IP4{
                      value: {10, 47, 16, 5}
                    },
-                   session_id: "2890844526",
-                   session_version: "2890842807",
+                   session_id: 2_890_844_526,
+                   session_version: 2_890_842_807,
                    username: "jdoe"
                  },
-                 session_information: %SessionInformation{
-                   value: "A Seminar on the session description protocol"
-                 },
-                 session_name: %SessionName{value: "SDP Seminar"},
+                 session_information: "A Seminar on the session description protocol",
+                 session_name: "SDP Seminar",
                  timing: %Timing{
                    start_time: 2_873_397_496,
                    stop_time: 2_873_404_696
                  },
-                 uri: %URI{value: "http://www.example.com/seminars/sdp.pdf"},
-                 version: %Version{value: 0}
+                 uri: "http://www.example.com/seminars/sdp.pdf",
+                 version: 0
                })
     end
 
@@ -426,7 +390,7 @@ defmodule ExSDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               ExSDP.serialize(%ExSDP{
+               to_string(%ExSDP{
                  attributes: [],
                  bandwidth: [],
                  connection_data: %ConnectionData{
@@ -437,32 +401,23 @@ defmodule ExSDP.RFCTest do
                  media: [
                    %Media{
                      attributes: [
-                       %Attribute{
-                         key: :rtpmap,
-                         value: %Attribute.RTPMapping{
-                           clock_rate: 8000,
-                           encoding: "PCMU",
-                           params: 1,
-                           payload_type: 0
-                         }
+                       %Attribute.RTPMapping{
+                         clock_rate: 8000,
+                         encoding: "PCMU",
+                         params: 1,
+                         payload_type: 0
                        },
-                       %Attribute{
-                         key: :rtpmap,
-                         value: %Attribute.RTPMapping{
-                           clock_rate: 8000,
-                           encoding: "PCMA",
-                           params: 1,
-                           payload_type: 8
-                         }
+                       %Attribute.RTPMapping{
+                         clock_rate: 8000,
+                         encoding: "PCMA",
+                         params: 1,
+                         payload_type: 8
                        },
-                       %Attribute{
-                         key: :rtpmap,
-                         value: %Attribute.RTPMapping{
-                           clock_rate: 8000,
-                           encoding: "iLBC",
-                           params: 1,
-                           payload_type: 97
-                         }
+                       %Attribute.RTPMapping{
+                         clock_rate: 8000,
+                         encoding: "iLBC",
+                         params: 1,
+                         payload_type: 97
                        }
                      ],
                      bandwidth: [],
@@ -475,21 +430,15 @@ defmodule ExSDP.RFCTest do
                    },
                    %Media{
                      attributes: [
-                       %Attribute{
-                         key: :rtpmap,
-                         value: %Attribute.RTPMapping{
-                           clock_rate: 90_000,
-                           encoding: "H261",
-                           payload_type: 31
-                         }
+                       %Attribute.RTPMapping{
+                         clock_rate: 90_000,
+                         encoding: "H261",
+                         payload_type: 31
                        },
-                       %Attribute{
-                         key: :rtpmap,
-                         value: %Attribute.RTPMapping{
-                           clock_rate: 90_000,
-                           encoding: "MPV",
-                           payload_type: 32
-                         }
+                       %Attribute.RTPMapping{
+                         clock_rate: 90_000,
+                         encoding: "MPV",
+                         payload_type: 32
                        }
                      ],
                      bandwidth: [],
@@ -503,18 +452,18 @@ defmodule ExSDP.RFCTest do
                  ],
                  origin: %Origin{
                    address: %FQDN{value: "host.atlanta.example.com"},
-                   session_id: "2890844526",
-                   session_version: "2890844526",
+                   session_id: 2_890_844_526,
+                   session_version: 2_890_844_526,
                    username: "alice"
                  },
                  phone_number: nil,
                  session_information: nil,
-                 session_name: %SessionName{value: "SDP Seminar"},
+                 session_name: "SDP Seminar",
                  time_repeats: [],
                  time_zones_adjustments: nil,
                  timing: %Timing{start_time: 0, stop_time: 0},
                  uri: nil,
-                 version: %Version{value: 0}
+                 version: 0
                })
     end
 
@@ -535,7 +484,7 @@ defmodule ExSDP.RFCTest do
         |> String.replace("\n", "\r\n")
 
       assert expected ==
-               ExSDP.serialize(%ExSDP{
+               to_string(%ExSDP{
                  attributes: [],
                  bandwidth: [],
                  connection_data: %ConnectionData{
@@ -546,14 +495,11 @@ defmodule ExSDP.RFCTest do
                  media: [
                    %Media{
                      attributes: [
-                       %Attribute{
-                         key: :rtpmap,
-                         value: %Attribute.RTPMapping{
-                           clock_rate: 8000,
-                           encoding: "PCMU",
-                           params: 1,
-                           payload_type: 0
-                         }
+                       %Attribute.RTPMapping{
+                         clock_rate: 8000,
+                         encoding: "PCMU",
+                         params: 1,
+                         payload_type: 0
                        }
                      ],
                      bandwidth: [],
@@ -566,14 +512,11 @@ defmodule ExSDP.RFCTest do
                    },
                    %Media{
                      attributes: [
-                       %Attribute{
-                         key: :rtpmap,
-                         value: %Attribute.RTPMapping{
-                           clock_rate: 90_000,
-                           encoding: "MPV",
-                           payload_type: 32,
-                           params: nil
-                         }
+                       %Attribute.RTPMapping{
+                         clock_rate: 90_000,
+                         encoding: "MPV",
+                         payload_type: 32,
+                         params: nil
                        }
                      ],
                      bandwidth: [],
@@ -587,18 +530,18 @@ defmodule ExSDP.RFCTest do
                  ],
                  origin: %Origin{
                    username: "bob",
-                   session_id: "2808844564",
-                   session_version: "2808844564",
+                   session_id: 2_808_844_564,
+                   session_version: 2_808_844_564,
                    address: %FQDN{value: "host.biloxi.example.com"}
                  },
                  phone_number: nil,
                  session_information: nil,
-                 session_name: %SessionName{value: "SDP Seminar"},
+                 session_name: "SDP Seminar",
                  time_repeats: [],
                  time_zones_adjustments: nil,
                  timing: %Timing{start_time: 0, stop_time: 0},
                  uri: nil,
-                 version: %Version{value: 0}
+                 version: 0
                })
     end
   end

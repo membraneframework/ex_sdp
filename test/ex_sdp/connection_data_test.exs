@@ -1,7 +1,7 @@
 defmodule ExSDP.ConnectionDataTest do
   use ExUnit.Case
 
-  alias ExSDP.{ConnectionData, Serializer}
+  alias ExSDP.ConnectionData
   alias ConnectionData.{IP4, IP6}
 
   describe "Connection information parser when working with ip4" do
@@ -94,12 +94,13 @@ defmodule ExSDP.ConnectionDataTest do
 
   describe "Connection Data Serializer serializes IPv4" do
     test "address with ttl" do
-      assert Serializer.serialize(%IP4{value: {43, 22, 11, 101}, ttl: 3}) ==
-               "IN IP4 43.22.11.101/3"
+      address = %IP4{value: {43, 22, 11, 101}, ttl: 3}
+      assert "#{address}" == "IN IP4 43.22.11.101/3"
     end
 
     test "address without ttl" do
-      assert Serializer.serialize(%IP4{value: {98, 122, 75, 1}}) == "IN IP4 98.122.75.1"
+      address = %IP4{value: {98, 122, 75, 1}}
+      assert "#{address}" == "IN IP4 98.122.75.1"
     end
 
     test "multiple addresses" do
@@ -111,14 +112,14 @@ defmodule ExSDP.ConnectionDataTest do
         ]
       }
 
-      assert Serializer.serialize(data) == "c=IN IP4 28.0.0.1/3"
+      assert "#{data}" == "IN IP4 28.0.0.1/3"
     end
   end
 
   describe "Connection Data Serializer serializes IPv6" do
     test "single address" do
-      assert Serializer.serialize(%IP6{value: {43, 0, 0, 0, 1, 1, 11, 101}}) ==
-               "IN IP6 2b::1:1:b:65"
+      address = %IP6{value: {43, 0, 0, 0, 1, 1, 11, 101}}
+      assert "#{address}" == "IN IP6 2b::1:1:b:65"
     end
 
     test "multiple addresses" do
@@ -132,7 +133,7 @@ defmodule ExSDP.ConnectionDataTest do
         ]
       }
 
-      assert Serializer.serialize(connection_data) == "c=IN IP6 3:48:c:4:3:7:5:0/5"
+      assert "#{connection_data}" == "IN IP6 3:48:c:4:3:7:5:0/5"
     end
   end
 end

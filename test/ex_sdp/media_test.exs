@@ -2,8 +2,6 @@ defmodule ExSDP.MediaTest do
   use ExUnit.Case
   use Bunch
 
-  alias ExSDP
-
   alias ExSDP.{
     Attribute,
     Bandwidth,
@@ -11,9 +9,10 @@ defmodule ExSDP.MediaTest do
     Encryption,
     Media,
     Origin,
-    Serializer,
     Timing
   }
+
+  alias ExSDP.Attribute.RTPMapping
 
   describe "Media parser" do
     test "processes valid media description" do
@@ -54,32 +53,23 @@ defmodule ExSDP.MediaTest do
         |> String.split("\n")
 
       parsed_attributes = [
-        %Attribute{
-          key: :rtpmap,
-          value: %Attribute.RTPMapping{
-            clock_rate: 8000,
-            encoding: "L8",
-            params: 1,
-            payload_type: 96
-          }
+        %Attribute.RTPMapping{
+          clock_rate: 8000,
+          encoding: "L8",
+          params: 1,
+          payload_type: 96
         },
-        %Attribute{
-          key: :rtpmap,
-          value: %Attribute.RTPMapping{
-            clock_rate: 8000,
-            encoding: "L16",
-            params: 1,
-            payload_type: 97
-          }
+        %Attribute.RTPMapping{
+          clock_rate: 8000,
+          encoding: "L16",
+          params: 1,
+          payload_type: 97
         },
-        %Attribute{
-          key: :rtpmap,
-          value: %Attribute.RTPMapping{
-            clock_rate: 11_025,
-            encoding: "L16",
-            params: 2,
-            payload_type: 98
-          }
+        %Attribute.RTPMapping{
+          clock_rate: 11_025,
+          encoding: "L16",
+          params: 2,
+          payload_type: 98
         }
       ]
 
@@ -122,7 +112,7 @@ defmodule ExSDP.MediaTest do
       session = %ExSDP{
         connection_data: connection_data,
         origin: %Origin{
-          session_id: "2890844526",
+          session_id: 2_890_844_526,
           address: %ConnectionData{
             addresses: [
               %ConnectionData.IP4{
@@ -131,7 +121,7 @@ defmodule ExSDP.MediaTest do
             ]
           },
           username: "-",
-          session_version: "2890842807"
+          session_version: 2_890_842_807
         },
         timing: %Timing{
           start_time: 2_873_397_496,
@@ -217,20 +207,17 @@ defmodule ExSDP.MediaTest do
   describe "Media serializer" do
     test "serializes audio description" do
       media = %Media{type: :audio, protocol: "RTP/AVP", fmt: [0], ports: [49_170]}
-      assert Serializer.serialize(media) == "m=audio 49170 RTP/AVP 0"
+      assert "#{media}" == "audio 49170 RTP/AVP 0"
     end
 
     test "serializes video description with an attribute" do
       # attribute = "rtpmap:99 h263-1998/90000"
 
-      attribute = %Attribute{
-        key: :rtpmap,
-        value: %Attribute.RTPMapping{
-          clock_rate: 90_000,
-          encoding: "h263-1998",
-          params: nil,
-          payload_type: 99
-        }
+      attribute = %Attribute.RTPMapping{
+        clock_rate: 90_000,
+        encoding: "h263-1998",
+        params: nil,
+        payload_type: 99
       }
 
       media = %Media{
@@ -241,8 +228,7 @@ defmodule ExSDP.MediaTest do
         attributes: [attribute]
       }
 
-      assert Serializer.serialize(media) ==
-               "m=video 51372 RTP/AVP 99\r\na=rtpmap:99 h263-1998/90000"
+      assert "#{media}" == "video 51372 RTP/AVP 99\r\na=rtpmap:99 h263-1998/90000"
     end
 
     test "serializes media description with title, bandwidth and encryption description" do
@@ -256,8 +242,7 @@ defmodule ExSDP.MediaTest do
         encryption: %Encryption{method: :prompt}
       }
 
-      assert Serializer.serialize(media) ==
-               "m=type 12345 some_protocol 100\r\ni=title\r\nb=CT:64\r\nk=prompt"
+      assert "#{media}" == "type 12345 some_protocol 100\r\ni=title\r\nb=CT:64\r\nk=prompt"
     end
 
     test "serializes media with connection_data description" do
@@ -287,15 +272,33 @@ defmodule ExSDP.MediaTest do
         fmt: [99]
       }
 
-      serialized_media = "m=video 51372 RTP/AVP 99"
+      serialized_media = "video 51372 RTP/AVP 99"
 
       addresses
       |> Enum.zip(serialized_addresses)
       |> Enum.each(fn {address, serialized_address} ->
         media = %Media{media | connection_data: address}
-        expected = serialized_media <> "\r\nc=" <> serialized_address
-        assert Serializer.serialize(media) == expected
+        expected = "#{serialized_media}\r\nc=#{serialized_address}"
+        assert "#{media}" == expected
       end)
+    end
+  end
+
+  describe "Utils functions" do
+    test "gets attribute by module" do
+      rtpmap = %RTPMapping{
+        clock_rate: 8000,
+        encoding: "L8",
+        params: 1,
+        payload_type: 96
+      }
+
+      media =
+        Media.new(:video, [51_372], "RTP/AVP", [99])
+        |> Media.add_attribute(rtpmap)
+
+      attr = Media.get_attribute(media, RTPMapping)
+      assert attr == rtpmap
     end
   end
 end

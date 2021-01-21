@@ -8,6 +8,7 @@ defmodule ExSDP.Origin do
 
   For more details please see [RFC4566 Section 5.2](https://tools.ietf.org/html/rfc4566#section-5.2)
   """
+  use Bunch.Access
 
   alias ExSDP.ConnectionData
 
@@ -16,16 +17,40 @@ defmodule ExSDP.Origin do
     :session_version,
     :address
   ]
-  defstruct @enforce_keys ++ [:username]
+  defstruct [username: "-"] ++ @enforce_keys
 
   @type t :: %__MODULE__{
-          username: binary() | nil,
-          session_id: binary(),
-          session_version: binary(),
+          username: binary(),
+          session_id: integer(),
+          session_version: integer(),
           address: ConnectionData.sdp_address()
         }
 
   @type reason :: :invalid_address | ConnectionData.reason()
+
+  @doc """
+  Returns new origin struct.
+
+  By default:
+  * `username` is `-`
+  * `session_id` is random 64 bit number
+  * `session_version` is `0`
+  * `address` is `ExSDP.ConnectionData.IP4` with `127.0.0.1` address
+  """
+  @spec new(
+          username: binary(),
+          session_id: integer(),
+          session_version: integer(),
+          address: ConnectionData.sdp_address()
+        ) :: t()
+  def new(opts \\ []) do
+    %__MODULE__{
+      username: Keyword.get(opts, :username, "-"),
+      session_id: Keyword.get(opts, :session_id, generate_random()),
+      session_version: Keyword.get(opts, :session_version, 0),
+      address: Keyword.get(opts, :address, %ExSDP.ConnectionData.IP4{value: {127, 0, 0, 1}})
+    }
+  end
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason}
   def parse(origin) do
@@ -35,8 +60,8 @@ defmodule ExSDP.Origin do
 
       origin = %__MODULE__{
         username: username,
-        session_id: sess_id,
-        session_version: sess_version,
+        session_id: String.to_integer(sess_id),
+        session_version: String.to_integer(sess_version),
         address: conn_info
       }
 
@@ -46,24 +71,20 @@ defmodule ExSDP.Origin do
       _ -> {:error, :invalid_origin}
     end
   end
+
+  @doc """
+  Increments `session_version` field.
+
+  Can be used while sending offer/answer again.
+  """
+  @spec bump_version(t()) :: {:ok, t()}
+  def bump_version(origin), do: {:ok, %{origin | session_version: origin.session_version + 1}}
+
+  defp generate_random(), do: :crypto.strong_rand_bytes(8) |> :binary.decode_unsigned()
 end
 
-defimpl ExSDP.Serializer, for: ExSDP.Origin do
-  alias ExSDP.Serializer
-
-  def serialize(origin) do
-    serialized_address = Serializer.serialize(origin.address)
-
-    origin_serialized_fields = [
-      serialize_username(origin.username),
-      origin.session_id,
-      origin.session_version,
-      serialized_address
-    ]
-
-    "o=" <> Enum.join(origin_serialized_fields, " ")
+defimpl String.Chars, for: ExSDP.Origin do
+  def to_string(origin) do
+    "#{origin.username} #{origin.session_id} #{origin.session_version} #{origin.address}"
   end
-
-  defp serialize_username(nil), do: "-"
-  defp serialize_username(username), do: username
 end

@@ -1,7 +1,7 @@
 defmodule ExSDP.RepeatTimesTest do
   use ExUnit.Case
 
-  alias ExSDP.{RepeatTimes, Serializer}
+  alias ExSDP.RepeatTimes
 
   describe "RepeatTimes parses compact format" do
     test "process a valid compact declaration" do
@@ -55,7 +55,7 @@ defmodule ExSDP.RepeatTimesTest do
   describe "RepeatTimes serializer" do
     test "serialize rebroadcasts empty list of offsets" do
       rebroadcasts = %RepeatTimes{repeat_interval: 1, active_duration: 1, offsets: []}
-      assert Serializer.serialize(rebroadcasts) == "r=1 1"
+      assert "#{rebroadcasts}" == "1 1"
     end
 
     test "serialize rebroadcasts with multiple offsets" do
@@ -65,7 +65,7 @@ defmodule ExSDP.RepeatTimesTest do
         offsets: [0, 90_000, 3]
       }
 
-      assert Serializer.serialize(rebroadcasts) == "r=604800 3600 0 90000 3"
+      assert "#{rebroadcasts}" == "604800 3600 0 90000 3"
     end
   end
 end
