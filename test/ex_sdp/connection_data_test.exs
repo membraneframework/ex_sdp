@@ -2,135 +2,123 @@ defmodule ExSDP.ConnectionDataTest do
   use ExUnit.Case
 
   alias ExSDP.ConnectionData
-  alias ConnectionData.{IP4, IP6}
 
   describe "Connection information parser when working with ip4" do
     test "parses valid connection with ttl and count params" do
-      assert {:ok, connections} = ConnectionData.parse("IN IP4 224.2.1.1/127/3")
+      assert {:ok, connection_data} = ConnectionData.parse("IN IP4 224.2.1.1/127/3")
 
-      assert connections == [
-               %IP4{
-                 ttl: 127,
-                 value: {224, 2, 1, 1}
-               },
-               %IP4{
-                 ttl: 127,
-                 value: {224, 2, 1, 2}
-               },
-               %IP4{
-                 ttl: 127,
-                 value: {224, 2, 1, 3}
-               }
-             ]
+      assert connection_data == %ConnectionData{
+               address: {224, 2, 1, 1},
+               address_count: 3,
+               ttl: 127,
+               network_type: "IN"
+             }
     end
 
     test "parses valid connection with ttl" do
-      assert {:ok, connections} = ConnectionData.parse("IN IP4 224.2.1.1/127")
+      assert {:ok, connection_data} = ConnectionData.parse("IN IP4 224.2.1.1/127")
 
-      assert connections == %IP4{
+      assert connection_data == %ConnectionData{
                ttl: 127,
-               value: {224, 2, 1, 1}
+               address_count: nil,
+               address: {224, 2, 1, 1},
+               network_type: "IN"
              }
     end
 
     test "parses valid connection " do
-      assert {:ok, connections} = ConnectionData.parse("IN IP4 224.2.1.1")
+      assert {:ok, connection_data} = ConnectionData.parse("IN IP4 224.2.1.1")
 
-      assert connections == %IP4{
+      assert connection_data == %ConnectionData{
                ttl: nil,
-               value: {224, 2, 1, 1}
+               address_count: nil,
+               address: {224, 2, 1, 1},
+               network_type: "IN"
              }
     end
   end
 
   describe "Connection information parser when working with ip6" do
     test "parses valid connection with count param" do
-      assert {:ok, connections} = ConnectionData.parse("IN IP6 FF15::101/3")
+      assert {:ok, connection_data} = ConnectionData.parse("IN IP6 FF15::101/3")
 
-      assert connections == [
-               %IP6{
-                 value: {65_301, 0, 0, 0, 0, 0, 0, 257}
-               },
-               %IP6{
-                 value: {65_301, 0, 0, 0, 0, 0, 0, 258}
-               },
-               %IP6{
-                 value: {65_301, 0, 0, 0, 0, 0, 0, 259}
+      assert connection_data ==
+               %ConnectionData{
+                 address: {65_301, 0, 0, 0, 0, 0, 0, 257},
+                 address_count: 3,
+                 ttl: nil,
+                 network_type: "IN"
                }
-             ]
     end
 
     test "parses valid connection" do
-      assert {:ok, connections} = ConnectionData.parse("IN IP6 FF15::103")
+      assert {:ok, connection_data} = ConnectionData.parse("IN IP6 FF15::103")
 
-      assert connections == %IP6{
-               value: {65_301, 0, 0, 0, 0, 0, 0, 259}
+      assert connection_data == %ConnectionData{
+               address: {65_301, 0, 0, 0, 0, 0, 0, 259},
+               address_count: nil,
+               ttl: nil,
+               network_type: "IN"
              }
     end
   end
 
   describe "Connection information parser returns an error when" do
     test "connection spec is invalid" do
-      assert {:error, :invalid_connection_data} = ConnectionData.parse("IN EPI")
+      assert {:error, {:invalid_connection_data, :too_few_fields}} =
+               ConnectionData.parse("IN EPI")
     end
 
     test "address is not valid" do
-      assert {:error, :invalid_address} = ConnectionData.parse("IN IP4 224.2.1.1/127/3/4")
+      assert {:error, {:invalid_connection_data, :invalid_ttl_or_address_count}} =
+               ConnectionData.parse("IN IP4 224.2.1.1/127/3/4")
     end
 
     test "either ttl or count is not an integer" do
-      assert {:error, :option_nan} = ConnectionData.parse("IN IP4 224.2.1.1/127/3d")
-      assert {:error, :option_nan} = ConnectionData.parse("IN IP4 224.2.1.1/127a/3")
+      assert {:error, {:invalid_connection_data, :invalid_ttl_or_address_count}} =
+               ConnectionData.parse("IN IP4 224.2.1.1/127/3d")
+
+      assert {:error, {:invalid_connection_data, :invalid_ttl_or_address_count}} =
+               ConnectionData.parse("IN IP4 224.2.1.1/127a/3")
     end
 
     test "ttl is not in 0..255 range" do
-      assert {:error, :wrong_ttl} = ConnectionData.parse("IN IP4 224.2.1.1/256")
-    end
-
-    test "when address expansion overflows IP octet range" do
-      assert {:error, :invalid_address} = ConnectionData.parse("IN IP4 224.2.1.255/127/3")
+      assert {:error, {:invalid_connection_data, :invalid_ttl_or_address_count}} =
+               ConnectionData.parse("IN IP4 224.2.1.1/256")
     end
   end
 
   describe "Connection Data Serializer serializes IPv4" do
     test "address with ttl" do
-      address = %IP4{value: {43, 22, 11, 101}, ttl: 3}
-      assert "#{address}" == "IN IP4 43.22.11.101/3"
+      connection_data = %ConnectionData{address: {43, 22, 11, 101}, ttl: 3}
+      assert "#{connection_data}" == "IN IP4 43.22.11.101/3"
     end
 
     test "address without ttl" do
-      address = %IP4{value: {98, 122, 75, 1}}
-      assert "#{address}" == "IN IP4 98.122.75.1"
+      connection_data = %ConnectionData{address: {98, 122, 75, 1}}
+      assert "#{connection_data}" == "IN IP4 98.122.75.1"
     end
 
     test "multiple addresses" do
-      data = %ConnectionData{
-        addresses: [
-          %IP4{value: {28, 0, 0, 1}},
-          %IP4{value: {28, 0, 0, 2}},
-          %IP4{value: {28, 0, 0, 3}}
-        ]
+      connection_data = %ConnectionData{
+        address: {28, 0, 0, 1},
+        address_count: 3
       }
 
-      assert "#{data}" == "IN IP4 28.0.0.1/3"
+      assert "#{connection_data}" == "IN IP4 28.0.0.1/3"
     end
   end
 
   describe "Connection Data Serializer serializes IPv6" do
     test "single address" do
-      address = %IP6{value: {43, 0, 0, 0, 1, 1, 11, 101}}
-      assert "#{address}" == "IN IP6 2b::1:1:b:65"
+      connection_data = %ConnectionData{address: {43, 0, 0, 0, 1, 1, 11, 101}}
+      assert "#{connection_data}" == "IN IP6 2b::1:1:b:65"
     end
 
     test "multiple addresses" do
       connection_data = %ConnectionData{
-        addresses: [
-          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 0}},
-          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 1}},
-          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 2}},
-          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 3}},
-          %IP6{value: {3, 72, 12, 4, 3, 7, 5, 4}}
-        ]
+        address: {3, 72, 12, 4, 3, 7, 5, 0},
+        address_count: 5
       }
 
       assert "#{connection_data}" == "IN IP6 3:48:c:4:3:7:5:0/5"

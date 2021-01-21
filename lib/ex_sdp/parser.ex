@@ -97,8 +97,8 @@ defmodule ExSDP.Parser do
     do: {rest, %ExSDP{spec | phone_number: phone_number}}
 
   defp parse_line(["c=" <> connection_data | rest], spec) do
-    with {:ok, addresses} <- ConnectionData.parse(connection_data) do
-      {rest, %ExSDP{spec | connection_data: %ConnectionData{addresses: [addresses]}}}
+    with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(connection_data) do
+      {rest, %ExSDP{spec | connection_data: connection_data}}
     end
   end
 
@@ -146,7 +146,7 @@ defmodule ExSDP.Parser do
     end
   end
 
-  defp format_error(["m=" <> _ = line | rest], reason) do
+  defp format_error(["m=" <> _ = line | rest], {invalid_line, reason}) do
     attributes =
       rest
       |> Enum.take_while(fn
@@ -162,15 +162,15 @@ defmodule ExSDP.Parser do
     Attributes:
     #{attributes}
 
-    with reason: #{reason}
+    with reason: #{invalid_line} #{reason}
     """
   end
 
-  defp format_error([line | _], reason) do
+  defp format_error([line | _], {invalid_line, reason}) do
     """
     An error has occurred while parsing following SDP line:
     #{line}
-    with reason: #{reason}
+    with reason: #{invalid_line} #{reason}
     """
   end
 

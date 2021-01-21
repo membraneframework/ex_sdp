@@ -10,23 +10,22 @@ defmodule ExSDP.Origin do
   """
   use Bunch.Access
 
-  alias ExSDP.ConnectionData
+  alias ExSDP.{Address, Utils}
 
   @enforce_keys [
     :session_id,
     :session_version,
     :address
   ]
-  defstruct [username: "-"] ++ @enforce_keys
+  defstruct [username: "-", network_type: "IN"] ++ @enforce_keys
 
   @type t :: %__MODULE__{
           username: binary(),
           session_id: integer(),
           session_version: integer(),
-          address: ConnectionData.sdp_address()
+          network_type: binary(),
+          address: Address.t()
         }
-
-  @type reason :: :invalid_address | ConnectionData.reason()
 
   @doc """
   Returns new origin struct.
@@ -41,34 +40,39 @@ defmodule ExSDP.Origin do
           username: binary(),
           session_id: integer(),
           session_version: integer(),
-          address: ConnectionData.sdp_address()
+          address: Address.t()
         ) :: t()
   def new(opts \\ []) do
     %__MODULE__{
       username: Keyword.get(opts, :username, "-"),
       session_id: Keyword.get(opts, :session_id, generate_random()),
       session_version: Keyword.get(opts, :session_version, 0),
-      address: Keyword.get(opts, :address, %ExSDP.ConnectionData.IP4{value: {127, 0, 0, 1}})
+      address: Keyword.get(opts, :address, {127, 0, 0, 1})
     }
   end
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, reason}
+  @spec parse(binary()) ::
+          {:ok, t()} | {:error, {:invalid_origin, :invalid_addrtype | :invalid_address}}
   def parse(origin) do
-    with [username, sess_id, sess_version, conn_info] <- String.split(origin, " ", parts: 4),
-         {:ok, conn_info} <- ConnectionData.parse(conn_info) do
+    with {:ok, [username, sess_id, sess_version, nettype, addrtype, address]} <-
+           Utils.split(origin, " ", 6),
+         {:ok, addrtype} <- Address.parse_addrtype(addrtype),
+         {:ok, address} <- Address.parse_address(address) do
       username = if username == "-", do: nil, else: username
+      # check whether fqdn
+      address = if is_binary(address), do: {addrtype, address}, else: address
 
       origin = %__MODULE__{
         username: username,
         session_id: String.to_integer(sess_id),
         session_version: String.to_integer(sess_version),
-        address: conn_info
+        network_type: nettype,
+        address: address
       }
 
       {:ok, origin}
     else
-      {:error, _} = error -> error
-      _ -> {:error, :invalid_origin}
+      {:error, reason} -> {:error, {:invalid_origin, reason}}
     end
   end
 
@@ -84,7 +88,16 @@ defmodule ExSDP.Origin do
 end
 
 defimpl String.Chars, for: ExSDP.Origin do
+  alias ExSDP.Address
+
   def to_string(origin) do
-    "#{origin.username} #{origin.session_id} #{origin.session_version} #{origin.address}"
+    """
+    #{origin.username} \
+    #{origin.session_id} \
+    #{origin.session_version} \
+    #{origin.network_type} \
+    #{Address.get_addrtype(origin.address)} \
+    #{Address.serialize_address(origin.address)}\
+    """
   end
 end

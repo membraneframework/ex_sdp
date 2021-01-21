@@ -19,182 +19,103 @@ defmodule ExSDP.ConnectionData do
   use Bunch
   use Bunch.Access
 
-  @ipv4_max_value 255
-  @ipv6_max_value 65_535
+  alias ExSDP.{Address, Utils}
 
-  defmodule IP4 do
-    @moduledoc """
-    Module representing IPv4 address.
-    """
-    @enforce_keys [:value]
-    defstruct @enforce_keys ++ [:ttl]
+  @type reason ::
+          :invalid_addrtype
+          | :invalid_address
+          | :ip6_cannot_have_ttl
+          | :invalid_ttl_or_address_count
 
-    @type t :: %__MODULE__{
-            value: :inet.ip4_address(),
-            ttl: 0..255 | nil
-          }
-  end
-
-  defmodule IP6 do
-    @moduledoc """
-    Module representing IPv6 address.
-    """
-    @enforce_keys [:value]
-    defstruct @enforce_keys
-
-    @type t :: %__MODULE__{
-            value: :inet.ip6_address()
-          }
-  end
-
-  defmodule FQDN do
-    @moduledoc """
-    Module representing Fully Qualified Domain Name.
-    """
-    @enforce_keys [:value]
-    defstruct @enforce_keys
-
-    @type t :: %__MODULE__{
-            value: binary()
-          }
-  end
-
-  @type sdp_address :: IP6.t() | IP4.t() | FQDN.t()
-  @type reason :: :invalid_address | :invalid_connection_data | :option_nan | :wrong_ttl
-
-  @enforce_keys [:addresses]
-  defstruct @enforce_keys ++ [network_type: "IN"]
+  @enforce_keys [:address]
+  defstruct @enforce_keys ++ [:address_count, :ttl, network_type: "IN"]
 
   @type t :: %__MODULE__{
-          addresses: [IP6.t()] | [IP6.t()] | [FQDN.t()],
+          address: Address.t(),
+          address_count: pos_integer() | nil,
+          ttl: 0..255 | nil,
           network_type: binary()
         }
 
-  @spec parse(binary()) :: {:ok, [sdp_address()] | sdp_address()} | {:error, reason}
-  def parse(connection_string) do
-    with [_nettype, addrtype, connection_address] <- String.split(connection_string, " "),
-         [address | optional] <- String.split(connection_address, "/") do
-      parse_address(address, addrtype, optional)
+  @spec parse(binary()) :: {:ok, t()} | {:error, {:invalid_connection_data, reason}}
+  def parse(connection) do
+    with {:ok, [nettype, addrtype, connection_address]} <- Utils.split(connection, " ", 3),
+         {:ok, addrtype} <- Address.parse_addrtype(addrtype),
+         [address | ttl_with_address_count] <- String.split(connection_address, "/", parts: 2),
+         {:ok, address} <- Address.parse_address(address),
+         {:ok, ttl, address_count} <-
+           parse_ttl_with_address_count(ttl_with_address_count, addrtype) do
+      # check whether fqdn
+      address = if is_binary(address), do: {addrtype, address}, else: address
+
+      connection_data = %__MODULE__{
+        address: address,
+        address_count: address_count,
+        ttl: ttl,
+        network_type: nettype
+      }
+
+      {:ok, connection_data}
     else
-      list when is_list(list) -> {:error, :invalid_connection_data}
+      {:error, reason} -> {:error, {:invalid_connection_data, reason}}
     end
   end
 
-  defp parse_address(address, addrtype, optional) do
-    with {:ok, address} <- address |> to_charlist() |> :inet.parse_address(),
-         {:ok, addresses} <- handle_address(address, addrtype, optional) do
-      {:ok, addresses}
-    else
-      {:error, :einval} -> {:ok, %FQDN{value: address}}
-      {:error, _} = error -> error
+  defp parse_ttl_with_address_count([], _addrtype), do: {:ok, nil, nil}
+  defp parse_ttl_with_address_count([""], _addrtype), do: {:error, :invalid_ttl_or_address_count}
+
+  defp parse_ttl_with_address_count([ttl_with_address_count], :IP4) do
+    case String.split(ttl_with_address_count, "/") do
+      [ttl] ->
+        case Utils.parse_numeric_string(ttl) do
+          {:ok, ttl} when 0 <= ttl and ttl <= 255 -> {:ok, ttl, nil}
+          _ -> {:error, :invalid_ttl_or_address_count}
+        end
+
+      [ttl | [address_count]] ->
+        with {:ok, ttl} <- Utils.parse_numeric_string(ttl),
+             {:ok, address_count} <- Utils.parse_numeric_string(address_count) do
+          {:ok, ttl, address_count}
+        else
+          _ -> {:error, :invalid_ttl_or_address_count}
+        end
+
+      _ ->
+        {:error, :invalid_ttl_or_address_count}
     end
   end
 
-  defp handle_address(address, type, options)
-  defp handle_address(address, "IP4", []), do: {:ok, %IP4{value: address}}
+  defp parse_ttl_with_address_count([ttl_with_address_count], :IP6) do
+    case String.split(ttl_with_address_count, "/") do
+      [address_count] ->
+        case Utils.parse_numeric_string(address_count) do
+          {:ok, address_count} -> {:ok, nil, address_count}
+          _ -> {:error, :invalid_ttl_or_address_count}
+        end
 
-  defp handle_address(address, "IP4", [ttl]) do
-    with {:ok, ttl} <- parse_ttl(ttl) do
-      {:ok, %IP4{value: address, ttl: ttl}}
+      [_ttl | [_address_count]] ->
+        {:error, :ip6_cannot_have_ttl}
+
+      _ ->
+        {:error, :invalid_ttl_or_address_count}
     end
   end
-
-  defp handle_address(address, "IP4", [ttl, count]) do
-    with {:ok, ttl} <- parse_ttl(ttl),
-         {:ok, addresses} <- unfold_addresses(address, count, @ipv4_max_value) do
-      addresses = Enum.map(addresses, fn address -> %IP4{value: address, ttl: ttl} end)
-      {:ok, addresses}
-    else
-      wrong_ttl when is_number(wrong_ttl) -> {:error, :wrong_ttl}
-      {:error, _} = error -> error
-    end
-  end
-
-  defp handle_address(address, "IP6", []), do: {:ok, %IP6{value: address}}
-
-  defp handle_address(address, "IP6", [count]) do
-    with {:ok, addresses} <- unfold_addresses(address, count, @ipv6_max_value) do
-      addresses = Enum.map(addresses, fn address -> %IP6{value: address} end)
-      {:ok, addresses}
-    end
-  end
-
-  defp handle_address(_, _, _), do: {:error, :invalid_address}
-
-  defp parse_ttl(ttl) do
-    ttl
-    |> parse_numeric_option()
-    ~>> ({:ok, ttl} when ttl not in 0..255 -> {:error, :wrong_ttl})
-  end
-
-  defp parse_numeric_option(option) do
-    option
-    |> Integer.parse()
-    |> case do
-      {number, ""} -> {:ok, number}
-      _ -> {:error, :option_nan}
-    end
-  end
-
-  # https://tools.ietf.org/html/rfc4566#page-15 defines a notation where
-  # ip_ddress/count defines a sequence of consecuttive addresses, this function
-  # creates such sequence.
-  defp unfold_addresses(address, count, max_value) do
-    with {:ok, count} <- parse_numeric_option(count) do
-      0..(count - 1)
-      |> Bunch.Enum.try_map(&offset_ip(address, &1, max_value))
-    end
-  end
-
-  defp offset_ip(ip, offset, max_value) do
-    index = tuple_size(ip) - 1
-    value = elem(ip, index)
-
-    if value + offset <= max_value do
-      {:ok, put_elem(ip, index, value + offset)}
-    else
-      {:error, :invalid_address}
-    end
-  end
-end
-
-defimpl String.Chars, for: ExSDP.ConnectionData.IP4 do
-  alias ExSDP.ConnectionData.IP4
-
-  def to_string(%IP4{ttl: nil, value: value}) do
-    "IN IP4 #{:inet.ntoa(value)}"
-  end
-
-  def to_string(%IP4{ttl: ttl, value: value}) do
-    "IN IP4 #{:inet.ntoa(value)}/#{ttl}"
-  end
-end
-
-defimpl String.Chars, for: ExSDP.ConnectionData.IP6 do
-  alias ExSDP.ConnectionData
-  alias ConnectionData.IP6
-
-  def to_string(%IP6{value: value}) do
-    "IN IP6 #{:inet.ntoa(value)}"
-  end
-end
-
-defimpl String.Chars, for: ExSDP.ConnectionData.FQDN do
-  alias ExSDP.ConnectionData.FQDN
-  def to_string(%FQDN{value: address}), do: "IN IP4 #{address}"
 end
 
 defimpl String.Chars, for: ExSDP.ConnectionData do
-  alias ExSDP.ConnectionData
+  alias ExSDP.{Address, ConnectionData}
 
-  def to_string(%ConnectionData{addresses: []}), do: ""
-
-  def to_string(%ConnectionData{addresses: list}) do
-    size = list |> length |> serialize_size
-    "#{hd(list)}#{size}"
+  def to_string(%ConnectionData{} = connection) do
+    """
+    #{connection.network_type} \
+    #{Address.get_addrtype(connection.address)} \
+    #{Address.serialize_address(connection.address)}\
+    #{serialize_ttl_with_address_count(connection.ttl, connection.address_count)}\
+    """
   end
 
-  defp serialize_size(0), do: ""
-  defp serialize_size(1), do: ""
-  defp serialize_size(size) when size > 1, do: "/" <> Integer.to_string(size)
+  defp serialize_ttl_with_address_count(nil, nil), do: ""
+  defp serialize_ttl_with_address_count(ttl, nil), do: "/#{ttl}"
+  defp serialize_ttl_with_address_count(nil, address_count), do: "/#{address_count}"
+  defp serialize_ttl_with_address_count(ttl, address_count), do: "/#{ttl}/#{address_count}"
 end

@@ -97,31 +97,14 @@ defmodule ExSDP.MediaTest do
         |> Media.parse()
 
       bandwidth = [%Bandwidth{bandwidth: 128, type: "X-YZ"}]
-
-      connection_data = [
-        %ConnectionData{
-          addresses: [
-            %ConnectionData.IP4{
-              ttl: 127,
-              value: {224, 2, 17, 12}
-            }
-          ]
-        }
-      ]
-
+      connection_data = %ConnectionData{ttl: 127, address: {224, 2, 17, 12}}
       encryption = %Encryption{method: :clear}
 
       session = %ExSDP{
         connection_data: connection_data,
         origin: %Origin{
           session_id: 2_890_844_526,
-          address: %ConnectionData{
-            addresses: [
-              %ConnectionData.IP4{
-                value: {10, 47, 16, 5}
-              }
-            ]
-          },
+          address: %ConnectionData{address: {10, 47, 16, 5}},
           username: "-",
           session_version: 2_890_842_807
         },
@@ -177,14 +160,7 @@ defmodule ExSDP.MediaTest do
 
       assert %Media{
                bandwidth: [%Bandwidth{bandwidth: 128, type: :AS}],
-               connection_data: %ConnectionData{
-                 addresses: [
-                   %ConnectionData.IP4{
-                     ttl: 220,
-                     value: {144, 2, 17, 12}
-                   }
-                 ]
-               },
+               connection_data: [%ConnectionData{ttl: 220, address: {144, 2, 17, 12}}],
                encryption: %Encryption{key: nil, method: :prompt}
              } = result
     end
@@ -249,16 +225,9 @@ defmodule ExSDP.MediaTest do
 
     test "serializes media with connection_data description" do
       addresses = [
-        %ConnectionData.IP4{
-          ttl: 127,
-          value: {224, 2, 1, 1}
-        },
-        %ConnectionData.IP6{
-          value: {15, 0, 0, 0, 0, 0, 0, 101}
-        },
-        %ConnectionData.FQDN{
-          value: "https://some.uri.net"
-        }
+        %ConnectionData{ttl: 127, address: {224, 2, 1, 1}},
+        %ConnectionData{address: {15, 0, 0, 0, 0, 0, 0, 101}},
+        %ConnectionData{address: {:IP4, "https://some.uri.net"}}
       ]
 
       serialized_addresses = [

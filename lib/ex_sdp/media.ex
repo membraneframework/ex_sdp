@@ -121,12 +121,14 @@ defmodule ExSDP.Media do
   def parse_optional(["i=" <> title | rest], media),
     do: parse_optional(rest, %__MODULE__{media | title: title})
 
-  def parse_optional(["c=" <> conn | rest], %__MODULE__{connection_data: info} = media) do
-    with {:ok, conn} <- ConnectionData.parse(conn) do
-      conn
-      |> Bunch.listify()
-      ~> %__MODULE__{media | connection_data: %ConnectionData{addresses: &1 ++ info}}
-      ~> parse_optional(rest, &1)
+  def parse_optional(["c=" <> conn | rest], media) do
+    with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(conn) do
+      connection_data = %__MODULE__{
+        media
+        | connection_data: media.connection_data ++ [connection_data]
+      }
+
+      parse_optional(rest, connection_data)
     end
   end
 

@@ -16,8 +16,6 @@ defmodule ExSDP.RFCTest do
     Timing
   }
 
-  alias ConnectionData.{FQDN, IP4}
-
   describe "SDP parser processes SDP specs from RFC" do
     @tag integration: true
     test "Parses single media spec with flag attributes" do
@@ -41,27 +39,13 @@ defmodule ExSDP.RFCTest do
 
       assert session_spec == %ExSDP{
                attributes: [:recvonly],
-               connection_data: %ConnectionData{
-                 addresses: [
-                   %IP4{
-                     ttl: 127,
-                     value: {224, 2, 17, 12}
-                   }
-                 ]
-               },
+               connection_data: %ConnectionData{ttl: 127, address: {224, 2, 17, 12}},
                email: "j.doe@example.com (Jane Doe)",
                media: [
                  %Media{
                    attributes: [],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     addresses: [
-                       %IP4{
-                         ttl: 127,
-                         value: {224, 2, 17, 12}
-                       }
-                     ]
-                   },
+                   connection_data: %ConnectionData{ttl: 127, address: {224, 2, 17, 12}},
                    fmt: [0],
                    port: 49_170,
                    protocol: "RTP/AVP",
@@ -75,14 +59,7 @@ defmodule ExSDP.RFCTest do
                        payload_type: 99
                      }
                    ],
-                   connection_data: %ConnectionData{
-                     addresses: [
-                       %IP4{
-                         ttl: 127,
-                         value: {224, 2, 17, 12}
-                       }
-                     ]
-                   },
+                   connection_data: %ConnectionData{ttl: 127, address: {224, 2, 17, 12}},
                    fmt: [99],
                    port: 51_372,
                    protocol: "RTP/AVP",
@@ -90,9 +67,7 @@ defmodule ExSDP.RFCTest do
                  }
                ],
                origin: %Origin{
-                 address: %IP4{
-                   value: {10, 47, 16, 5}
-                 },
+                 address: {10, 47, 16, 5},
                  session_id: 2_890_844_526,
                  session_version: 2_890_842_807,
                  username: "jdoe"
@@ -131,9 +106,7 @@ defmodule ExSDP.RFCTest do
       assert result == %ExSDP{
                attributes: [],
                bandwidth: [],
-               connection_data: %ConnectionData{
-                 addresses: [%FQDN{value: "host.atlanta.example.com"}]
-               },
+               connection_data: %ConnectionData{address: {:IP4, "host.atlanta.example.com"}},
                email: nil,
                encryption: nil,
                media: [
@@ -159,9 +132,7 @@ defmodule ExSDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     addresses: [%FQDN{value: "host.atlanta.example.com"}]
-                   },
+                   connection_data: %ConnectionData{address: {:IP4, "host.atlanta.example.com"}},
                    encryption: nil,
                    fmt: [0, 8, 97],
                    port: 49_170,
@@ -183,9 +154,7 @@ defmodule ExSDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     addresses: [%FQDN{value: "host.atlanta.example.com"}]
-                   },
+                   connection_data: %ConnectionData{address: {:IP4, "host.atlanta.example.com"}},
                    encryption: nil,
                    fmt: [31, 32],
                    port: 51_372,
@@ -195,7 +164,7 @@ defmodule ExSDP.RFCTest do
                  }
                ],
                origin: %Origin{
-                 address: %FQDN{value: "host.atlanta.example.com"},
+                 address: {:IP4, "host.atlanta.example.com"},
                  session_id: 2_890_844_526,
                  session_version: 2_890_844_526,
                  username: "alice"
@@ -231,9 +200,7 @@ defmodule ExSDP.RFCTest do
       assert %ExSDP{
                attributes: [],
                bandwidth: [],
-               connection_data: %ConnectionData{
-                 addresses: [%FQDN{value: "host.biloxi.example.com"}]
-               },
+               connection_data: %ConnectionData{address: {:IP4, "host.biloxi.example.com"}},
                email: nil,
                encryption: nil,
                media: [
@@ -247,9 +214,7 @@ defmodule ExSDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     addresses: [%FQDN{value: "host.biloxi.example.com"}]
-                   },
+                   connection_data: %ConnectionData{address: {:IP4, "host.biloxi.example.com"}},
                    encryption: nil,
                    fmt: [0],
                    port: 49_174,
@@ -267,9 +232,7 @@ defmodule ExSDP.RFCTest do
                      }
                    ],
                    bandwidth: [],
-                   connection_data: %ConnectionData{
-                     addresses: [%FQDN{value: "host.biloxi.example.com"}]
-                   },
+                   connection_data: %ConnectionData{address: {:IP4, "host.biloxi.example.com"}},
                    encryption: nil,
                    fmt: [32],
                    port: 49_170,
@@ -282,7 +245,7 @@ defmodule ExSDP.RFCTest do
                  username: "bob",
                  session_id: 2_808_844_564,
                  session_version: 2_808_844_564,
-                 address: %FQDN{value: "host.biloxi.example.com"}
+                 address: {:IP4, "host.biloxi.example.com"}
                },
                phone_number: nil,
                session_information: nil,
@@ -319,14 +282,7 @@ defmodule ExSDP.RFCTest do
       assert expected ==
                to_string(%ExSDP{
                  attributes: [:recvonly],
-                 connection_data: %ConnectionData{
-                   addresses: [
-                     %IP4{
-                       ttl: 127,
-                       value: {224, 2, 17, 12}
-                     }
-                   ]
-                 },
+                 connection_data: %ConnectionData{ttl: 127, address: {224, 2, 17, 12}},
                  email: "j.doe@example.com (Jane Doe)",
                  media: [
                    %Media{
@@ -352,9 +308,7 @@ defmodule ExSDP.RFCTest do
                    }
                  ],
                  origin: %Origin{
-                   address: %IP4{
-                     value: {10, 47, 16, 5}
-                   },
+                   address: {10, 47, 16, 5},
                    session_id: 2_890_844_526,
                    session_version: 2_890_842_807,
                    username: "jdoe"
@@ -393,9 +347,7 @@ defmodule ExSDP.RFCTest do
                to_string(%ExSDP{
                  attributes: [],
                  bandwidth: [],
-                 connection_data: %ConnectionData{
-                   addresses: [%FQDN{value: "host.atlanta.example.com"}]
-                 },
+                 connection_data: %ConnectionData{address: {:IP4, "host.atlanta.example.com"}},
                  email: nil,
                  encryption: nil,
                  media: [
@@ -451,7 +403,7 @@ defmodule ExSDP.RFCTest do
                    }
                  ],
                  origin: %Origin{
-                   address: %FQDN{value: "host.atlanta.example.com"},
+                   address: {:IP4, "host.atlanta.example.com"},
                    session_id: 2_890_844_526,
                    session_version: 2_890_844_526,
                    username: "alice"
@@ -487,9 +439,7 @@ defmodule ExSDP.RFCTest do
                to_string(%ExSDP{
                  attributes: [],
                  bandwidth: [],
-                 connection_data: %ConnectionData{
-                   addresses: [%FQDN{value: "host.biloxi.example.com"}]
-                 },
+                 connection_data: %ConnectionData{address: {:IP4, "host.biloxi.example.com"}},
                  email: nil,
                  encryption: nil,
                  media: [
@@ -532,7 +482,7 @@ defmodule ExSDP.RFCTest do
                    username: "bob",
                    session_id: 2_808_844_564,
                    session_version: 2_808_844_564,
-                   address: %FQDN{value: "host.biloxi.example.com"}
+                   address: {:IP4, "host.biloxi.example.com"}
                  },
                  phone_number: nil,
                  session_information: nil,

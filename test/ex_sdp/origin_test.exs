@@ -1,8 +1,7 @@
 defmodule ExSDP.OriginTest do
   use ExUnit.Case
 
-  alias ExSDP.{ConnectionData, Origin}
-  alias ConnectionData.FQDN
+  alias ExSDP.Origin
 
   describe "Origin parser" do
     test "processes valid origin declaration" do
@@ -10,9 +9,7 @@ defmodule ExSDP.OriginTest do
 
       assert origin == %Origin{
                session_id: 2_890_844_526,
-               address: %ConnectionData.IP4{
-                 value: {10, 47, 16, 5}
-               },
+               address: {10, 47, 16, 5},
                session_version: 2_890_842_807,
                username: "jdoe"
              }
@@ -23,27 +20,26 @@ defmodule ExSDP.OriginTest do
 
       assert origin == %Origin{
                session_id: 2_890_844_526,
-               address: %ConnectionData.IP4{
-                 value: {10, 47, 16, 5}
-               },
+               address: {10, 47, 16, 5},
                session_version: 2_890_842_807,
                username: nil
              }
     end
 
     test "returns an error if declaration is invalid" do
-      assert {:error, :invalid_origin} = Origin.parse("jdoe 2890844526 2890842807")
+      assert {:error, {:invalid_origin, :too_few_fields}} =
+               Origin.parse("jdoe 2890844526 2890842807")
     end
 
     test "returns an error if declaration contains not supported address type" do
-      assert {:error, :invalid_address} =
+      assert {:error, {:invalid_origin, :invalid_addrtype}} =
                Origin.parse("jdoe 2890844526 2890842807 IN NOTIP 10.47.16.5")
     end
 
     test "processes origin with FQDN" do
       assert {:ok,
               %Origin{
-                address: %FQDN{value: "host.origin.name"},
+                address: {:IP4, "host.origin.name"},
                 session_id: 2_890_844_526,
                 session_version: 2_890_842_807,
                 username: "jdoe"
@@ -55,12 +51,12 @@ defmodule ExSDP.OriginTest do
     test "serializes origin" do
       origin = %Origin{
         session_version: 0,
-        address: %FQDN{value: "some.origin.address"},
+        address: {:IP6, "some.origin.address"},
         session_id: 222,
         username: "username_id"
       }
 
-      assert "#{origin}" == "username_id 222 0 IN IP4 some.origin.address"
+      assert "#{origin}" == "username_id 222 0 IN IP6 some.origin.address"
     end
   end
 end
