@@ -4,9 +4,7 @@ defmodule ExSDP.Serializer do
   """
 
   @doc """
-  Each SDP line is of the following format:
-    <type>=<value>
-  Function parameters follows this description.
+  Serializes both sdp lines (<type>=<value>) and sdp parameters (<parameter>=<value>)
   """
   @spec maybe_serialize(type :: binary(), value :: term()) :: binary()
   def maybe_serialize(_type, nil), do: ""
@@ -19,5 +17,12 @@ defmodule ExSDP.Serializer do
 
   def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
 
+  def maybe_serialize(type, true), do: "#{type}=1"
+  def maybe_serialize(type, false), do: "#{type}=0"
   def maybe_serialize(type, value), do: "#{type}=#{value}"
+
+  def maybe_serialize_hex(_type, nil), do: ""
+
+  def maybe_serialize_hex(type, value),
+    do: "#{type}=#{Integer.to_string(value, 16) |> String.downcase()}"
 end

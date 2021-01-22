@@ -12,4 +12,19 @@ defmodule ExSDP.Utils do
       _ -> {:error, :string_nan}
     end
   end
+
+  def parse_numeric_hex_string(string) do
+    case Integer.parse(string, 16) do
+      {number, ""} -> {:ok, number}
+      _ -> {:error, :string_not_hex}
+    end
+  end
+
+  def parse_numeric_bool_string(string) do
+    case Integer.parse(string) do
+      {0, ""} -> {:ok, false}
+      {1, ""} -> {:ok, true}
+      _ -> {:error, :string_not_0_nor_1}
+    end
+  end
 end
