@@ -52,7 +52,7 @@ defmodule ExSDP.Origin do
   end
 
   @spec parse(binary()) ::
-          {:ok, t()} | {:error, {:invalid_origin, :invalid_addrtype | :invalid_address}}
+          {:ok, t()} | {:error, :invalid_addrtype | :invalid_address}
   def parse(origin) do
     with {:ok, [username, sess_id, sess_version, nettype, addrtype, address]} <-
            Utils.split(origin, " ", 6),
@@ -72,7 +72,7 @@ defmodule ExSDP.Origin do
 
       {:ok, origin}
     else
-      {:error, reason} -> {:error, {:invalid_origin, reason}}
+      {:error, _reason} = error -> error
     end
   end
 

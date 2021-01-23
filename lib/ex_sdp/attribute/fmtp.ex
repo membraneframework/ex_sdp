@@ -61,7 +61,7 @@ defmodule ExSDP.Attribute.Fmtp do
   """
   @type reason :: :unsupported_parameter | :string_nan | :string_not_hex | :string_not_0_nor_1
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, {:invalid_fmtp, reason()}}
+  @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
     [pt, rest] = String.split(fmtp, " ")
     fmtp = %__MODULE__{pt: String.to_integer(pt)}
@@ -74,7 +74,7 @@ defmodule ExSDP.Attribute.Fmtp do
   defp do_parse(params, fmtp) do
     case parse_param(params, fmtp) do
       {rest, %__MODULE__{} = fmtp} -> do_parse(rest, fmtp)
-      {:error, reason} -> {:error, {:invalid_fmtp, reason}}
+      {:error, _reason} = error -> error
     end
   end
 

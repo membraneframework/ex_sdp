@@ -31,7 +31,7 @@ defmodule ExSDP.Attribute.Msid do
     for _ <- 1..length, into: "", do: <<Enum.random(char_set)>>
   end
 
-  @spec parse(binary()) :: {:error, :invalid_msid} | {:ok, t()}
+  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_msid}
   def parse(msid) do
     case String.split(msid, " ") do
       [""] ->
@@ -50,6 +50,9 @@ defmodule ExSDP.Attribute.Msid do
         }
 
         {:ok, msid}
+
+      _ ->
+        {:error, :invalid_msid}
     end
   end
 end

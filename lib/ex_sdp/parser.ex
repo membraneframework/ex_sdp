@@ -146,7 +146,7 @@ defmodule ExSDP.Parser do
     end
   end
 
-  defp format_error(["m=" <> _ = line | rest], {invalid_line, reason}) do
+  defp format_error(["m=" <> _ = line | rest], reason) do
     attributes =
       rest
       |> Enum.take_while(fn
@@ -162,15 +162,15 @@ defmodule ExSDP.Parser do
     Attributes:
     #{attributes}
 
-    with reason: #{invalid_line} #{reason}
+    with reason: #{reason}
     """
   end
 
-  defp format_error([line | _], {invalid_line, reason}) do
+  defp format_error([line | _], reason) do
     """
     An error has occurred while parsing following SDP line:
     #{line}
-    with reason: #{invalid_line} #{reason}
+    with reason: #{reason}
     """
   end
 

@@ -27,12 +27,11 @@ defmodule ExSDP.OriginTest do
     end
 
     test "returns an error if declaration is invalid" do
-      assert {:error, {:invalid_origin, :too_few_fields}} =
-               Origin.parse("jdoe 2890844526 2890842807")
+      assert {:error, :too_few_fields} = Origin.parse("jdoe 2890844526 2890842807")
     end
 
     test "returns an error if declaration contains not supported address type" do
-      assert {:error, {:invalid_origin, :invalid_addrtype}} =
+      assert {:error, :invalid_addrtype} =
                Origin.parse("jdoe 2890844526 2890842807 IN NOTIP 10.47.16.5")
     end
 

@@ -21,12 +21,6 @@ defmodule ExSDP.ConnectionData do
 
   alias ExSDP.{Address, Utils}
 
-  @type reason ::
-          :invalid_addrtype
-          | :invalid_address
-          | :ip6_cannot_have_ttl
-          | :invalid_ttl_or_address_count
-
   @enforce_keys [:address]
   defstruct @enforce_keys ++ [:address_count, :ttl, network_type: "IN"]
 
@@ -37,7 +31,13 @@ defmodule ExSDP.ConnectionData do
           network_type: binary()
         }
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, {:invalid_connection_data, reason}}
+  @type reason ::
+          :invalid_addrtype
+          | :invalid_address
+          | :ip6_cannot_have_ttl
+          | :invalid_ttl_or_address_count
+
+  @spec parse(binary()) :: {:ok, t()} | {:error, reason}
   def parse(connection) do
     with {:ok, [nettype, addrtype, connection_address]} <- Utils.split(connection, " ", 3),
          {:ok, addrtype} <- Address.parse_addrtype(addrtype),
@@ -57,7 +57,7 @@ defmodule ExSDP.ConnectionData do
 
       {:ok, connection_data}
     else
-      {:error, reason} -> {:error, {:invalid_connection_data, reason}}
+      {:error, reason} = error -> error
     end
   end
 

@@ -65,25 +65,24 @@ defmodule ExSDP.ConnectionDataTest do
 
   describe "Connection information parser returns an error when" do
     test "connection spec is invalid" do
-      assert {:error, {:invalid_connection_data, :too_few_fields}} =
-               ConnectionData.parse("IN EPI")
+      assert {:error, :too_few_fields} = ConnectionData.parse("IN EPI")
     end
 
     test "address is not valid" do
-      assert {:error, {:invalid_connection_data, :invalid_ttl_or_address_count}} =
+      assert {:error, :invalid_ttl_or_address_count} =
                ConnectionData.parse("IN IP4 224.2.1.1/127/3/4")
     end
 
     test "either ttl or count is not an integer" do
-      assert {:error, {:invalid_connection_data, :invalid_ttl_or_address_count}} =
+      assert {:error, :invalid_ttl_or_address_count} =
                ConnectionData.parse("IN IP4 224.2.1.1/127/3d")
 
-      assert {:error, {:invalid_connection_data, :invalid_ttl_or_address_count}} =
+      assert {:error, :invalid_ttl_or_address_count} =
                ConnectionData.parse("IN IP4 224.2.1.1/127a/3")
     end
 
     test "ttl is not in 0..255 range" do
-      assert {:error, {:invalid_connection_data, :invalid_ttl_or_address_count}} =
+      assert {:error, :invalid_ttl_or_address_count} =
                ConnectionData.parse("IN IP4 224.2.1.1/256")
     end
   end

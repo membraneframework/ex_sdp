@@ -159,7 +159,7 @@ defmodule ExSDPTest do
       a=rtpmap:99 h263-1998/90000
       c=invalid data
 
-      with reason: invalid_connection_data too_few_fields
+      with reason: too_few_fields
       """
 
       assert_raise RuntimeError, expected_message, fn ->
@@ -177,7 +177,7 @@ defmodule ExSDPTest do
       expected = """
       An error has occurred while parsing following SDP line:
       o=jdoe 2890844526 2890842807 IN
-      with reason: invalid_origin too_few_fields
+      with reason: too_few_fields
       """
 
       assert_raise RuntimeError, expected, fn ->
