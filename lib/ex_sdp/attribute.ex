@@ -12,6 +12,7 @@ defmodule ExSDP.Attribute do
   @type orient_value :: :portrait | :landscape | :seascape
   @type type_value :: :broadcast | :meeting | :moderated | :test | :H332
   @type framerate_value :: float() | {integer(), integer()}
+  @type group_semantic :: :BUNDLE
 
   @list_type flag_attributes :: [
                :recvonly,
@@ -40,6 +41,7 @@ defmodule ExSDP.Attribute do
   @type fingerprint :: {:fingerprint, {hash_function(), binary()}}
   @type setup :: {:setup, setup_value()}
   @type mid :: {:mid, binary()}
+  @type group :: {:group, {group_semantic(), [binary()]}}
 
   @type t ::
           __MODULE__.RTPMapping.t()
@@ -103,6 +105,7 @@ defmodule ExSDP.Attribute do
   defp do_parse("mid", value, _opts), do: {:ok, {:mid, value}}
   defp do_parse("rtcp-mux", value, _opts), do: {:ok, {:rtcp_mux, value}}
   defp do_parse("rtcp-rsize", value, _opts), do: {:ok, {:rtcp_rsize, value}}
+  defp do_parse("group", value, _opts), do: parse_group(value)
 
   defp do_parse(attribute, value, _opts) when attribute in ["maxptime", "ptime", "quality"] do
     case Integer.parse(value) do
@@ -161,6 +164,13 @@ defmodule ExSDP.Attribute do
       "actpass" -> {:ok, {:setup, :actpass}}
       "holdconn" -> {:ok, {:setup, :holdconn}}
       _ -> {:error, :invalid_setup}
+    end
+  end
+
+  defp parse_group(group) do
+    case String.split(group, " ") do
+      ["BUNDLE" | ids] -> {:ok, {:group, {:BUNDLE, ids}}}
+      _ -> {:error, :invalid_group}
     end
   end
 end
