@@ -57,7 +57,7 @@ defmodule ExSDP.ConnectionData do
 
       {:ok, connection_data}
     else
-      {:error, reason} = error -> error
+      {:error, _reason} = error -> error
     end
   end
 
