@@ -45,6 +45,7 @@ defmodule ExSDP.Attribute do
           __MODULE__.RTPMapping.t()
           | __MODULE__.Msid.t()
           | __MODULE__.Fmtp.t()
+          | __MODULE__.Ssrc.t()
           | cat()
           | charset()
           | keywds()
@@ -82,11 +83,6 @@ defmodule ExSDP.Attribute do
     do_parse(attribute, List.first(value), opts)
   end
 
-  defp do_parse(flag, nil, _opts) when flag in @flag_attributes_strings,
-    do: {:ok, String.to_atom(flag)}
-
-  defp do_parse(flag, nil, _opts), do: {:ok, flag}
-
   defp do_parse("rtpmap", value, opts), do: RTPMapping.parse(value, opts)
   defp do_parse("msid", value, _opts), do: Msid.parse(value)
   defp do_parse("fmtp", value, _opts), do: Fmtp.parse(value)
@@ -114,6 +110,11 @@ defmodule ExSDP.Attribute do
       _ -> {:error, :invalid_attribute}
     end
   end
+
+  defp do_parse(flag, nil, _opts) when flag in @flag_attributes_strings,
+    do: {:ok, String.to_atom(flag)}
+
+  defp do_parse(flag, nil, _opts), do: {:ok, flag}
 
   defp do_parse(attribute, value, _opts), do: {:ok, {attribute, value}}
 
