@@ -51,7 +51,9 @@ defmodule ExSDP.Media do
   # For searching struct attributes by atoms
   @struct_attr_keys %{
     :rtpmap => RTPMapping,
-    :msid => Msid
+    :msid => Msid,
+    :fmtp => Fmtp,
+    :ssrc => Ssrc
   }
 
   @spec new(
@@ -123,11 +125,8 @@ defmodule ExSDP.Media do
 
   def parse_optional(["c=" <> conn | rest], media) do
     with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(conn) do
-      connection_data = %__MODULE__{
-        media
-        | connection_data: media.connection_data ++ [connection_data]
-      }
-
+      connection_data = media.connection_data ++ [connection_data]
+      connection_data = %__MODULE__{media | connection_data: connection_data}
       parse_optional(rest, connection_data)
     end
   end
@@ -184,7 +183,7 @@ defmodule ExSDP.Media do
 
   defp parse_type(type) when is_binary(type), do: type
 
-  defp parse_fmt(fmt, proto) when proto == "RTP/AVP" or proto == "RTP/SAVP" do
+  defp parse_fmt(fmt, proto) when proto in ["RTP/AVP", "RTP/SAVP", "UDP/TLS/RTP/SAVPF"] do
     fmt
     |> String.split(" ")
     |> Bunch.Enum.try_map(fn single_fmt ->

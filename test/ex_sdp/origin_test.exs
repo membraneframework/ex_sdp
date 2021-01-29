@@ -21,8 +21,7 @@ defmodule ExSDP.OriginTest do
       assert origin == %Origin{
                session_id: 2_890_844_526,
                address: {10, 47, 16, 5},
-               session_version: 2_890_842_807,
-               username: nil
+               session_version: 2_890_842_807
              }
     end
 

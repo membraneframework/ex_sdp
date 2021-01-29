@@ -58,7 +58,6 @@ defmodule ExSDP.Origin do
            Utils.split(origin, " ", 6),
          {:ok, addrtype} <- Address.parse_addrtype(addrtype),
          {:ok, address} <- Address.parse_address(address) do
-      username = if username == "-", do: nil, else: username
       # check whether fqdn
       address = if is_binary(address), do: {addrtype, address}, else: address
 

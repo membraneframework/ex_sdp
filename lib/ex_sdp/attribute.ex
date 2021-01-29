@@ -5,7 +5,7 @@ defmodule ExSDP.Attribute do
   use Bunch.Typespec
   use Bunch.Access
 
-  alias __MODULE__.{RTPMapping, Msid, Fmtp}
+  alias __MODULE__.{RTPMapping, Msid, Fmtp, Ssrc}
 
   @type hash_function :: :sha1 | :sha224 | :sha256 | :sha384 | :sha512
   @type setup_value :: :active | :passive | :actpass | :holdconn
@@ -66,6 +66,7 @@ defmodule ExSDP.Attribute do
           | fingerprint()
           | setup()
           | mid()
+          | group()
           | flag_attributes()
 
   @flag_attributes_strings @flag_attributes |> Enum.map(&to_string/1)
@@ -88,6 +89,7 @@ defmodule ExSDP.Attribute do
   defp do_parse("rtpmap", value, opts), do: RTPMapping.parse(value, opts)
   defp do_parse("msid", value, _opts), do: Msid.parse(value)
   defp do_parse("fmtp", value, _opts), do: Fmtp.parse(value)
+  defp do_parse("ssrc", value, _opts), do: Ssrc.parse(value)
   defp do_parse("cat", value, _opts), do: {:ok, {:cat, value}}
   defp do_parse("charset", value, _opts), do: {:ok, {:charset, value}}
   defp do_parse("keywds", value, _opts), do: {:ok, {:keywds, value}}
@@ -103,8 +105,8 @@ defmodule ExSDP.Attribute do
   defp do_parse("fingerprint", value, _opts), do: parse_fingerprint(value)
   defp do_parse("setup", value, _opts), do: parse_setup(value)
   defp do_parse("mid", value, _opts), do: {:ok, {:mid, value}}
-  defp do_parse("rtcp-mux", value, _opts), do: {:ok, {:rtcp_mux, value}}
-  defp do_parse("rtcp-rsize", value, _opts), do: {:ok, {:rtcp_rsize, value}}
+  defp do_parse("rtcp-mux", _value, _opts), do: {:ok, :rtcp_mux}
+  defp do_parse("rtcp-rsize", _value, _opts), do: {:ok, :rtcp_rsize}
   defp do_parse("group", value, _opts), do: parse_group(value)
 
   defp do_parse(attribute, value, _opts) when attribute in ["maxptime", "ptime", "quality"] do

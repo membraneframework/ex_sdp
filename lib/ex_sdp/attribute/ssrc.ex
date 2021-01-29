@@ -2,6 +2,7 @@ defmodule ExSDP.Attribute.Ssrc do
   @moduledoc """
   This module represents ssrc (RFC 5576).
   """
+  alias ExSDP.Utils
 
   @enforce_keys [:id, :attribute]
   defstruct @enforce_keys ++ [:value]
@@ -15,16 +16,15 @@ defmodule ExSDP.Attribute.Ssrc do
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_ssrc}
   def parse(ssrc) do
-    case String.split(ssrc, " ") do
-      [id, attribute] ->
-        case String.split(attribute, ":") do
-          [attribute, value] -> {:ok, %__MODULE__{id: id, attribute: attribute, value: value}}
-          [attribute] -> {:ok, %__MODULE__{id: id, attribute: attribute}}
-          _ -> {:error, :invalid_ssrc}
-        end
-
-      _ ->
-        {:error, :invalid_ssrc}
+    with [id, attribute] <- String.split(ssrc, " "),
+         {:ok, id} <- Utils.parse_numeric_string(id) do
+      case String.split(attribute, ":") do
+        [attribute, value] -> {:ok, %__MODULE__{id: id, attribute: attribute, value: value}}
+        [attribute] -> {:ok, %__MODULE__{id: id, attribute: attribute}}
+        _ -> {:error, :invalid_ssrc}
+      end
+    else
+      _ -> {:error, :invalid_ssrc}
     end
   end
 end
