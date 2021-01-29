@@ -52,6 +52,7 @@ defmodule ExSDP.MixProject do
   defp deps do
     [
       {:bunch, "~> 1.3"},
+      {:uuid, "~> 1.1"},
       {:dialyxir, "~> 1.0.0", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.23", only: :dev, runtime: false},
       {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},

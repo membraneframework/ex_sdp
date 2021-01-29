@@ -26,15 +26,15 @@ defmodule ExSDP.Attribute.MsidTest do
 
   describe "Msid serializer" do
     test "serializes msid without app data" do
-      msid_id = Msid.generate_random()
+      msid_id = UUID.uuid4()
       msid = Msid.new(msid_id, nil)
 
       assert "#{msid}" == "msid:#{msid_id}"
     end
 
     test "serializes msid with app data" do
-      id = Msid.generate_random()
-      app_data = Msid.generate_random()
+      id = UUID.uuid4()
+      app_data = UUID.uuid4()
       msid = Msid.new(id, app_data)
 
       assert "#{msid}" == "msid:#{id} #{app_data}"
