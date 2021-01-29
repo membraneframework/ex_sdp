@@ -55,88 +55,69 @@ a=rtpmap:99 h263-1998/90000
 # =>
 {:ok,
  %ExSDP{
-   attributes: [
-     %ExSDP.Attribute{key: "key", value: "value"},
-     %ExSDP.Attribute{key: nil, value: :recvonly}
-   ],
+   attributes: [{"key", "value"}, :recvonly],
    bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
    connection_data: %ExSDP.ConnectionData{
-     addresses: [
-       %ExSDP.ConnectionData.IP4{
-         ttl: 127,
-         value: {224, 2, 17, 12}
-       }
-     ],
-     network_type: "IN"
+     address: {224, 2, 17, 12},
+     address_count: nil,
+     network_type: "IN",
+     ttl: 127
    },
-   email: %ExSDP.Email{value: "j.doe@example.com (Jane Doe)"},
+   email: "j.doe@example.com (Jane Doe)",
    encryption: %ExSDP.Encryption{key: "key", method: :clear},
    media: [
      %ExSDP.Media{
        attributes: [],
        bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
        connection_data: %ExSDP.ConnectionData{
-         addresses: [
-           %ExSDP.ConnectionData.IP4{
-             ttl: 127,
-             value: {224, 2, 17, 12}
-           }
-         ],
-         network_type: "IN"
+         address: {224, 2, 17, 12},
+         address_count: nil,
+         network_type: "IN",
+         ttl: 127
        },
        encryption: %ExSDP.Encryption{key: nil, method: :prompt},
        fmt: [0],
-       ports: [49170],
+       port: 49170,
+       port_count: 1,
        protocol: "RTP/AVP",
        title: "Sample media title",
        type: :audio
      },
      %ExSDP.Media{
        attributes: [
-         %ExSDP.Attribute{
-           key: :rtpmap,
-           value: %ExSDP.Attribute.RTPMapping{
-             clock_rate: 90000,
-             encoding: "h263-1998",
-             params: nil,
-             payload_type: 99
-           }
+         %ExSDP.Attribute.RTPMapping{
+           clock_rate: 90000,
+           encoding: "h263-1998",
+           params: nil,
+           payload_type: 99
          }
        ],
        bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
        connection_data: %ExSDP.ConnectionData{
-         addresses: [
-           %ExSDP.ConnectionData.IP4{
-             ttl: 127,
-             value: {224, 2, 17, 12}
-           }
-         ],
-         network_type: "IN"
+         address: {224, 2, 17, 12},
+         address_count: nil,
+         network_type: "IN",
+         ttl: 127
        },
        encryption: %ExSDP.Encryption{key: "key", method: :clear},
        fmt: 'c',
-       ports: [51372],
+       port: 51372,
+       port_count: 1,
        protocol: "RTP/AVP",
        title: nil,
        type: :video
      }
    ],
    origin: %ExSDP.Origin{
-     address: %ExSDP.ConnectionData.IP4{
-       ttl: nil,
-       value: {10, 47, 16, 5}
-     },
-     session_id: "2890844526",
-     session_version: "2890842807",
+     address: {10, 47, 16, 5},
+     network_type: "IN",
+     session_id: 2890844526,
+     session_version: 2890842807,
      username: "jdoe"
    },
-   phone_number: %ExSDP.PhoneNumber{value: "111 111 111"},
-   session_information: %ExSDP.SessionInformation{
-     value: "A Seminar on the session description protocol"
-   },
-   session_name: %ExSDP.SessionName{
-     value: "Very fancy session name"
-   },
+   phone_number: "111 111 111",
+   session_information: "A Seminar on the session description protocol",
+   session_name: "Very fancy session name",
    time_repeats: [
      %ExSDP.RepeatTimes{
        active_duration: 3600,
@@ -151,24 +132,13 @@ a=rtpmap:99 h263-1998/90000
    ],
    time_zones_adjustments: %ExSDP.Timezone{
      corrections: [
-       %ExSDP.Timezone.Correction{
-         adjustment_time: 2882844526,
-         offset: -1
-       },
-       %ExSDP.Timezone.Correction{
-         adjustment_time: 2898848070,
-         offset: 0
-       }
+       %ExSDP.Timezone.Correction{adjustment_time: 2882844526, offset: -1},
+       %ExSDP.Timezone.Correction{adjustment_time: 2898848070, offset: 0}
      ]
    },
-   timing: %ExSDP.Timing{
-     start_time: 2873397496,
-     stop_time: 2873404696
-   },
-   uri: %ExSDP.URI{
-     value: "http://www.example.com/seminars/sdp.pdf"
-   },
-   version: %ExSDP.Version{value: 0}
+   timing: %ExSDP.Timing{start_time: 2873397496, stop_time: 2873404696},
+   uri: "http://www.example.com/seminars/sdp.pdf",
+   version: 0
  }}
 ```
 
@@ -178,88 +148,64 @@ Serializer serializes `ExSDP` struct to a string with `\r\n` terminated lines.
 
 ```elixir
 %ExSDP{
-   attributes: [
-     %ExSDP.Attribute{key: "key", value: "value"},
-     %ExSDP.Attribute{key: nil, value: :recvonly}
-   ],
+   attributes: [{"key", "value"}, :recvonly],
    bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
    connection_data: %ExSDP.ConnectionData{
-     addresses: [
-       %ExSDP.ConnectionData.IP4{
-         ttl: 127,
-         value: {224, 2, 17, 12}
-       }
-     ],
-     network_type: "IN"
+     address: {224, 2, 17, 12},
+     network_type: "IN",
+     ttl: 127
    },
-   email: %ExSDP.Email{value: "j.doe@example.com (Jane Doe)"},
+   email: "j.doe@example.com (Jane Doe)",
    encryption: %ExSDP.Encryption{key: "key", method: :clear},
    media: [
      %ExSDP.Media{
        attributes: [],
        bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
        connection_data: %ExSDP.ConnectionData{
-         addresses: [
-           %ExSDP.ConnectionData.IP4{
-             ttl: 127,
-             value: {224, 2, 17, 12}
-           }
-         ],
-         network_type: "IN"
+         address: {224, 2, 17, 12},
+         network_type: "IN",
+         ttl: 127
        },
-       encryption: %ExSDP.Encryption{key: nil, method: :prompt},
+       encryption: %ExSDP.Encryption{method: :prompt},
        fmt: [0],
-       ports: [49170],
+       port: 49170,
+       port_count: 1,
        protocol: "RTP/AVP",
        title: "Sample media title",
        type: :audio
      },
      %ExSDP.Media{
        attributes: [
-         %ExSDP.Attribute{
-           key: :rtpmap,
-           value: %ExSDP.Attribute.RTPMapping{
-             clock_rate: 90000,
-             encoding: "h263-1998",
-             params: nil,
-             payload_type: 99
-           }
+         %ExSDP.Attribute.RTPMapping{
+           clock_rate: 90000,
+           encoding: "h263-1998",
+           payload_type: 99
          }
        ],
        bandwidth: [%ExSDP.Bandwidth{bandwidth: 256, type: :AS}],
        connection_data: %ExSDP.ConnectionData{
-         addresses: [
-           %ExSDP.ConnectionData.IP4{
-             ttl: 127,
-             value: {224, 2, 17, 12}
-           }
-         ],
-         network_type: "IN"
+         address: {224, 2, 17, 12},
+         network_type: "IN",
+         ttl: 127
        },
        encryption: %ExSDP.Encryption{key: "key", method: :clear},
        fmt: 'c',
-       ports: [51372],
+       port: 51372,
+       port_count: 1,
        protocol: "RTP/AVP",
-       title: nil,
        type: :video
      }
    ],
    origin: %ExSDP.Origin{
-     address: %ExSDP.ConnectionData.IP4{
-       ttl: nil,
-       value: {10, 47, 16, 5}
-     },
-     session_id: "2890844526",
-     session_version: "2890842807",
+     address: {10, 47, 16, 5},
+     network_type: "IN",
+     session_id: 2890844526,
+     session_version: 2890842807,
      username: "jdoe"
    },
-   phone_number: %ExSDP.PhoneNumber{value: "111 111 111"},
-   session_information: %ExSDP.SessionInformation{
-     value: "A Seminar on the session description protocol"
-   },
-   session_name: %ExSDP.SessionName{
-     value: "Very fancy session name"
-   },
+   phone_number: "111 111 111",
+   session_information: "A Seminar on the session description protocol",
+   session_name: "Very fancy session name",
    time_repeats: [
      %ExSDP.RepeatTimes{
        active_duration: 3600,
@@ -274,27 +220,15 @@ Serializer serializes `ExSDP` struct to a string with `\r\n` terminated lines.
    ],
    time_zones_adjustments: %ExSDP.Timezone{
      corrections: [
-       %ExSDP.Timezone.Correction{
-         adjustment_time: 2882844526,
-         offset: -1
-       },
-       %ExSDP.Timezone.Correction{
-         adjustment_time: 2898848070,
-         offset: 0
-       }
+       %ExSDP.Timezone.Correction{adjustment_time: 2882844526, offset: -1},
+       %ExSDP.Timezone.Correction{adjustment_time: 2898848070, offset: 0}
      ]
    },
-   timing: %ExSDP.Timing{
-     start_time: 2873397496,
-     stop_time: 2873404696
-   },
-   uri: %ExSDP.URI{
-     value: "http://www.example.com/seminars/sdp.pdf"
-   },
-   version: %ExSDP.Version{value: 0}
+   timing: %ExSDP.Timing{start_time: 2873397496, stop_time: 2873404696},
+   uri: "http://www.example.com/seminars/sdp.pdf",
+   version: 0
 }
-|> ExSDP.serialize
-|> String.replace("\r\n", "\n")
+|> to_string()
 
 # =>
 """
