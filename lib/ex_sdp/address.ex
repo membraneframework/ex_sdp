@@ -12,7 +12,6 @@ defmodule ExSDP.Address do
       {:ok, address} -> {:ok, address}
       # for fqdn
       {:error, :einval} -> {:ok, address}
-      {:error, _} -> {:error, :invalid_address}
     end
   end
 

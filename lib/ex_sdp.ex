@@ -69,10 +69,11 @@ defmodule ExSDP do
 
   By default:
   * `version` is `0`
+  * `origin` is generated with `ExSDP.Origin.new/1`
   * `session_name` is `-`
   """
-  @spec new(origin :: binary(), version: non_neg_integer(), session_name: binary()) :: t()
-  def new(origin, opts \\ []) do
+  @spec new(origin :: Origin.t(), version: non_neg_integer(), session_name: binary()) :: t()
+  def new(origin \\ Origin.new(), opts \\ []) do
     %__MODULE__{
       version: Keyword.get(opts, :version, 0),
       origin: origin,

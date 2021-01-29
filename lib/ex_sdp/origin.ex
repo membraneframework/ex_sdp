@@ -34,7 +34,7 @@ defmodule ExSDP.Origin do
   * `username` is `-`
   * `session_id` is random 64 bit number
   * `session_version` is `0`
-  * `address` is `ExSDP.ConnectionData.IP4` with `127.0.0.1` address
+  * `address` is `{127, 0, 0, 1}`
   """
   @spec new(
           username: binary(),

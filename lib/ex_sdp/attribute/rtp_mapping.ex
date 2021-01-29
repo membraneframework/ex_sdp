@@ -22,7 +22,7 @@ defmodule ExSDP.Attribute.RTPMapping do
   @type attr_key :: :rtpmap
 
   @spec parse(binary(), opts :: []) ::
-          {:ok, t()} | {:error, :string_nan | :only_audio_can_have_params}
+          {:ok, t()} | {:error, :string_nan | :only_audio_can_have_params | :invalid_rtpmap}
   def parse(mapping, opts) do
     with [payload_type, encoding | _] <- String.split(mapping, " "),
          [encoding_name, clock_rate | params] <- String.split(encoding, "/"),
@@ -39,6 +39,7 @@ defmodule ExSDP.Attribute.RTPMapping do
       {:ok, mapping}
     else
       {:error, reason} -> {:error, reason}
+      _ -> {:error, :invalid_rtpmap}
     end
   end
 

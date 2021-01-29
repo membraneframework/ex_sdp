@@ -2,7 +2,7 @@ defmodule ExSDP.Utils do
   @moduledoc false
 
   def split(origin, delim, expected_len) do
-    split = String.split(origin, delim)
+    split = String.split(origin, delim, parts: expected_len)
     if length(split) == expected_len, do: {:ok, split}, else: {:error, :too_few_fields}
   end
 

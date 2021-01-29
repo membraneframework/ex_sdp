@@ -58,6 +58,7 @@ defmodule ExSDP.ConnectionData do
       {:ok, connection_data}
     else
       {:error, _reason} = error -> error
+      _ -> {:error, :invalid_address}
     end
   end
 
@@ -65,14 +66,11 @@ defmodule ExSDP.ConnectionData do
   defp parse_ttl_with_address_count([""], _addrtype), do: {:error, :invalid_ttl_or_address_count}
 
   defp parse_ttl_with_address_count([ttl_with_address_count], :IP4) do
-    case String.split(ttl_with_address_count, "/") do
-      [ttl] ->
-        case Utils.parse_numeric_string(ttl) do
-          {:ok, ttl} when 0 <= ttl and ttl <= 255 -> {:ok, ttl, nil}
-          _ -> {:error, :invalid_ttl_or_address_count}
-        end
-
-      [ttl | [address_count]] ->
+    with [ttl] <- String.split(ttl_with_address_count, "/"),
+         {:ok, ttl} when ttl in 0..255 <- Utils.parse_numeric_string(ttl) do
+      {:ok, ttl, nil}
+    else
+      [ttl, address_count] ->
         with {:ok, ttl} <- Utils.parse_numeric_string(ttl),
              {:ok, address_count} <- Utils.parse_numeric_string(address_count) do
           {:ok, ttl, address_count}
@@ -93,7 +91,7 @@ defmodule ExSDP.ConnectionData do
           _ -> {:error, :invalid_ttl_or_address_count}
         end
 
-      [_ttl | [_address_count]] ->
+      [_ttl, _address_count] ->
         {:error, :ip6_cannot_have_ttl}
 
       _ ->
