@@ -83,7 +83,7 @@ defmodule ExSDP.Origin do
   @spec bump_version(t()) :: {:ok, t()}
   def bump_version(origin), do: {:ok, %{origin | session_version: origin.session_version + 1}}
 
-  defp generate_random(), do: :crypto.strong_rand_bytes(8) |> :binary.decode_unsigned()
+  defp generate_random(), do: :crypto.strong_rand_bytes(7) |> :binary.decode_unsigned()
 end
 
 defimpl String.Chars, for: ExSDP.Origin do
