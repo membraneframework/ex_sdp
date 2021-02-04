@@ -27,6 +27,7 @@ defmodule ExSDP.Attribute.Fmtp do
                 :useinbandfec,
                 :usedtx,
                 # VP8/9
+                :profile_id,
                 :max_fr
               ]
 
@@ -48,6 +49,7 @@ defmodule ExSDP.Attribute.Fmtp do
           useinbandfec: boolean() | nil,
           usedtx: boolean() | nil,
           # VP8/9
+          profile_id: non_neg_integer() | nil,
           max_fr: non_neg_integer() | nil
         }
 
@@ -156,8 +158,12 @@ defmodule ExSDP.Attribute.Fmtp do
          do: {rest, %{fmtp | max_fr: value}}
   end
 
-  defp parse_param(_params, _fmtp),
-    do: {:error, :unsupported_parameter}
+  defp parse_param(["profile-id=" <> profile_id | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(profile_id),
+         do: {rest, %{fmtp | profile_id: value}}
+  end
+
+  defp parse_param(_params, _fmtp), do: {:error, :unsupported_parameter}
 end
 
 defimpl String.Chars, for: ExSDP.Attribute.Fmtp do
@@ -184,6 +190,7 @@ defimpl String.Chars, for: ExSDP.Attribute.Fmtp do
         Serializer.maybe_serialize("useinbandfec", fmtp.useinbandfec),
         Serializer.maybe_serialize("usedtx", fmtp.usedtx),
         # VP8/9
+        Serializer.maybe_serialize("profile-id", fmtp.profile_id),
         Serializer.maybe_serialize("max-fr", fmtp.max_fr)
       ]
       |> Enum.filter(fn param -> param != "" end)
