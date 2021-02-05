@@ -154,7 +154,7 @@ defmodule ExSDP.Attribute.Fmtp do
   end
 
   defp parse_param(["max-fr=" <> max_fr | rest], fmtp) do
-    with {:ok, value} <- Utils.parse_numeric_bool_string(max_fr),
+    with {:ok, value} <- Utils.parse_numeric_string(max_fr),
          do: {rest, %{fmtp | max_fr: value}}
   end
 
