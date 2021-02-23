@@ -85,8 +85,11 @@ defmodule ExSDP do
   def add_media(sdp, media), do: Map.update!(sdp, :media, &(&1 ++ Bunch.listify(media)))
 
   @spec add_attribute(sdp :: t(), attribute :: Attribute.t()) :: t()
-  def add_attribute(sdp, attribute),
-    do: Map.update!(sdp, :attributes, &(&1 ++ Bunch.listify(attribute)))
+  def add_attribute(sdp, attribute), do: add_attributes(sdp, [attribute])
+
+  @spec add_attributes(sdp :: t(), attributes :: [Attribute.t()]) :: t()
+  def add_attributes(sdp, attributes) when is_list(attributes),
+    do: Map.update!(sdp, :attributes, &(&1 ++ attributes))
 end
 
 defimpl String.Chars, for: ExSDP do

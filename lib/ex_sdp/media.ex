@@ -74,7 +74,11 @@ defmodule ExSDP.Media do
   end
 
   @spec add_attribute(media :: t(), attribute :: Attribute.t()) :: t()
-  def add_attribute(media, attribute), do: Map.update!(media, :attributes, &(&1 ++ [attribute]))
+  def add_attribute(media, attribute), do: add_attributes(media, [attribute])
+
+  @spec add_attributes(media :: t(), attributes :: [Attribute.t()]) :: t()
+  def add_attributes(media, attributes) when is_list(attributes),
+    do: Map.update!(media, :attributes, &(&1 ++ attributes))
 
   @spec get_attribute(media :: t(), key :: module() | atom() | binary()) :: Attribute.t()
   def get_attribute(media, key) do
