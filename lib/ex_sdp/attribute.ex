@@ -5,7 +5,7 @@ defmodule ExSDP.Attribute do
   use Bunch.Typespec
   use Bunch.Access
 
-  alias __MODULE__.{RTPMapping, Msid, Fmtp, Ssrc}
+  alias __MODULE__.{RTPMapping, MSID, FMTP, SSRC}
 
   @type hash_function :: :sha1 | :sha224 | :sha256 | :sha384 | :sha512
   @type setup_value :: :active | :passive | :actpass | :holdconn
@@ -45,9 +45,9 @@ defmodule ExSDP.Attribute do
 
   @type t ::
           __MODULE__.RTPMapping.t()
-          | __MODULE__.Msid.t()
-          | __MODULE__.Fmtp.t()
-          | __MODULE__.Ssrc.t()
+          | __MODULE__.MSID.t()
+          | __MODULE__.FMTP.t()
+          | __MODULE__.SSRC.t()
           | cat()
           | charset()
           | keywds()
@@ -87,9 +87,9 @@ defmodule ExSDP.Attribute do
   end
 
   defp do_parse("rtpmap", value, opts), do: RTPMapping.parse(value, opts)
-  defp do_parse("msid", value, _opts), do: Msid.parse(value)
-  defp do_parse("fmtp", value, _opts), do: Fmtp.parse(value)
-  defp do_parse("ssrc", value, _opts), do: Ssrc.parse(value)
+  defp do_parse("msid", value, _opts), do: MSID.parse(value)
+  defp do_parse("fmtp", value, _opts), do: FMTP.parse(value)
+  defp do_parse("ssrc", value, _opts), do: SSRC.parse(value)
   defp do_parse("cat", value, _opts), do: {:ok, {:cat, value}}
   defp do_parse("charset", value, _opts), do: {:ok, {:charset, value}}
   defp do_parse("keywds", value, _opts), do: {:ok, {:keywds, value}}

@@ -1,4 +1,4 @@
-defmodule ExSDP.Attribute.Ssrc do
+defmodule ExSDP.Attribute.SSRC do
   @moduledoc """
   This module represents ssrc (RFC 5576).
   """
@@ -29,11 +29,11 @@ defmodule ExSDP.Attribute.Ssrc do
   end
 end
 
-defimpl String.Chars, for: ExSDP.Attribute.Ssrc do
-  alias ExSDP.Attribute.Ssrc
+defimpl String.Chars, for: ExSDP.Attribute.SSRC do
+  alias ExSDP.Attribute.SSRC
 
-  def to_string(%Ssrc{id: id, attribute: attribute, value: nil}), do: "ssrc:#{id} #{attribute}"
+  def to_string(%SSRC{id: id, attribute: attribute, value: nil}), do: "ssrc:#{id} #{attribute}"
 
-  def to_string(%Ssrc{id: id, attribute: attribute, value: value}),
+  def to_string(%SSRC{id: id, attribute: attribute, value: value}),
     do: "ssrc:#{id} #{attribute}:#{value}"
 end

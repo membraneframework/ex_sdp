@@ -51,9 +51,9 @@ defmodule ExSDP.Media do
   # For searching struct attributes by atoms
   @struct_attr_keys %{
     :rtpmap => RTPMapping,
-    :msid => Msid,
-    :fmtp => Fmtp,
-    :ssrc => Ssrc
+    :msid => MSID,
+    :fmtp => FMTP,
+    :ssrc => SSRC
   }
 
   @spec new(

@@ -55,7 +55,7 @@ defmodule ExSDP.WebRTCTest do
                      "92:35:B0:F7:B5:98:6D:E3:B8:7C:EA:03:84:7D:16:B6:D8:01:4C:48:61:9A:EF:DE:83:31:A0:2A:09:A9:47:92"}},
                    {:setup, :actpass},
                    {:mid, "0"},
-                   %ExSDP.Attribute.Msid{
+                   %ExSDP.Attribute.MSID{
                      app_data: "95315dd8-13a2-4e3c-952a-c57042a75dc2",
                      id: "699c4cc3-91bf-40e0-a664-a96ee2d103c2"
                    },
@@ -66,8 +66,8 @@ defmodule ExSDP.WebRTCTest do
                      params: 2,
                      payload_type: 120
                    },
-                   %ExSDP.Attribute.Fmtp{pt: 120, useinbandfec: true},
-                   %ExSDP.Attribute.Ssrc{attribute: "cname", id: 990_927_281, value: "media0"}
+                   %ExSDP.Attribute.FMTP{pt: 120, useinbandfec: true},
+                   %ExSDP.Attribute.SSRC{attribute: "cname", id: 990_927_281, value: "media0"}
                  ],
                  connection_data: [
                    %ExSDP.ConnectionData{address: {0, 0, 0, 0}, network_type: "IN"}
@@ -88,7 +88,7 @@ defmodule ExSDP.WebRTCTest do
                      "92:35:B0:F7:B5:98:6D:E3:B8:7C:EA:03:84:7D:16:B6:D8:01:4C:48:61:9A:EF:DE:83:31:A0:2A:09:A9:47:92"}},
                    {:setup, :actpass},
                    {:mid, "1"},
-                   %ExSDP.Attribute.Msid{
+                   %ExSDP.Attribute.MSID{
                      app_data: "9f80e638-16f2-4120-81b3-8b4290df3ab6",
                      id: "699c4cc3-91bf-40e0-a664-a96ee2d103c2"
                    },
@@ -99,13 +99,13 @@ defmodule ExSDP.WebRTCTest do
                      encoding: "H264",
                      payload_type: 96
                    },
-                   %ExSDP.Attribute.Fmtp{
+                   %ExSDP.Attribute.FMTP{
                      level_asymmetry_allowed: true,
                      packetization_mode: 1,
                      profile_level_id: 4_382_751,
                      pt: 96
                    },
-                   %ExSDP.Attribute.Ssrc{attribute: "cname", id: 50_301_058, value: "media1"}
+                   %ExSDP.Attribute.SSRC{attribute: "cname", id: 50_301_058, value: "media1"}
                  ],
                  connection_data: [
                    %ExSDP.ConnectionData{address: {0, 0, 0, 0}, network_type: "IN"}

@@ -1,4 +1,4 @@
-defmodule ExSDP.Attribute.Msid do
+defmodule ExSDP.Attribute.MSID do
   @moduledoc """
   This module represents msid (RFC 8830).
   """
@@ -44,9 +44,9 @@ defmodule ExSDP.Attribute.Msid do
   end
 end
 
-defimpl String.Chars, for: ExSDP.Attribute.Msid do
-  alias ExSDP.Attribute.Msid
+defimpl String.Chars, for: ExSDP.Attribute.MSID do
+  alias ExSDP.Attribute.MSID
 
-  def to_string(%Msid{id: id, app_data: nil}), do: "msid:#{id}"
-  def to_string(%Msid{id: id, app_data: app_data}), do: "msid:#{id} #{app_data}"
+  def to_string(%MSID{id: id, app_data: nil}), do: "msid:#{id}"
+  def to_string(%MSID{id: id, app_data: app_data}), do: "msid:#{id} #{app_data}"
 end

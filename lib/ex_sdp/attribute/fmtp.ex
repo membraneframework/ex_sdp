@@ -1,4 +1,4 @@
-defmodule ExSDP.Attribute.Fmtp do
+defmodule ExSDP.Attribute.FMTP do
   @moduledoc """
   This module represents fmtp (RFC 5576).
 
@@ -166,7 +166,7 @@ defmodule ExSDP.Attribute.Fmtp do
   defp parse_param(_params, _fmtp), do: {:error, :unsupported_parameter}
 end
 
-defimpl String.Chars, for: ExSDP.Attribute.Fmtp do
+defimpl String.Chars, for: ExSDP.Attribute.FMTP do
   def to_string(fmtp) do
     alias ExSDP.Serializer
 
