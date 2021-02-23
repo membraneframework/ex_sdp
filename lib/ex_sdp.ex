@@ -31,6 +31,7 @@ defmodule ExSDP do
 
   alias ExSDP.{
     Attribute,
+    Address,
     Bandwidth,
     ConnectionData,
     Encryption,
@@ -69,15 +70,25 @@ defmodule ExSDP do
 
   By default:
   * `version` is `0`
-  * `origin` is generated with `ExSDP.Origin.new/1`
+  * `username`, `session_id`, `session_version` and `address` - refer to `Origin.new/1`
   * `session_name` is `-`
   """
-  @spec new(origin :: Origin.t(), version: non_neg_integer(), session_name: binary()) :: t()
-  def new(origin \\ Origin.new(), opts \\ []) do
+  @spec new(
+          version: non_neg_integer(),
+          username: binary(),
+          session_id: integer(),
+          session_version: integer(),
+          address: Address.t(),
+          session_name: binary()
+        ) :: t()
+  def new(opts \\ []) do
+    {version, opts} = Keyword.pop(opts, :version, 0)
+    {session_name, opts} = Keyword.pop(opts, :session_name, "-")
+
     %__MODULE__{
-      version: Keyword.get(opts, :version, 0),
-      origin: origin,
-      session_name: Keyword.get(opts, :session_name, "-")
+      version: version,
+      origin: Origin.new(opts),
+      session_name: session_name
     }
   end
 
