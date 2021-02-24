@@ -10,16 +10,16 @@ defmodule ExSDP.Bandwidth do
   @enforce_keys [:type, :bandwidth]
   defstruct @enforce_keys
 
-  @type type :: :CT | :AS
-
-  @supported_types ["CT", "AS"]
-
   @type t :: %__MODULE__{
           type: type(),
           bandwidth: non_neg_integer()
         }
 
-  @spec parse(binary()) :: {:error, :invalid_bandwidth} | {:ok, t()}
+  @type type :: :CT | :AS
+
+  @supported_types ["CT", "AS"]
+
+  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_bandwidth}
   def parse(bandwidth) do
     with [type, bandwidth] <- String.split(bandwidth, ":"),
          {:ok, bandwidth} <- parse_bandwidth(bandwidth),

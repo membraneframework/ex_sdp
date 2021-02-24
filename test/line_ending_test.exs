@@ -2,13 +2,11 @@ defmodule ExSDP.LineEndingTest do
   use ExUnit.Case
   alias ExSDP
 
-  alias ExSDP.{ConnectionData, Origin, Timing}
+  alias ExSDP.{Origin, Timing}
 
   @expected_output %ExSDP{
     origin: %Origin{
-      address: %ConnectionData.IP4{
-        value: {10, 47, 16, 5}
-      },
+      address: {10, 47, 16, 5},
       session_id: 2_890_844_526,
       session_version: 2_890_842_807,
       username: "jdoe"

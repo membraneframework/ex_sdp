@@ -16,11 +16,12 @@ defmodule ExSDP.Media do
 
   alias ExSDP.Attribute.RTPMapping
 
-  @enforce_keys [:type, :ports, :protocol, :fmt]
+  @enforce_keys [:type, :port, :protocol, :fmt]
   defstruct @enforce_keys ++
               [
                 :title,
                 :encryption,
+                port_count: 1,
                 connection_data: [],
                 bandwidth: [],
                 attributes: []
@@ -28,7 +29,8 @@ defmodule ExSDP.Media do
 
   @type t :: %__MODULE__{
           type: type(),
-          ports: [:inet.port_number()],
+          port: :inet.port_number(),
+          port_count: non_neg_integer(),
           protocol: binary(),
           fmt: binary() | [0..127],
           title: binary() | nil,
@@ -47,25 +49,36 @@ defmodule ExSDP.Media do
   @type type :: :audio | :video | :text | :application | :message | binary()
 
   # For searching struct attributes by atoms
-  @struct_attr_keys %{:rtpmap => RTPMapping}
+  @struct_attr_keys %{
+    :rtpmap => RTPMapping,
+    :msid => MSID,
+    :fmtp => FMTP,
+    :ssrc => SSRC
+  }
 
   @spec new(
           type :: type(),
-          ports :: [:inet.port_number()],
+          port :: :inet.port_number(),
           protocol :: binary(),
-          fmt :: binary() | [0..127]
+          fmt :: binary() | 0..127 | [0..127],
+          opts :: [port_count: non_neg_integer()]
         ) :: t()
-  def new(type, ports, protocol, fmt) do
+  def new(type, port, protocol, fmt, opts \\ []) do
     %__MODULE__{
       type: type,
-      ports: ports,
+      port: port,
+      port_count: opts[:port_count] || 1,
       protocol: protocol,
-      fmt: fmt
+      fmt: Bunch.listify(fmt)
     }
   end
 
   @spec add_attribute(media :: t(), attribute :: Attribute.t()) :: t()
-  def add_attribute(media, attribute), do: Map.update!(media, :attributes, &(&1 ++ [attribute]))
+  def add_attribute(media, attribute), do: add_attributes(media, [attribute])
+
+  @spec add_attributes(media :: t(), attributes :: [Attribute.t()]) :: t()
+  def add_attributes(media, attributes) when is_list(attributes),
+    do: Map.update!(media, :attributes, &(&1 ++ attributes))
 
   @spec get_attribute(media :: t(), key :: module() | atom() | binary()) :: Attribute.t()
   def get_attribute(media, key) do
@@ -83,11 +96,13 @@ defmodule ExSDP.Media do
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
-          int: {port_no, port_options} when port_no in 0..65_535 <- Integer.parse(port),
+          port: {port, port_count} when port in 0..65_535 <- Integer.parse(port),
+          port_count: port_count when port_count > 0 <- parse_port_count(port_count),
           fmt: {:ok, fmt} <- parse_fmt(fmt, proto) do
       media = %__MODULE__{
         type: parse_type(type),
-        ports: gen_ports(port_no, port_options),
+        port: port,
+        port_count: port_count,
         protocol: proto,
         fmt: fmt
       }
@@ -95,7 +110,8 @@ defmodule ExSDP.Media do
       {:ok, media}
     else
       conn: _ -> {:error, :invalid_media_spec}
-      int: _ -> {:error, :malformed_port_number}
+      port: _ -> {:error, :invalid_port_number}
+      port_count: _ -> {:error, :invalid_port_count}
       fmt: error -> error
     end
   end
@@ -111,12 +127,11 @@ defmodule ExSDP.Media do
   def parse_optional(["i=" <> title | rest], media),
     do: parse_optional(rest, %__MODULE__{media | title: title})
 
-  def parse_optional(["c=" <> conn | rest], %__MODULE__{connection_data: info} = media) do
-    with {:ok, conn} <- ConnectionData.parse(conn) do
-      conn
-      |> Bunch.listify()
-      ~> %__MODULE__{media | connection_data: %ConnectionData{addresses: &1 ++ info}}
-      ~> parse_optional(rest, &1)
+  def parse_optional(["c=" <> conn | rest], media) do
+    with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(conn) do
+      connection_data = media.connection_data ++ [connection_data]
+      connection_data = %__MODULE__{media | connection_data: connection_data}
+      parse_optional(rest, connection_data)
     end
   end
 
@@ -172,7 +187,7 @@ defmodule ExSDP.Media do
 
   defp parse_type(type) when is_binary(type), do: type
 
-  defp parse_fmt(fmt, proto) when proto == "RTP/AVP" or proto == "RTP/SAVP" do
+  defp parse_fmt(fmt, proto) when proto in ["RTP/AVP", "RTP/SAVP", "UDP/TLS/RTP/SAVPF"] do
     fmt
     |> String.split(" ")
     |> Bunch.Enum.try_map(fn single_fmt ->
@@ -185,22 +200,14 @@ defmodule ExSDP.Media do
 
   defp parse_fmt(fmt, _), do: {:ok, fmt}
 
-  defp gen_ports(port_no, "/" <> port_count) do
-    port_count
-    |> Integer.parse()
-    |> case do
-      {port_count, ""} ->
-        port_no
-        |> Stream.unfold(fn port_no -> {port_no, port_no + 2} end)
-        |> Stream.take(port_count)
-        |> Enum.into([])
+  defp parse_port_count(""), do: 1
 
-      _ ->
-        {:error, :invalid_port_count}
+  defp parse_port_count("/" <> port_count) do
+    case Integer.parse(port_count) do
+      {port_count, ""} -> port_count
+      _ -> :error
     end
   end
-
-  defp gen_ports(port_no, _), do: [port_no]
 end
 
 defimpl String.Chars, for: ExSDP.Media do
@@ -223,18 +230,15 @@ defimpl String.Chars, for: ExSDP.Media do
 
   defp header_fields(media) do
     """
-    #{serialize_type(media.type)} \
-    #{serialize_ports(media.ports)} \
+    #{media.type} \
+    #{serialize_port(media.port, media.port_count)} \
     #{media.protocol} \
     #{serialize_fmt(media.fmt)} \
     """
   end
 
-  defp serialize_type(type), do: "#{type}"
-
-  defp serialize_ports([port]), do: "#{port}"
-
-  defp serialize_ports([port | _rest] = ports), do: "#{port}/#{length(ports)}"
+  defp serialize_port(port, 1), do: "#{port}"
+  defp serialize_port(port, port_count), do: "#{port}/#{port_count}"
 
   defp serialize_fmt(fmt) when is_binary(fmt), do: fmt
   defp serialize_fmt(fmt), do: Enum.map_join(fmt, " ", &Kernel.to_string/1)

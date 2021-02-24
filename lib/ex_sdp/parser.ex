@@ -97,8 +97,8 @@ defmodule ExSDP.Parser do
     do: {rest, %ExSDP{spec | phone_number: phone_number}}
 
   defp parse_line(["c=" <> connection_data | rest], spec) do
-    with {:ok, addresses} <- ConnectionData.parse(connection_data) do
-      {rest, %ExSDP{spec | connection_data: %ConnectionData{addresses: [addresses]}}}
+    with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(connection_data) do
+      {rest, %ExSDP{spec | connection_data: connection_data}}
     end
   end
 

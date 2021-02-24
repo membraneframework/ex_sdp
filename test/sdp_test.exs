@@ -47,14 +47,7 @@ defmodule ExSDPTest do
     bandwidth: [
       %Bandwidth{bandwidth: 256, type: :CT}
     ],
-    connection_data: %ConnectionData{
-      addresses: [
-        %ConnectionData.IP4{
-          ttl: 127,
-          value: {224, 2, 17, 12}
-        }
-      ]
-    },
+    connection_data: %ConnectionData{address: {224, 2, 17, 12}, ttl: 127},
     email: "j.doe@example.com (Jane Doe)",
     encryption: %Encryption{key: "key", method: :clear},
     media: [
@@ -63,17 +56,10 @@ defmodule ExSDPTest do
         bandwidth: [
           %Bandwidth{bandwidth: 256, type: :CT}
         ],
-        connection_data: %ConnectionData{
-          addresses: [
-            %ConnectionData.IP4{
-              ttl: 127,
-              value: {224, 2, 17, 12}
-            }
-          ]
-        },
+        connection_data: %ConnectionData{ttl: 127, address: {224, 2, 17, 12}},
         encryption: %Encryption{key: nil, method: :prompt},
         fmt: [0],
-        ports: [49_170],
+        port: 49_170,
         protocol: "RTP/AVP",
         title: "Sample media title",
         type: :audio
@@ -90,26 +76,17 @@ defmodule ExSDPTest do
         bandwidth: [
           %Bandwidth{bandwidth: 256, type: :CT}
         ],
-        connection_data: %ConnectionData{
-          addresses: [
-            %ConnectionData.IP4{
-              ttl: 127,
-              value: {224, 2, 17, 12}
-            }
-          ]
-        },
+        connection_data: %ConnectionData{ttl: 127, address: {224, 2, 17, 12}},
         encryption: %Encryption{key: "key", method: :clear},
         fmt: [99],
-        ports: [51_372],
+        port: 51_372,
         protocol: "RTP/AVP",
         title: nil,
         type: :video
       }
     ],
     origin: %Origin{
-      address: %ConnectionData.IP4{
-        value: {10, 47, 16, 5}
-      },
+      address: {10, 47, 16, 5},
       session_id: 2_890_844_526,
       session_version: 2_890_842_807,
       username: "jdoe"
@@ -182,7 +159,7 @@ defmodule ExSDPTest do
       a=rtpmap:99 h263-1998/90000
       c=invalid data
 
-      with reason: invalid_connection_data
+      with reason: too_few_fields
       """
 
       assert_raise RuntimeError, expected_message, fn ->
@@ -200,7 +177,7 @@ defmodule ExSDPTest do
       expected = """
       An error has occurred while parsing following SDP line:
       o=jdoe 2890844526 2890842807 IN
-      with reason: invalid_connection_data
+      with reason: too_few_fields
       """
 
       assert_raise RuntimeError, expected, fn ->

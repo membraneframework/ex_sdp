@@ -22,7 +22,8 @@ defmodule ExSDP.MediaTest do
 
       assert %Media{
                fmt: [31],
-               ports: [49_170],
+               port: 49_170,
+               port_count: 1,
                protocol: "RTP/AVP",
                type: :video
              } = media
@@ -35,7 +36,8 @@ defmodule ExSDP.MediaTest do
 
       assert %Media{
                fmt: [31],
-               ports: [49_170, 49_172],
+               port: 49_170,
+               port_count: 2,
                protocol: "RTP/AVP",
                type: :video
              } = media
@@ -81,7 +83,7 @@ defmodule ExSDP.MediaTest do
       assert %Media{
                attributes: parsed_attributes,
                fmt: [96, 97, 98],
-               ports: [49_230],
+               port: 49_230,
                protocol: "RTP/AVP",
                type: :audio
              } == medium
@@ -95,31 +97,14 @@ defmodule ExSDP.MediaTest do
         |> Media.parse()
 
       bandwidth = [%Bandwidth{bandwidth: 128, type: "X-YZ"}]
-
-      connection_data = [
-        %ConnectionData{
-          addresses: [
-            %ConnectionData.IP4{
-              ttl: 127,
-              value: {224, 2, 17, 12}
-            }
-          ]
-        }
-      ]
-
+      connection_data = %ConnectionData{ttl: 127, address: {224, 2, 17, 12}}
       encryption = %Encryption{method: :clear}
 
       session = %ExSDP{
         connection_data: connection_data,
         origin: %Origin{
           session_id: 2_890_844_526,
-          address: %ConnectionData{
-            addresses: [
-              %ConnectionData.IP4{
-                value: {10, 47, 16, 5}
-              }
-            ]
-          },
+          address: %ConnectionData{address: {10, 47, 16, 5}},
           username: "-",
           session_version: 2_890_842_807
         },
@@ -175,14 +160,7 @@ defmodule ExSDP.MediaTest do
 
       assert %Media{
                bandwidth: [%Bandwidth{bandwidth: 128, type: :AS}],
-               connection_data: %ConnectionData{
-                 addresses: [
-                   %ConnectionData.IP4{
-                     ttl: 220,
-                     value: {144, 2, 17, 12}
-                   }
-                 ]
-               },
+               connection_data: [%ConnectionData{ttl: 220, address: {144, 2, 17, 12}}],
                encryption: %Encryption{key: nil, method: :prompt}
              } = result
     end
@@ -206,7 +184,7 @@ defmodule ExSDP.MediaTest do
 
   describe "Media serializer" do
     test "serializes audio description" do
-      media = %Media{type: :audio, protocol: "RTP/AVP", fmt: [0], ports: [49_170]}
+      media = %Media{type: :audio, protocol: "RTP/AVP", fmt: [0], port: 49_170}
       assert "#{media}" == "audio 49170 RTP/AVP 0"
     end
 
@@ -223,7 +201,7 @@ defmodule ExSDP.MediaTest do
       media = %Media{
         type: :video,
         protocol: "RTP/AVP",
-        ports: [51_372],
+        port: 51_372,
         fmt: [99],
         attributes: [attribute]
       }
@@ -234,7 +212,7 @@ defmodule ExSDP.MediaTest do
     test "serializes media description with title, bandwidth and encryption description" do
       media = %Media{
         type: "type",
-        ports: [12_345],
+        port: 12_345,
         title: "title",
         protocol: "some_protocol",
         fmt: [100],
@@ -247,16 +225,9 @@ defmodule ExSDP.MediaTest do
 
     test "serializes media with connection_data description" do
       addresses = [
-        %ConnectionData.IP4{
-          ttl: 127,
-          value: {224, 2, 1, 1}
-        },
-        %ConnectionData.IP6{
-          value: {15, 0, 0, 0, 0, 0, 0, 101}
-        },
-        %ConnectionData.FQDN{
-          value: "https://some.uri.net"
-        }
+        %ConnectionData{ttl: 127, address: {224, 2, 1, 1}},
+        %ConnectionData{address: {15, 0, 0, 0, 0, 0, 0, 101}},
+        %ConnectionData{address: {:IP4, "https://some.uri.net"}}
       ]
 
       serialized_addresses = [
@@ -268,7 +239,7 @@ defmodule ExSDP.MediaTest do
       media = %Media{
         type: :video,
         protocol: "RTP/AVP",
-        ports: [51_372],
+        port: 51_372,
         fmt: [99]
       }
 
@@ -294,7 +265,7 @@ defmodule ExSDP.MediaTest do
       }
 
       media =
-        Media.new(:video, [51_372], "RTP/AVP", [99])
+        Media.new(:video, 51_372, "RTP/AVP", [99])
         |> Media.add_attribute(rtpmap)
 
       attr = Media.get_attribute(media, RTPMapping)
