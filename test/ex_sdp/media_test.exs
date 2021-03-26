@@ -257,25 +257,13 @@ defmodule ExSDP.MediaTest do
 
   describe "Utils functions" do
     test "gets attribute by module" do
-      rtpmap = %RTPMapping{
-        clock_rate: 8000,
-        encoding: "L8",
-        params: 1,
-        payload_type: 96
-      }
+      rtpmap = %RTPMapping{clock_rate: 8000, encoding: "L8", params: 1, payload_type: 96}
 
-      ssrc = %SSRC{
-        id: 12345,
-        attribute: "cname"
-      }
+      ssrc = %SSRC{id: 12_345, attribute: "cname", value: "HPd3XfRHXYUxzfsJ"}
 
-      fmtp = %FMTP{
-        pt: 96
-      }
+      fmtp = %FMTP{pt: 96}
 
-      msid = %MSID{
-        id: "DycBRAGTwt75ESYihb03FsVWVs8sSdIkhTqN"
-      }
+      msid = %MSID{id: "DycBRAGTwt75ESYihb03FsVWVs8sSdIkhTqN"}
 
       media =
         Media.new(:video, 51_372, "RTP/AVP", [99])
@@ -286,6 +274,7 @@ defmodule ExSDP.MediaTest do
 
       assert rtpmap == Media.get_attribute(media, RTPMapping)
       assert rtpmap == Media.get_attribute(media, :rtpmap)
+
       assert ssrc == Media.get_attribute(media, SSRC)
       assert ssrc == Media.get_attribute(media, :ssrc)
 
