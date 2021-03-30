@@ -12,7 +12,7 @@ defmodule ExSDP.MediaTest do
     Timing
   }
 
-  alias ExSDP.Attribute.RTPMapping
+  alias ExSDP.Attribute.{FMTP, MSID, RTPMapping, SSRC}
 
   describe "Media parser" do
     test "processes valid media description" do
@@ -257,19 +257,32 @@ defmodule ExSDP.MediaTest do
 
   describe "Utils functions" do
     test "gets attribute by module" do
-      rtpmap = %RTPMapping{
-        clock_rate: 8000,
-        encoding: "L8",
-        params: 1,
-        payload_type: 96
-      }
+      rtpmap = %RTPMapping{clock_rate: 8000, encoding: "L8", params: 1, payload_type: 96}
+
+      ssrc = %SSRC{id: 12_345, attribute: "cname", value: "HPd3XfRHXYUxzfsJ"}
+
+      fmtp = %FMTP{pt: 96}
+
+      msid = %MSID{id: "DycBRAGTwt75ESYihb03FsVWVs8sSdIkhTqN"}
 
       media =
         Media.new(:video, 51_372, "RTP/AVP", [99])
         |> Media.add_attribute(rtpmap)
+        |> Media.add_attribute(ssrc)
+        |> Media.add_attribute(fmtp)
+        |> Media.add_attribute(msid)
 
-      attr = Media.get_attribute(media, RTPMapping)
-      assert attr == rtpmap
+      assert rtpmap == Media.get_attribute(media, RTPMapping)
+      assert rtpmap == Media.get_attribute(media, :rtpmap)
+
+      assert ssrc == Media.get_attribute(media, SSRC)
+      assert ssrc == Media.get_attribute(media, :ssrc)
+
+      assert fmtp == Media.get_attribute(media, FMTP)
+      assert fmtp == Media.get_attribute(media, :fmtp)
+
+      assert msid == Media.get_attribute(media, MSID)
+      assert msid == Media.get_attribute(media, :msid)
     end
   end
 end
