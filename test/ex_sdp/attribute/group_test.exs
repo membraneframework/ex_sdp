@@ -4,9 +4,16 @@ defmodule ExSDP.Attribute.GroupTest do
   alias ExSDP.Attribute.Group
 
   describe "Group parser" do
+    @tag :debug
     test "parses group" do
       group = "BUNDLE 1 2 3 4"
       expected = %Group{semantics: "BUNDLE", mids: ["1", "2", "3", "4"]}
+      assert {:ok, expected} == Group.parse(group)
+    end
+
+    test "parses group without mids" do
+      group = "BUNDLE"
+      expected = %Group{semantics: "BUNDLE", mids: []}
       assert {:ok, expected} == Group.parse(group)
     end
 
@@ -22,9 +29,9 @@ defmodule ExSDP.Attribute.GroupTest do
       assert "#{group}" == "group:BUNDLE 1 2 3 4"
     end
 
-    test "doesn't produce string when there are no mids" do
+    test "serializes Group without mids" do
       group = %Group{semantics: "BUNDLE", mids: []}
-      assert "#{group}" == ""
+      assert "#{group}" == "group:BUNDLE"
     end
   end
 end

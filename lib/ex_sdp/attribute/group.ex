@@ -16,9 +16,21 @@ defmodule ExSDP.Attribute.Group do
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_group}
   def parse(group) do
     case String.split(group, " ", parts: 2) do
-      [_semantics, ""] -> {:error, :invalid_group}
-      [semantics, mids] -> {:ok, %__MODULE__{semantics: semantics, mids: String.split(mids, " ")}}
-      _ -> {:error, :invalid_group}
+      [semantics] ->
+        {:ok, %__MODULE__{semantics: semantics, mids: []}}
+
+      [semantics, mids] ->
+        mids = String.split(mids, " ")
+
+        # check against any redundant white spaces
+        if Enum.any?(mids, &(String.match?(&1, ~r/\s+/) or &1 == "")) do
+          {:error, :invalid_group}
+        else
+          {:ok, %__MODULE__{semantics: semantics, mids: mids}}
+        end
+
+      _ ->
+        {:error, :invalid_group}
     end
   end
 end
@@ -26,8 +38,6 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.Group do
   alias ExSDP.Attribute.Group
 
-  def to_string(%Group{semantics: _semantics, mids: []}), do: ""
-
   def to_string(%Group{semantics: semantics, mids: mids}),
-    do: "group:#{semantics} #{Enum.join(mids, " ")}"
+    do: "group:#{semantics} #{Enum.join(mids, " ")}" |> String.trim()
 end

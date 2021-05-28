@@ -33,13 +33,7 @@ defmodule ExSDP.Serializer do
   def maybe_serialize(type, true), do: "#{type}=1"
   def maybe_serialize(type, false), do: "#{type}=0"
   def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
-
-  def maybe_serialize(type, value) do
-    case "#{value}" do
-      "" -> ""
-      value -> "#{type}=#{value}"
-    end
-  end
+  def maybe_serialize(type, value), do: "#{type}=#{value}"
 
   def maybe_serialize_hex(_type, nil), do: ""
 
