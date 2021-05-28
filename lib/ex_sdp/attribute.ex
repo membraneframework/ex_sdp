@@ -5,14 +5,13 @@ defmodule ExSDP.Attribute do
   use Bunch.Typespec
   use Bunch.Access
 
-  alias __MODULE__.{RTPMapping, MSID, FMTP, SSRC}
+  alias __MODULE__.{RTPMapping, MSID, FMTP, SSRC, Group}
 
   @type hash_function :: :sha1 | :sha224 | :sha256 | :sha384 | :sha512
   @type setup_value :: :active | :passive | :actpass | :holdconn
   @type orient_value :: :portrait | :landscape | :seascape
   @type type_value :: :broadcast | :meeting | :moderated | :test | :H332
   @type framerate_value :: float() | {integer(), integer()}
-  @type group_semantic :: :BUNDLE
 
   @list_type flag_attributes :: [
                :recvonly,
@@ -41,13 +40,13 @@ defmodule ExSDP.Attribute do
   @type fingerprint :: {:fingerprint, {hash_function(), binary()}}
   @type setup :: {:setup, setup_value()}
   @type mid :: {:mid, binary()}
-  @type group :: {:group, {group_semantic(), [binary()]}}
 
   @type t ::
           __MODULE__.RTPMapping.t()
           | __MODULE__.MSID.t()
           | __MODULE__.FMTP.t()
           | __MODULE__.SSRC.t()
+          | __MODULE__.Group.t()
           | cat()
           | charset()
           | keywds()
@@ -66,7 +65,6 @@ defmodule ExSDP.Attribute do
           | fingerprint()
           | setup()
           | mid()
-          | group()
           | flag_attributes()
 
   @flag_attributes_strings @flag_attributes |> Enum.map(&to_string/1)
@@ -90,6 +88,7 @@ defmodule ExSDP.Attribute do
   defp do_parse("msid", value, _opts), do: MSID.parse(value)
   defp do_parse("fmtp", value, _opts), do: FMTP.parse(value)
   defp do_parse("ssrc", value, _opts), do: SSRC.parse(value)
+  defp do_parse("group", value, _opts), do: Group.parse(value)
   defp do_parse("cat", value, _opts), do: {:ok, {:cat, value}}
   defp do_parse("charset", value, _opts), do: {:ok, {:charset, value}}
   defp do_parse("keywds", value, _opts), do: {:ok, {:keywds, value}}
@@ -107,7 +106,6 @@ defmodule ExSDP.Attribute do
   defp do_parse("mid", value, _opts), do: {:ok, {:mid, value}}
   defp do_parse("rtcp-mux", _value, _opts), do: {:ok, :rtcp_mux}
   defp do_parse("rtcp-rsize", _value, _opts), do: {:ok, :rtcp_rsize}
-  defp do_parse("group", value, _opts), do: parse_group(value)
 
   defp do_parse(attribute, value, _opts) when attribute in ["maxptime", "ptime", "quality"] do
     case Integer.parse(value) do
@@ -166,13 +164,6 @@ defmodule ExSDP.Attribute do
       "actpass" -> {:ok, {:setup, :actpass}}
       "holdconn" -> {:ok, {:setup, :holdconn}}
       _ -> {:error, :invalid_setup}
-    end
-  end
-
-  defp parse_group(group) do
-    case String.split(group, " ") do
-      ["BUNDLE" | ids] -> {:ok, {:group, {:BUNDLE, ids}}}
-      _ -> {:error, :invalid_group}
     end
   end
 end

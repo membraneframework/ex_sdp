@@ -27,14 +27,19 @@ defmodule ExSDP.Serializer do
 
   def maybe_serialize(type, {:setup, value}), do: "#{type}=setup:#{serialize_setup(value)}"
   def maybe_serialize(type, {:mid, value}), do: "#{type}=mid:#{value}"
-  def maybe_serialize(type, {:group, value}), do: "#{type}=group:#{serialize_group(value)}"
   def maybe_serialize(type, :rtcp_mux), do: "#{type}=rtcp-mux"
   def maybe_serialize(type, :rtcp_rsize), do: "#{type}=rtcp-rsize"
 
   def maybe_serialize(type, true), do: "#{type}=1"
   def maybe_serialize(type, false), do: "#{type}=0"
   def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
-  def maybe_serialize(type, value), do: "#{type}=#{value}"
+
+  def maybe_serialize(type, value) do
+    case "#{value}" do
+      "" -> ""
+      value -> "#{type}=#{value}"
+    end
+  end
 
   def maybe_serialize_hex(_type, nil), do: ""
 
@@ -57,9 +62,4 @@ defmodule ExSDP.Serializer do
 
   defp serialize_setup(setup) when setup in [:active, :passive, :actpass, :holdconn],
     do: Atom.to_string(setup)
-
-  defp serialize_group({semantic, ids}) do
-    ids = Enum.join(ids, " ")
-    "#{semantic} #{ids}"
-  end
 end
