@@ -15,22 +15,12 @@ defmodule ExSDP.Attribute.Group do
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_group}
   def parse(group) do
-    case String.split(group, " ", parts: 2) do
-      [semantics] ->
-        {:ok, %__MODULE__{semantics: semantics, mids: []}}
-
-      [semantics, mids] ->
-        mids = String.split(mids, " ")
-
-        # check against any redundant white spaces
-        if Enum.any?(mids, &(String.match?(&1, ~r/\s+/) or &1 == "")) do
-          {:error, :invalid_group}
-        else
-          {:ok, %__MODULE__{semantics: semantics, mids: mids}}
-        end
-
-      _ ->
-        {:error, :invalid_group}
+    with [semantics | mids] <- String.split(group, " "),
+         # check against any redundant white spaces
+         false <- Enum.any?(mids, &(String.match?(&1, ~r/\s+/) or &1 == "")) do
+      {:ok, %__MODULE__{semantics: semantics, mids: mids}}
+    else
+      _ -> {:error, :invalid_group}
     end
   end
 end
