@@ -42,7 +42,7 @@ defmodule ExSDP.WebRTCTest do
       |> ExSDP.parse()
 
     assert parsed == %ExSDP{
-             attributes: [group: {:BUNDLE, ["0", "1"]}],
+             attributes: [%ExSDP.Attribute.Group{semantics: "BUNDLE", mids: ["0", "1"]}],
              media: [
                %ExSDP.Media{
                  attributes: [
