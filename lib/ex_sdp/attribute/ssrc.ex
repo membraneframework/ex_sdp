@@ -4,6 +4,7 @@ defmodule ExSDP.Attribute.SSRC do
   """
   alias ExSDP.Utils
 
+
   @enforce_keys [:id, :attribute]
   defstruct @enforce_keys ++ [:value]
 
@@ -16,8 +17,9 @@ defmodule ExSDP.Attribute.SSRC do
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_ssrc}
   def parse(ssrc) do
-    with [id, attribute] <- String.split(ssrc, " "),
+    with [id | attribute] <- String.split(ssrc, " "),
          {:ok, id} <- Utils.parse_numeric_string(id) do
+        attribute = Enum.join(attribute," ")
       case String.split(attribute, ":") do
         [attribute, value] -> {:ok, %__MODULE__{id: id, attribute: attribute, value: value}}
         [attribute] -> {:ok, %__MODULE__{id: id, attribute: attribute}}

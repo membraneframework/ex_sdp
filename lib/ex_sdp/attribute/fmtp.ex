@@ -6,6 +6,8 @@ defmodule ExSDP.Attribute.FMTP do
   """
   alias ExSDP.Utils
 
+
+
   @enforce_keys [:pt]
   defstruct @enforce_keys ++
               [
@@ -57,6 +59,8 @@ defmodule ExSDP.Attribute.FMTP do
   Key that can be used for searching this attribute using `ExSDP.Media.get_attribute/2`.
   """
   @type attr_key :: :fmtp
+
+  require Logger
 
   @typedoc """
   Reason of parsing failure.
@@ -163,7 +167,19 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | profile_id: value}}
   end
 
-  defp parse_param(_params, _fmtp), do: {:error, :unsupported_parameter}
+  defp parse_param(["apt=" <> value | rest], fmtp), do: {rest, Map.put(fmtp, :apt, value)}
+  defp parse_param(["repair-window=" <> value | rest], fmtp), do: {rest, Map.put(fmtp, :repair_window, value)}
+
+  defp parse_param([ head | rest], fmtp) do
+    [start_range,end_range] = String.split(head,"-")
+    {:ok,start_range} = Utils.parse_numeric_string(start_range)
+    {:ok,end_range} = Utils.parse_numeric_string(end_range)
+    {rest, Map.put(fmtp, :redundancy_range, "#{start_range}-#{end_range}")}
+  end
+
+
+  defp parse_param(_params, _fmtp), do:    {:error, :unsupported_parameter}
+
 end
 
 defimpl String.Chars, for: ExSDP.Attribute.FMTP do
