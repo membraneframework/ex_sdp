@@ -14,9 +14,6 @@ defmodule ExSDP.Media do
     Encryption
   }
 
-  require Logger
-
-
   alias ExSDP.Attribute.{RTPMapping, MSID, FMTP, SSRC, Group}
 
   @enforce_keys [:type, :port, :protocol, :fmt]
@@ -110,6 +107,7 @@ defmodule ExSDP.Media do
         protocol: proto,
         fmt: fmt
       }
+
       {:ok, media}
     else
       conn: _ -> {:error, :invalid_media_spec}
