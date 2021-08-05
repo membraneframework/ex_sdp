@@ -53,9 +53,7 @@ defimpl String.Chars, for: ExSDP.Attribute.RTPMapping do
   alias ExSDP.Attribute.RTPMapping
 
   def to_string(mapping) do
-    "rtpmap:#{mapping.payload_type} #{mapping.encoding}/#{mapping.clock_rate}#{
-      serialize_params(mapping)
-    }"
+    "rtpmap:#{mapping.payload_type} #{mapping.encoding}/#{mapping.clock_rate}#{serialize_params(mapping)}"
   end
 
   defp serialize_params(%RTPMapping{params: nil}), do: ""
