@@ -16,7 +16,7 @@ defmodule ExSDP.Attribute.SSRC do
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_ssrc}
   def parse(ssrc) do
-    with [id | attribute] <- String.split(ssrc, " "),
+    with [id | [_ | _] = attribute] <- String.split(ssrc, " "),
          {:ok, id} <- Utils.parse_numeric_string(id) do
       attribute = Enum.join(attribute, " ")
 

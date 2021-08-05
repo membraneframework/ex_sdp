@@ -170,9 +170,13 @@ defmodule ExSDP.Attribute.FMTP do
 
   defp parse_param([head | rest], fmtp) do
     [start_range, end_range] = String.split(head, "-")
-    {:ok, start_range} = Utils.parse_numeric_string(start_range)
-    {:ok, end_range} = Utils.parse_numeric_string(end_range)
-    {rest, Map.put(fmtp, :redundancy_range, "#{start_range}-#{end_range}")}
+
+    with {:ok, start_range} <- Utils.parse_numeric_string(start_range),
+         {:ok, end_range} <- Utils.parse_numeric_string(end_range) do
+      {rest, Map.put(fmtp, :redundancy_range, "#{start_range}-#{end_range}")}
+    else
+      {:error, error} -> {:error, :unsupported_parameter}
+    end
   end
 
   defp parse_param(_params, _fmtp), do: {:error, :unsupported_parameter}
