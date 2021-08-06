@@ -18,6 +18,9 @@ defmodule ExSDP.Attribute.FMTP do
                 :max_fs,
                 :max_dpb,
                 :max_br,
+                :apt,
+                :repair_window,
+                :redundancy_range,
                 # OPUS
                 :maxaveragebitrate,
                 :maxplaybackrate,
@@ -40,6 +43,9 @@ defmodule ExSDP.Attribute.FMTP do
           max_br: non_neg_integer() | nil,
           level_asymmetry_allowed: boolean() | nil,
           packetization_mode: non_neg_integer() | nil,
+          apt: non_neg_integer() | nil,
+          repair_window: non_neg_integer() | nil,
+          redundancy_range: {non_neg_integer(), non_neg_integer()} | nil,
           # OPUS
           maxaveragebitrate: non_neg_integer() | nil,
           maxplaybackrate: non_neg_integer() | nil,
@@ -163,17 +169,18 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | profile_id: value}}
   end
 
-  defp parse_param(["apt=" <> value | rest], fmtp), do: {rest, Map.put(fmtp, :apt, value)}
+  defp parse_param(["apt=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | apt: value}}
+  end
 
   defp parse_param(["repair-window=" <> value | rest], fmtp),
-    do: {rest, Map.put(fmtp, :repair_window, value)}
+    do: {rest, %{fmtp | repair_window: value}}
 
   defp parse_param([head | rest], fmtp) do
-    [start_range, end_range] = String.split(head, "-")
-
-    with {:ok, start_range} <- Utils.parse_numeric_string(start_range),
+    with [start_range, end_range] = String.split(head, "-"),
+         {:ok, start_range} <- Utils.parse_numeric_string(start_range),
          {:ok, end_range} <- Utils.parse_numeric_string(end_range) do
-      {rest, Map.put(fmtp, :redundancy_range, "#{start_range}-#{end_range}")}
+      {rest, Map.put(fmtp, :redundancy_range, {start_range, end_range})}
     else
       _ -> {:error, :unsupported_parameter}
     end
@@ -197,6 +204,9 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("max-br", fmtp.max_br),
         Serializer.maybe_serialize("level-asymmetry-allowed", fmtp.level_asymmetry_allowed),
         Serializer.maybe_serialize("packetization-mode", fmtp.packetization_mode),
+        Serializer.maybe_serialize("apt", fmtp.apt),
+        Serializer.maybe_serialize("repair-window", fmtp.repair_window),
+        Serializer.maybe_serialize("redundancy-range", fmtp.redundancy_range),
         # OPUS
         Serializer.maybe_serialize("maxaveragebitrate", fmtp.maxaveragebitrate),
         Serializer.maybe_serialize("maxplaybackrate", fmtp.maxplaybackrate),
