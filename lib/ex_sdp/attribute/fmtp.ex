@@ -177,7 +177,7 @@ defmodule ExSDP.Attribute.FMTP do
     do: {rest, %{fmtp | repair_window: value}}
 
   defp parse_param([head | rest], fmtp) do
-    with [start_range, end_range] = String.split(head, "-"),
+    with [start_range, end_range] <- String.split(head, "-"),
          {:ok, start_range} <- Utils.parse_numeric_string(start_range),
          {:ok, end_range} <- Utils.parse_numeric_string(end_range) do
       {rest, Map.put(fmtp, :redundancy_range, {start_range, end_range})}
