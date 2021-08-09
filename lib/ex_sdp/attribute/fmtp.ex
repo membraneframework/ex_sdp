@@ -180,7 +180,7 @@ defmodule ExSDP.Attribute.FMTP do
     with [start_range, end_range] <- String.split(head, "-"),
          {:ok, start_range} <- Utils.parse_numeric_string(start_range),
          {:ok, end_range} <- Utils.parse_numeric_string(end_range) do
-      {rest, Map.put(fmtp, :redundancy_range, {start_range, end_range})}
+      {rest, Map.put(fmtp, :range, {start_range, end_range})}
     else
       _ -> {:error, :unsupported_parameter}
     end
@@ -206,7 +206,7 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("packetization-mode", fmtp.packetization_mode),
         Serializer.maybe_serialize("apt", fmtp.apt),
         Serializer.maybe_serialize("repair-window", fmtp.repair_window),
-        Serializer.maybe_serialize("redundancy-range", fmtp.redundancy_range),
+        Serializer.maybe_serialize("range", fmtp.range),
         # OPUS
         Serializer.maybe_serialize("maxaveragebitrate", fmtp.maxaveragebitrate),
         Serializer.maybe_serialize("maxplaybackrate", fmtp.maxplaybackrate),
