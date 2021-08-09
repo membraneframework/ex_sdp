@@ -20,7 +20,7 @@ defmodule ExSDP.Attribute.FMTP do
                 :max_br,
                 :apt,
                 :repair_window,
-                :redundancy_range,
+                :range,
                 # OPUS
                 :maxaveragebitrate,
                 :maxplaybackrate,
@@ -45,7 +45,7 @@ defmodule ExSDP.Attribute.FMTP do
           packetization_mode: non_neg_integer() | nil,
           apt: non_neg_integer() | nil,
           repair_window: non_neg_integer() | nil,
-          redundancy_range: {non_neg_integer(), non_neg_integer()} | nil,
+          range: {non_neg_integer(), non_neg_integer()} | nil,
           # OPUS
           maxaveragebitrate: non_neg_integer() | nil,
           maxplaybackrate: non_neg_integer() | nil,
