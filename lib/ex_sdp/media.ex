@@ -94,6 +94,19 @@ defmodule ExSDP.Media do
     end)
   end
 
+  @spec get_attributes(media :: t(), key :: module() | atom() | binary()) :: [Attribute.t()]
+  def get_attributes(media, key) do
+    key = Map.get(@struct_attr_keys, key, key)
+
+    media.attributes
+    |> Enum.filter(fn
+      %module{} -> module == key
+      {k, _v} -> k == key
+      # for flag attributes
+      k -> k == key
+    end)
+  end
+
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
