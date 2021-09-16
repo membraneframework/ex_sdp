@@ -32,6 +32,7 @@ defmodule ExSDP.Serializer do
 
   def maybe_serialize(type, true), do: "#{type}=1"
   def maybe_serialize(type, false), do: "#{type}=0"
+  def maybe_serialize("range", {from, to}), do: "#{from}-#{to}"
   def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
   def maybe_serialize(type, value), do: "#{type}=#{value}"
 
