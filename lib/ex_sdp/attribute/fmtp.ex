@@ -2,7 +2,7 @@ defmodule ExSDP.Attribute.FMTP do
   @moduledoc """
   This module represents fmtp (RFC 5576).
 
-  Parameters for H264 (not all, RFC 6184), VP8, VP9 and OPUS (RFC 7587) are currently supported.
+  Parameters for H264 (not all, RFC 6184), VP8, VP9, OPUS (RFC 7587) and RED (RFC 2198) are currently supported.
   """
   alias ExSDP.Utils
 
@@ -31,7 +31,9 @@ defmodule ExSDP.Attribute.FMTP do
                 :usedtx,
                 # VP8/9
                 :profile_id,
-                :max_fr
+                :max_fr,
+                # RED
+                :redundant_payloads
               ]
 
   @type t :: %__MODULE__{
@@ -56,7 +58,9 @@ defmodule ExSDP.Attribute.FMTP do
           usedtx: boolean() | nil,
           # VP8/9
           profile_id: non_neg_integer() | nil,
-          max_fr: non_neg_integer() | nil
+          max_fr: non_neg_integer() | nil,
+          # RED
+          redundant_payloads: [0..128]
         }
 
   @typedoc """
@@ -176,7 +180,18 @@ defmodule ExSDP.Attribute.FMTP do
   defp parse_param(["repair-window=" <> value | rest], fmtp),
     do: {rest, %{fmtp | repair_window: value}}
 
-  defp parse_param([head | rest], fmtp) do
+  defp parse_param([head | _rest] = params, fmtp) do
+    # this is for non-key-value parameters as `key=value` format is not mandatory
+    if String.contains?(head, "/") do
+      parse_redundant_payloads_param(params, fmtp)
+    else
+      parse_range_param(params, fmtp)
+    end
+  end
+
+  defp parse_param(_params, _fmtp), do: {:error, :unsupported_parameter}
+
+  defp parse_range_param([head | rest], fmtp) do
     with [start_range, end_range] <- String.split(head, "-"),
          {:ok, start_range} <- Utils.parse_numeric_string(start_range),
          {:ok, end_range} <- Utils.parse_numeric_string(end_range) do
@@ -186,7 +201,19 @@ defmodule ExSDP.Attribute.FMTP do
     end
   end
 
-  defp parse_param(_params, _fmtp), do: {:error, :unsupported_parameter}
+  defp parse_redundant_payloads_param([head | rest], fmtp) do
+    with redundant_payloads <- String.split(head, "/"),
+         {:ok, redundant_payloads} <-
+           Bunch.Enum.try_map(redundant_payloads, fn redundant_payload ->
+             case Utils.parse_numeric_string(redundant_payload) do
+               {:ok, value} when value >= 0 and value <= 128 -> {:ok, value}
+               {:ok, _value} -> {:error, :red_not_in_0_128_range}
+               other -> other
+             end
+           end) do
+      {rest, Map.put(fmtp, :redundant_payloads, redundant_payloads)}
+    end
+  end
 end
 
 defimpl String.Chars, for: ExSDP.Attribute.FMTP do
@@ -217,7 +244,9 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("usedtx", fmtp.usedtx),
         # VP8/9
         Serializer.maybe_serialize("profile-id", fmtp.profile_id),
-        Serializer.maybe_serialize("max-fr", fmtp.max_fr)
+        Serializer.maybe_serialize("max-fr", fmtp.max_fr),
+        # RED
+        Serializer.maybe_serialize_list(fmtp.redundant_payloads, "/")
       ]
       |> Enum.filter(fn param -> param != "" end)
       |> Enum.join(";")

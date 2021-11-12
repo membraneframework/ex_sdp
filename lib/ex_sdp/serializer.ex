@@ -41,6 +41,10 @@ defmodule ExSDP.Serializer do
   def maybe_serialize_hex(type, value),
     do: "#{type}=#{Integer.to_string(value, 16) |> String.downcase()}"
 
+  def maybe_serialize_list([], _sep), do: ""
+  def maybe_serialize_list(nil, _sep), do: ""
+  def maybe_serialize_list(list, sep), do: Enum.map_join(list, sep, &"#{&1}")
+
   defp serialize_ice_options(ice_options) do
     Bunch.listify(ice_options) |> Enum.join(" ")
   end
