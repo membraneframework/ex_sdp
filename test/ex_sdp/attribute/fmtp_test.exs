@@ -33,6 +33,43 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:error, :red_not_in_0_128_range} == FMTP.parse(fmtp)
     end
 
+    test "parses proper fmtp with simple DTMF tones parameter" do
+      fmtp = "100 0-15"
+
+      expected = %FMTP{
+        pt: 100,
+        dtmf_tones: "0-15"
+      }
+
+      assert {:ok, expected} == FMTP.parse(fmtp)
+    end
+
+    test "parses proper fmtp with complex DTMF tones parameter" do
+      fmtp = "100 0-15,66,70"
+
+      expected = %FMTP{
+        pt: 100,
+        dtmf_tones: "0-15,66,70"
+      }
+
+      assert {:ok, expected} == FMTP.parse(fmtp)
+    end
+
+    test "returns an error when DTMF tone is too big" do
+      fmtp = "100 0-15,256"
+      assert {:error, :invalid_dtmf_tones} = FMTP.parse(fmtp)
+    end
+
+    test "returns an error when DTMF tone range is invalid" do
+      fmtp = "100 4-2"
+      assert {:error, :invalid_dtmf_tones} = FMTP.parse(fmtp)
+    end
+
+    test "returns an error when DTMF tone range is too big" do
+      fmtp = "100 0-256"
+      assert {:error, :invalid_dtmf_tones} = FMTP.parse(fmtp)
+    end
+
     test "returns an error when there is unsupported parameter" do
       fmtp = "108 profile-level-id=42e01f;level-asymmetry-allowed=1;unsupported-param=1"
       assert {:error, :unsupported_parameter} = FMTP.parse(fmtp)

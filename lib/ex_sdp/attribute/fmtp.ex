@@ -6,6 +6,7 @@ defmodule ExSDP.Attribute.FMTP do
   * H264 (not all, RFC 6184),
   * VP8, VP9, OPUS (RFC 7587)
   * RTX (RFC 4588)
+  * Telephone Events (RFC 4733)
   * RED (RFC 2198)
   are currently supported.
   """
@@ -26,7 +27,6 @@ defmodule ExSDP.Attribute.FMTP do
                 :max_dpb,
                 :max_br,
                 :repair_window,
-                :range,
                 # OPUS
                 :maxaveragebitrate,
                 :maxplaybackrate,
@@ -41,6 +41,8 @@ defmodule ExSDP.Attribute.FMTP do
                 # RTX
                 :apt,
                 :rtx_time,
+                # Telephone Events
+                :dtmf_tones,
                 # RED
                 :redundant_payloads
               ]
@@ -55,7 +57,6 @@ defmodule ExSDP.Attribute.FMTP do
           level_asymmetry_allowed: boolean() | nil,
           packetization_mode: non_neg_integer() | nil,
           repair_window: non_neg_integer() | nil,
-          range: {non_neg_integer(), non_neg_integer()} | nil,
           # OPUS
           maxaveragebitrate: non_neg_integer() | nil,
           maxplaybackrate: non_neg_integer() | nil,
@@ -70,6 +71,8 @@ defmodule ExSDP.Attribute.FMTP do
           # RTX
           apt: payload_type_t() | nil,
           rtx_time: non_neg_integer() | nil,
+          # Telephone Events
+          dtmf_tones: String.t() | nil,
           # RED
           redundant_payloads: [payload_type_t()] | nil
         }
@@ -197,22 +200,21 @@ defmodule ExSDP.Attribute.FMTP do
 
   defp parse_param([head | _rest] = params, fmtp) do
     # this is for non-key-value parameters as `key=value` format is not mandatory
-    if String.contains?(head, "/") do
-      parse_redundant_payloads_param(params, fmtp)
-    else
-      parse_range_param(params, fmtp)
+    cond do
+      String.contains?(head, "=") -> {:error, :unsupported_parameter}
+      String.contains?(head, "/") -> parse_redundant_payloads_param(params, fmtp)
+      true -> parse_dtmf_tones_param(params, fmtp)
     end
   end
 
   defp parse_param(_params, _fmtp), do: {:error, :unsupported_parameter}
 
-  defp parse_range_param([head | rest], fmtp) do
-    with [start_range, end_range] <- String.split(head, "-"),
-         {:ok, start_range} <- Utils.parse_numeric_string(start_range),
-         {:ok, end_range} <- Utils.parse_numeric_string(end_range) do
-      {rest, Map.put(fmtp, :range, {start_range, end_range})}
+  defp parse_dtmf_tones_param([head | rest], fmtp) do
+    with dtmf_tones <- String.split(head, ","),
+         true <- validate_dtmf_tones(dtmf_tones) do
+      {rest, Map.put(fmtp, :dtmf_tones, head)}
     else
-      _ -> {:error, :unsupported_parameter}
+      _error -> {:error, :invalid_dtmf_tones}
     end
   end
 
@@ -228,6 +230,32 @@ defmodule ExSDP.Attribute.FMTP do
            end) do
       {rest, Map.put(fmtp, :redundant_payloads, redundant_payloads)}
     end
+  end
+
+  defp validate_dtmf_tones(dtmf_tones) do
+    Enum.all?(dtmf_tones, fn dtmf_tone ->
+      case String.split(dtmf_tone, "-") do
+        [start_range, end_range] ->
+          with {:ok, start_range} <- Utils.parse_numeric_string(start_range),
+               {:ok, end_range} <- Utils.parse_numeric_string(end_range),
+               true <- start_range < end_range and 0 <= start_range and end_range <= 255 do
+            true
+          else
+            _error -> false
+          end
+
+        [single_tone] ->
+          with {:ok, single_tone} <- Utils.parse_numeric_string(single_tone),
+               true <- 0 <= single_tone and single_tone <= 255 do
+            true
+          else
+            _error -> false
+          end
+
+        _other ->
+          false
+      end
+    end)
   end
 end
 
@@ -247,7 +275,6 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("level-asymmetry-allowed", fmtp.level_asymmetry_allowed),
         Serializer.maybe_serialize("packetization-mode", fmtp.packetization_mode),
         Serializer.maybe_serialize("repair-window", fmtp.repair_window),
-        Serializer.maybe_serialize("range", fmtp.range),
         # OPUS
         Serializer.maybe_serialize("maxaveragebitrate", fmtp.maxaveragebitrate),
         Serializer.maybe_serialize("maxplaybackrate", fmtp.maxplaybackrate),
@@ -262,6 +289,8 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         # RTX
         Serializer.maybe_serialize("apt", fmtp.apt),
         Serializer.maybe_serialize("rtx-time", fmtp.rtx_time),
+        # Telephone Events
+        Serializer.maybe_serialize("dtmf-tones", fmtp.dtmf_tones),
         # RED
         Serializer.maybe_serialize_list(fmtp.redundant_payloads, "/")
       ]
