@@ -2,9 +2,16 @@ defmodule ExSDP.Attribute.FMTP do
   @moduledoc """
   This module represents fmtp (RFC 5576).
 
-  Parameters for H264 (not all, RFC 6184), VP8, VP9, OPUS (RFC 7587) and RED (RFC 2198) are currently supported.
+  Parameters for:
+  * H264 (not all, RFC 6184),
+  * VP8, VP9, OPUS (RFC 7587)
+  * RTX (RFC 4588)
+  * RED (RFC 2198)
+  are currently supported.
   """
   alias ExSDP.Utils
+
+  @type payload_type_t() :: 0..127
 
   @enforce_keys [:pt]
   defstruct @enforce_keys ++
@@ -18,7 +25,6 @@ defmodule ExSDP.Attribute.FMTP do
                 :max_fs,
                 :max_dpb,
                 :max_br,
-                :apt,
                 :repair_window,
                 :range,
                 # OPUS
@@ -32,6 +38,9 @@ defmodule ExSDP.Attribute.FMTP do
                 # VP8/9
                 :profile_id,
                 :max_fr,
+                # RTX
+                :apt,
+                :rtx_time,
                 # RED
                 :redundant_payloads
               ]
@@ -45,7 +54,6 @@ defmodule ExSDP.Attribute.FMTP do
           max_br: non_neg_integer() | nil,
           level_asymmetry_allowed: boolean() | nil,
           packetization_mode: non_neg_integer() | nil,
-          apt: non_neg_integer() | nil,
           repair_window: non_neg_integer() | nil,
           range: {non_neg_integer(), non_neg_integer()} | nil,
           # OPUS
@@ -59,8 +67,11 @@ defmodule ExSDP.Attribute.FMTP do
           # VP8/9
           profile_id: non_neg_integer() | nil,
           max_fr: non_neg_integer() | nil,
+          # RTX
+          apt: payload_type_t() | nil,
+          rtx_time: non_neg_integer() | nil,
           # RED
-          redundant_payloads: [0..128]
+          redundant_payloads: [payload_type_t()] | nil
         }
 
   @typedoc """
@@ -177,6 +188,10 @@ defmodule ExSDP.Attribute.FMTP do
     with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | apt: value}}
   end
 
+  defp parse_param(["rtx-time=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | rtx_time: value}}
+  end
+
   defp parse_param(["repair-window=" <> value | rest], fmtp),
     do: {rest, %{fmtp | repair_window: value}}
 
@@ -231,7 +246,6 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("max-br", fmtp.max_br),
         Serializer.maybe_serialize("level-asymmetry-allowed", fmtp.level_asymmetry_allowed),
         Serializer.maybe_serialize("packetization-mode", fmtp.packetization_mode),
-        Serializer.maybe_serialize("apt", fmtp.apt),
         Serializer.maybe_serialize("repair-window", fmtp.repair_window),
         Serializer.maybe_serialize("range", fmtp.range),
         # OPUS
@@ -245,6 +259,9 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         # VP8/9
         Serializer.maybe_serialize("profile-id", fmtp.profile_id),
         Serializer.maybe_serialize("max-fr", fmtp.max_fr),
+        # RTX
+        Serializer.maybe_serialize("apt", fmtp.apt),
+        Serializer.maybe_serialize("rtx-time", fmtp.rtx_time),
         # RED
         Serializer.maybe_serialize_list(fmtp.redundant_payloads, "/")
       ]
