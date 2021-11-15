@@ -6,6 +6,7 @@ defmodule ExSDP.Attribute.FMTP do
   * H264 (not all, RFC 6184),
   * VP8, VP9, OPUS (RFC 7587)
   * RTX (RFC 4588)
+  * FLEXFEC (RFC 8627)
   * Telephone Events (RFC 4733)
   * RED (RFC 2198)
   are currently supported.
@@ -26,7 +27,6 @@ defmodule ExSDP.Attribute.FMTP do
                 :max_fs,
                 :max_dpb,
                 :max_br,
-                :repair_window,
                 # OPUS
                 :maxaveragebitrate,
                 :maxplaybackrate,
@@ -41,6 +41,8 @@ defmodule ExSDP.Attribute.FMTP do
                 # RTX
                 :apt,
                 :rtx_time,
+                # FLEXFEC
+                :repair_window,
                 # Telephone Events
                 :dtmf_tones,
                 # RED
@@ -56,7 +58,6 @@ defmodule ExSDP.Attribute.FMTP do
           max_br: non_neg_integer() | nil,
           level_asymmetry_allowed: boolean() | nil,
           packetization_mode: non_neg_integer() | nil,
-          repair_window: non_neg_integer() | nil,
           # OPUS
           maxaveragebitrate: non_neg_integer() | nil,
           maxplaybackrate: non_neg_integer() | nil,
@@ -71,6 +72,8 @@ defmodule ExSDP.Attribute.FMTP do
           # RTX
           apt: payload_type_t() | nil,
           rtx_time: non_neg_integer() | nil,
+          # FLEXFEC
+          repair_window: non_neg_integer() | nil,
           # Telephone Events
           dtmf_tones: String.t() | nil,
           # RED
@@ -195,8 +198,10 @@ defmodule ExSDP.Attribute.FMTP do
     with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | rtx_time: value}}
   end
 
-  defp parse_param(["repair-window=" <> value | rest], fmtp),
-    do: {rest, %{fmtp | repair_window: value}}
+  defp parse_param(["repair-window=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | repair_window: value}}
+  end
 
   defp parse_param([head | _rest] = params, fmtp) do
     # this is for non-key-value parameters as `key=value` format is not mandatory
@@ -274,7 +279,6 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("max-br", fmtp.max_br),
         Serializer.maybe_serialize("level-asymmetry-allowed", fmtp.level_asymmetry_allowed),
         Serializer.maybe_serialize("packetization-mode", fmtp.packetization_mode),
-        Serializer.maybe_serialize("repair-window", fmtp.repair_window),
         # OPUS
         Serializer.maybe_serialize("maxaveragebitrate", fmtp.maxaveragebitrate),
         Serializer.maybe_serialize("maxplaybackrate", fmtp.maxplaybackrate),
@@ -289,6 +293,8 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         # RTX
         Serializer.maybe_serialize("apt", fmtp.apt),
         Serializer.maybe_serialize("rtx-time", fmtp.rtx_time),
+        # FLEXFEC
+        Serializer.maybe_serialize("repair-window", fmtp.repair_window),
         # Telephone Events
         Serializer.maybe_serialize("dtmf-tones", fmtp.dtmf_tones),
         # RED
