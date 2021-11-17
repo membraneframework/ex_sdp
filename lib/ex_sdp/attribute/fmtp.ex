@@ -238,29 +238,28 @@ defmodule ExSDP.Attribute.FMTP do
   end
 
   defp validate_dtmf_tones(dtmf_tones) do
-    Enum.all?(dtmf_tones, fn dtmf_tone ->
-      case String.split(dtmf_tone, "-") do
-        [start_range, end_range] ->
-          with {:ok, start_range} <- Utils.parse_numeric_string(start_range),
-               {:ok, end_range} <- Utils.parse_numeric_string(end_range),
-               true <- start_range < end_range and 0 <= start_range and end_range <= 255 do
-            true
-          else
-            _error -> false
-          end
+    Enum.all?(dtmf_tones, &validate_dtmf_tone(&1))
+  end
 
-        [single_tone] ->
-          with {:ok, single_tone} <- Utils.parse_numeric_string(single_tone),
-               true <- 0 <= single_tone and single_tone <= 255 do
-            true
-          else
-            _error -> false
-          end
+  defp validate_dtmf_tone(dtmf_tone) do
+    case String.split(dtmf_tone, "-") do
+      [start_range, end_range] ->
+        with {:ok, start_range} <- Utils.parse_numeric_string(start_range),
+             {:ok, end_range} <- Utils.parse_numeric_string(end_range) do
+          start_range < end_range and 0 <= start_range and end_range <= 255
+        else
+          _error -> false
+        end
 
-        _other ->
-          false
-      end
-    end)
+      [single_tone] ->
+        case Utils.parse_numeric_string(single_tone) do
+          {:ok, single_tone} -> 0 <= single_tone and single_tone <= 255
+          _other -> false
+        end
+
+      _other ->
+        false
+    end
   end
 end
 
