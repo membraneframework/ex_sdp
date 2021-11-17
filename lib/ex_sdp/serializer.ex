@@ -32,7 +32,7 @@ defmodule ExSDP.Serializer do
 
   def maybe_serialize(type, true), do: "#{type}=1"
   def maybe_serialize(type, false), do: "#{type}=0"
-  def maybe_serialize("range", {from, to}), do: "#{from}-#{to}"
+  def maybe_serialize("dtmf-tones", value), do: "#{value}"
   def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
   def maybe_serialize(type, value), do: "#{type}=#{value}"
 
@@ -40,6 +40,10 @@ defmodule ExSDP.Serializer do
 
   def maybe_serialize_hex(type, value),
     do: "#{type}=#{Integer.to_string(value, 16) |> String.downcase()}"
+
+  def maybe_serialize_list([], _sep), do: ""
+  def maybe_serialize_list(nil, _sep), do: ""
+  def maybe_serialize_list(list, sep), do: Enum.map_join(list, sep, &"#{&1}")
 
   defp serialize_ice_options(ice_options) do
     Bunch.listify(ice_options) |> Enum.join(" ")
