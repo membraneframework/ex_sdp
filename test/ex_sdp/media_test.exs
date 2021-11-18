@@ -291,6 +291,9 @@ defmodule ExSDP.MediaTest do
 
       assert msid == Media.get_attribute(media, MSID)
       assert msid == Media.get_attribute(media, :msid)
+
+      assert extmap == Media.get_attribute(media, Extmap)
+      assert extmap == Media.get_attribute(media, :extmap)
     end
   end
 end

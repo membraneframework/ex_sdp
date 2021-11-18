@@ -80,12 +80,7 @@ defimpl String.Chars, for: ExSDP.Attribute.Extmap do
   alias ExSDP.Attribute.Extmap
 
   def to_string(%Extmap{id: id, direction: direction, uri: uri, attributes: attributes}) do
-    maybe_direction =
-      if direction == nil do
-        ""
-      else
-        "/#{Atom.to_string(direction)}"
-      end
+    maybe_direction = if direction == nil, do: "", else: "/#{Atom.to_string(direction)}"
 
     attributes = Enum.join(attributes, " ")
 
