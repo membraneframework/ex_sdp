@@ -12,7 +12,7 @@ defmodule ExSDP.MediaTest do
     Timing
   }
 
-  alias ExSDP.Attribute.{FMTP, MSID, RTPMapping, SSRC}
+  alias ExSDP.Attribute.{FMTP, MSID, RTPMapping, SSRC, Extmap}
 
   describe "Media parser" do
     test "processes valid media description" do
@@ -265,12 +265,20 @@ defmodule ExSDP.MediaTest do
 
       msid = %MSID{id: "DycBRAGTwt75ESYihb03FsVWVs8sSdIkhTqN"}
 
+      extmap = %Extmap{
+        id: 1,
+        uri: "http://example.com/082005/ext.htm#xmeta",
+        direction: :recvonly,
+        attributes: ["unsigned", "short", "int"]
+      }
+
       media =
         Media.new(:video, 51_372, "RTP/AVP", [99])
         |> Media.add_attribute(rtpmap)
         |> Media.add_attribute(ssrc)
         |> Media.add_attribute(fmtp)
         |> Media.add_attribute(msid)
+        |> Media.add_attribute(extmap)
 
       assert rtpmap == Media.get_attribute(media, RTPMapping)
       assert rtpmap == Media.get_attribute(media, :rtpmap)
@@ -283,6 +291,9 @@ defmodule ExSDP.MediaTest do
 
       assert msid == Media.get_attribute(media, MSID)
       assert msid == Media.get_attribute(media, :msid)
+
+      assert extmap == Media.get_attribute(media, Extmap)
+      assert extmap == Media.get_attribute(media, :extmap)
     end
   end
 end
