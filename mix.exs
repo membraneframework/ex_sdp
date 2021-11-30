@@ -1,8 +1,8 @@
 defmodule ExSDP.MixProject do
   use Mix.Project
 
-  @version "0.5.0"
-  @github_url "https://github.com/membraneframework/membrane-protocol-sdp"
+  @version "0.6.0"
+  @github_url "https://github.com/membraneframework/ex_sdp"
 
   def project do
     [
