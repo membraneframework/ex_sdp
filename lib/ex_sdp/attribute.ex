@@ -100,6 +100,7 @@ defmodule ExSDP.Attribute do
   defp do_parse("tool", value, _opts), do: {:ok, {:tool, value}}
   defp do_parse("type", value, _opts), do: parse_type(value)
   defp do_parse("framerate", value, _opts), do: parse_framerate(value)
+  defp do_parse("ice-lite", _value, _opts), do: {:ok, :ice_lite}
   defp do_parse("ice-ufrag", value, _opts), do: {:ok, {:ice_ufrag, value}}
   defp do_parse("ice-pwd", value, _opts), do: {:ok, {:ice_pwd, value}}
   defp do_parse("ice-options", value, _opts), do: {:ok, {:ice_options, String.split(value, " ")}}
