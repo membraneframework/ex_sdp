@@ -8,6 +8,7 @@ defmodule ExSDP.WebRTCTest do
       o=- 10697771362128785113 0 IN IP4 127.0.0.1
       s=-
       t=0 0
+      a=ice-lite
       a=group:BUNDLE 0 1
       m=audio 9 UDP/TLS/RTP/SAVPF 120
       c=IN IP4 0.0.0.0
@@ -42,7 +43,10 @@ defmodule ExSDP.WebRTCTest do
       |> ExSDP.parse()
 
     assert parsed == %ExSDP{
-             attributes: [%ExSDP.Attribute.Group{semantics: "BUNDLE", mids: ["0", "1"]}],
+             attributes: [
+               %ExSDP.Attribute.Group{semantics: "BUNDLE", mids: ["0", "1"]},
+               :ice_lite
+             ],
              media: [
                %ExSDP.Media{
                  attributes: [
