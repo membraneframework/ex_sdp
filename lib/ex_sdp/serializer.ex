@@ -19,6 +19,8 @@ defmodule ExSDP.Serializer do
   def maybe_serialize(type, {:ice_ufrag, value}), do: "#{type}=ice-ufrag:#{value}"
   def maybe_serialize(type, {:ice_pwd, value}), do: "#{type}=ice-pwd:#{value}"
 
+  def maybe_serialize(type, :ice_lite), do: "#{type}=ice-lite"
+
   def maybe_serialize(type, {:ice_options, value}),
     do: "#{type}=ice-options:#{serialize_ice_options(value)}"
 
