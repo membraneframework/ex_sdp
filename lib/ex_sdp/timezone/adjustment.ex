@@ -19,7 +19,7 @@ defmodule ExSDP.Timezone.Correction do
   def parse(correction) do
     case String.split(correction) do
       [adjustment_time, offset] -> wrap_correction(adjustment_time, offset)
-      _ -> {:error, :invalid_timezone}
+      _invalid_timezone -> {:error, :invalid_timezone}
     end
   end
 
@@ -33,12 +33,13 @@ defmodule ExSDP.Timezone.Correction do
 
       {:ok, correction}
     else
-      _ -> {:error, :invalid_timezone}
+      _invalid_timezone -> {:error, :invalid_timezone}
     end
   end
 end
 
 defimpl String.Chars, for: ExSDP.Timezone.Correction do
+  @spec to_string(ExSDP.Timezone.Correction.t()) :: nonempty_binary
   def to_string(correction) do
     serialized_offset =
       if correction.offset == 0 do

@@ -8,13 +8,14 @@ defmodule ExSDP.MixProject do
     [
       app: :ex_sdp,
       version: @version,
-      elixir: "~> 1.10",
+      elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       name: "ExSDP",
       description: "Parser and serializer for Session Description Protocol",
       source_url: @github_url,
       deps: deps(),
+      dialyzer: dialyzer(),
       docs: docs(),
       package: package()
     ]
@@ -33,9 +34,23 @@ defmodule ExSDP.MixProject do
     [
       main: "readme",
       extras: ["README.md", "LICENSE"],
+      formatters: ["html"],
       source_ref: "v#{@version}",
       nest_modules_by_prefix: [ExSDP]
     ]
+  end
+
+  defp dialyzer() do
+    opts = [
+      flags: [:error_handling]
+    ]
+
+    if System.get_env("CI") == "true" do
+      # Store PLTs in cacheable directory for CI
+      [plt_local_path: "priv/plts", plt_core_path: "priv/plts"] ++ opts
+    else
+      opts
+    end
   end
 
   defp package do

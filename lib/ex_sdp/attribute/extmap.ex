@@ -37,7 +37,7 @@ defmodule ExSDP.Attribute.Extmap do
       {:ok, %__MODULE__{id: id, direction: direction, uri: uri, attributes: attributes}}
     else
       {:error, reason} -> {:error, reason}
-      _ -> {:error, :invalid_extmap}
+      _invalid_extmap -> {:error, :invalid_extmap}
     end
   end
 
@@ -55,10 +55,10 @@ defmodule ExSDP.Attribute.Extmap do
       [id] ->
         case Utils.parse_numeric_string(id) do
           {:ok, id} -> {:ok, {id, nil}}
-          _ -> {:error, :invalid_id}
+          _invalid_id -> {:error, :invalid_id}
         end
 
-      _ ->
+      _invalid_extmap ->
         {:error, :invalid_extmap}
     end
   end
@@ -66,19 +66,20 @@ defmodule ExSDP.Attribute.Extmap do
   defp parse_uri_attributes(uri_attributes) do
     case String.split(uri_attributes, " ") do
       [uri | attributes] -> {:ok, {uri, attributes}}
-      _ -> {:error, :invalid_uri}
+      _invalid_uri -> {:error, :invalid_uri}
     end
   end
 
   defp parse_direction(direction) when direction in @valid_directions,
     do: {:ok, String.to_atom(direction)}
 
-  defp parse_direction(_unknown), do: {:error, :invalid_direction}
+  defp parse_direction(_invalid_directio), do: {:error, :invalid_direction}
 end
 
 defimpl String.Chars, for: ExSDP.Attribute.Extmap do
   alias ExSDP.Attribute.Extmap
 
+  @spec to_string(ExSDP.Attribute.Extmap.t()) :: binary
   def to_string(%Extmap{id: id, direction: direction, uri: uri, attributes: attributes}) do
     maybe_direction = if direction == nil, do: "", else: "/#{Atom.to_string(direction)}"
 

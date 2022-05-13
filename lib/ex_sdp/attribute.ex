@@ -113,7 +113,7 @@ defmodule ExSDP.Attribute do
   defp do_parse(attribute, value, _opts) when attribute in ["maxptime", "ptime", "quality"] do
     case Integer.parse(value) do
       {number, ""} -> {:ok, {String.to_atom(attribute), number}}
-      _ -> {:error, :invalid_attribute}
+      _invalid_attribute -> {:error, :invalid_attribute}
     end
   end
 
@@ -127,7 +127,7 @@ defmodule ExSDP.Attribute do
   defp parse_orient(orient) do
     case orient do
       string when string in ["portrait", "landscape", "seascape"] -> String.to_atom(string)
-      _ -> {:error, :invalid_orient}
+      _invalid_orient -> {:error, :invalid_orient}
     end
   end
 
@@ -136,7 +136,7 @@ defmodule ExSDP.Attribute do
       string when string in ["broadcast", "meeting", "moderated", "test", "H332"] ->
         String.to_atom(string)
 
-      _ ->
+      _invalid_type ->
         {:error, :invalid_type}
     end
   end
@@ -145,7 +145,7 @@ defmodule ExSDP.Attribute do
     case String.split(framerate, "/") do
       [value] -> {:ok, {:framerate, String.to_float(value)}}
       [left, right] -> {:ok, {:framerate, {String.to_integer(left), String.to_integer(right)}}}
-      _ -> {:error, :invalid_framerate}
+      _invalid_framerate -> {:error, :invalid_framerate}
     end
   end
 
@@ -156,7 +156,7 @@ defmodule ExSDP.Attribute do
       ["sha-256", value] -> {:ok, {:fingerprint, {:sha256, value}}}
       ["sha-384", value] -> {:ok, {:fingerprint, {:sha384, value}}}
       ["sha-512", value] -> {:ok, {:fingerprint, {:sha512, value}}}
-      _ -> {:error, :invalid_fingerprint}
+      _invalid_fingerprint -> {:error, :invalid_fingerprint}
     end
   end
 
@@ -166,7 +166,7 @@ defmodule ExSDP.Attribute do
       "passive" -> {:ok, {:setup, :passive}}
       "actpass" -> {:ok, {:setup, :actpass}}
       "holdconn" -> {:ok, {:setup, :holdconn}}
-      _ -> {:error, :invalid_setup}
+      _invalid_setup -> {:error, :invalid_setup}
     end
   end
 end

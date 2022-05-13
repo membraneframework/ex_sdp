@@ -52,7 +52,7 @@ defmodule ExSDP.RepeatTimes do
           parse_explicit(interval, duration, offsets)
         end
 
-      _ ->
+      _malformed_repeat ->
         {:error, :malformed_repeat}
     end
   end
@@ -78,7 +78,7 @@ defmodule ExSDP.RepeatTimes do
       {:ok, explicit_repeat}
     else
       {:error, _} = error -> error
-      _ -> {:error, :malformed_repeat}
+      _other_error -> {:error, :malformed_repeat}
     end
   end
 
@@ -132,6 +132,7 @@ defmodule ExSDP.RepeatTimes do
 end
 
 defimpl String.Chars, for: ExSDP.RepeatTimes do
+  @spec to_string(ExSDP.RepeatTimes.t()) :: binary
   def to_string(repeat_times) do
     serialized_fields =
       [

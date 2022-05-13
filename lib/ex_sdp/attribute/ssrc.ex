@@ -21,10 +21,10 @@ defmodule ExSDP.Attribute.SSRC do
       case String.split(attribute, ":") do
         [attribute, value] -> {:ok, %__MODULE__{id: id, attribute: attribute, value: value}}
         [attribute] -> {:ok, %__MODULE__{id: id, attribute: attribute}}
-        _ -> {:error, :invalid_ssrc}
+        _invalid_ssrc -> {:error, :invalid_ssrc}
       end
     else
-      _ -> {:error, :invalid_ssrc}
+      _invalid_ssrc -> {:error, :invalid_ssrc}
     end
   end
 end
@@ -32,6 +32,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.SSRC do
   alias ExSDP.Attribute.SSRC
 
+  @spec to_string(ExSDP.Attribute.SSRC.t()) :: <<_::48, _::_*8>>
   def to_string(%SSRC{id: id, attribute: attribute, value: nil}), do: "ssrc:#{id} #{attribute}"
 
   def to_string(%SSRC{id: id, attribute: attribute, value: value}),

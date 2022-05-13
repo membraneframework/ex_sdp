@@ -20,7 +20,7 @@ defmodule ExSDP.Attribute.Group do
          false <- Enum.any?(mids, &(String.match?(&1, ~r/\s+/) or &1 == "")) do
       {:ok, %__MODULE__{semantics: semantics, mids: mids}}
     else
-      _ -> {:error, :invalid_group}
+      _invalid_group -> {:error, :invalid_group}
     end
   end
 end
@@ -28,6 +28,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.Group do
   alias ExSDP.Attribute.Group
 
+  @spec to_string(ExSDP.Attribute.Group.t()) :: binary
   def to_string(%Group{semantics: semantics, mids: mids}),
     do: "group:#{semantics} #{Enum.join(mids, " ")}" |> String.trim()
 end

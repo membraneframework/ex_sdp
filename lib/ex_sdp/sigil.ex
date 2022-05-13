@@ -3,6 +3,7 @@ defmodule ExSDP.Sigil do
   Module containing sigil for deleting empty lines and replacing `\n` with `\r\n`.
   """
 
+  @spec sigil_n(binary, []) :: binary
   @doc """
   Deletes empty lines and replaces `\n` with `\r\n`
   """
