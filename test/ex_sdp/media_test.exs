@@ -12,7 +12,7 @@ defmodule ExSDP.MediaTest do
     Timing
   }
 
-  alias ExSDP.Attribute.{FMTP, MSID, RTPMapping, SSRC, Extmap}
+  alias ExSDP.Attribute.{Extmap, FMTP, MSID, RTPMapping, SSRC}
 
   describe "Media parser" do
     test "processes valid media description" do

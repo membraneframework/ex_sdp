@@ -45,10 +45,11 @@ defmodule ExSDP.Encryption do
   defp method_to_atom("clear"), do: {:ok, :clear}
   defp method_to_atom("base64"), do: {:ok, :base64}
   defp method_to_atom("uri"), do: {:ok, :uri}
-  defp method_to_atom(_), do: {:error, :unsupported_method}
+  defp method_to_atom(_unknown), do: {:error, :unsupported_method}
 end
 
 defimpl String.Chars, for: ExSDP.Encryption do
+  @impl true
   def to_string(encryption) do
     key = if encryption.key, do: ":" <> encryption.key, else: ""
     "#{encryption.method}#{key}"

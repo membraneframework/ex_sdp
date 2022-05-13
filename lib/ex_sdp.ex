@@ -7,6 +7,21 @@ defmodule ExSDP do
   """
   use Bunch.Access
 
+  alias ExSDP.{
+    Address,
+    Attribute,
+    Bandwidth,
+    ConnectionData,
+    Encryption,
+    Media,
+    Origin,
+    Parser,
+    RepeatTimes,
+    Serializer,
+    Timezone,
+    Timing
+  }
+
   @enforce_keys [:origin]
 
   @optional_keys [
@@ -28,21 +43,6 @@ defmodule ExSDP do
               version: 0,
               session_name: "-"
             ] ++ @enforce_keys ++ @optional_keys
-
-  alias ExSDP.{
-    Attribute,
-    Address,
-    Bandwidth,
-    ConnectionData,
-    Encryption,
-    Media,
-    Origin,
-    Parser,
-    RepeatTimes,
-    Serializer,
-    Timezone,
-    Timing
-  }
 
   @type t :: %__MODULE__{
           version: non_neg_integer(),
@@ -104,6 +104,7 @@ defmodule ExSDP do
 end
 
 defimpl String.Chars, for: ExSDP do
+  @impl true
   def to_string(session) do
     import ExSDP.Sigil
     alias ExSDP.Serializer

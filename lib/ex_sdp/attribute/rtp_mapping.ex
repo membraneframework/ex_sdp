@@ -39,7 +39,7 @@ defmodule ExSDP.Attribute.RTPMapping do
       {:ok, mapping}
     else
       {:error, reason} -> {:error, reason}
-      _ -> {:error, :invalid_rtpmap}
+      _invalid_rtpmap -> {:error, :invalid_rtpmap}
     end
   end
 
@@ -52,6 +52,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.RTPMapping do
   alias ExSDP.Attribute.RTPMapping
 
+  @impl true
   def to_string(mapping) do
     "rtpmap:#{mapping.payload_type} #{mapping.encoding}/#{mapping.clock_rate}#{serialize_params(mapping)}"
   end

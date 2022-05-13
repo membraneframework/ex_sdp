@@ -1,8 +1,8 @@
 defmodule ExSDP.SerializerTest do
   use ExUnit.Case
 
-  alias ExSDP.Serializer
   alias ExSDP.Attribute.RTPMapping
+  alias ExSDP.Serializer
 
   describe "Attribute serialization" do
     test "serializes framerate attribute" do

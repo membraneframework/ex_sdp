@@ -264,6 +264,7 @@ defmodule ExSDP.Attribute.FMTP do
 end
 
 defimpl String.Chars, for: ExSDP.Attribute.FMTP do
+  @impl true
   def to_string(fmtp) do
     alias ExSDP.Serializer
 

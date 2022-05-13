@@ -14,7 +14,7 @@ defmodule ExSDP.Media do
     Encryption
   }
 
-  alias ExSDP.Attribute.{RTPMapping, MSID, FMTP, SSRC, Group, Extmap}
+  alias ExSDP.Attribute.{Extmap, FMTP, Group, MSID, RTPMapping, SSRC}
 
   @enforce_keys [:type, :port, :protocol, :fmt]
   defstruct @enforce_keys ++
@@ -187,7 +187,7 @@ defmodule ExSDP.Media do
           do: acc,
           else: Map.put(acc, inherited_key, value)
 
-      _, acc ->
+      _key_value, acc ->
         acc
     end)
     ~> struct(__MODULE__, &1)
@@ -208,24 +208,25 @@ defmodule ExSDP.Media do
     |> Bunch.Enum.try_map(fn single_fmt ->
       case Integer.parse(single_fmt) do
         {parsed_fmt, ""} -> {:ok, parsed_fmt}
-        _ -> {:error, :invalid_fmt}
+        _invalid_fmt -> {:error, :invalid_fmt}
       end
     end)
   end
 
-  defp parse_fmt(fmt, _), do: {:ok, fmt}
+  defp parse_fmt(fmt, _proto), do: {:ok, fmt}
 
   defp parse_port_count(""), do: 1
 
   defp parse_port_count("/" <> port_count) do
     case Integer.parse(port_count) do
       {port_count, ""} -> port_count
-      _ -> :error
+      _not_matched -> :error
     end
   end
 end
 
 defimpl String.Chars, for: ExSDP.Media do
+  @impl true
   def to_string(media) do
     import ExSDP.Sigil
 

@@ -36,5 +36,6 @@ defmodule ExSDP.Timing do
 end
 
 defimpl String.Chars, for: ExSDP.Timing do
+  @impl true
   def to_string(timing), do: "#{timing.start_time} #{timing.stop_time}"
 end

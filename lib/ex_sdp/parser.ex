@@ -146,7 +146,7 @@ defmodule ExSDP.Parser do
     end
   end
 
-  defp format_error(["m=" <> _ = line | rest], reason) do
+  defp format_error(["m=" <> _rest = line | rest], reason) do
     attributes =
       rest
       |> Enum.take_while(fn

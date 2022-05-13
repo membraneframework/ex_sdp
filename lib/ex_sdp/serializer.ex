@@ -38,11 +38,13 @@ defmodule ExSDP.Serializer do
   def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
   def maybe_serialize(type, value), do: "#{type}=#{value}"
 
+  @spec maybe_serialize_hex(String.t(), nil | integer) :: binary
   def maybe_serialize_hex(_type, nil), do: ""
 
   def maybe_serialize_hex(type, value),
     do: "#{type}=#{Integer.to_string(value, 16) |> String.downcase()}"
 
+  @spec maybe_serialize_list([String.t()] | nil, String.t()) :: String.t()
   def maybe_serialize_list([], _sep), do: ""
   def maybe_serialize_list(nil, _sep), do: ""
   def maybe_serialize_list(list, sep), do: Enum.map_join(list, sep, &"#{&1}")

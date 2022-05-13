@@ -58,7 +58,7 @@ defmodule ExSDP.ConnectionData do
       {:ok, connection_data}
     else
       {:error, _reason} = error -> error
-      _ -> {:error, :invalid_address}
+      _invalid_address -> {:error, :invalid_address}
     end
   end
 
@@ -75,10 +75,10 @@ defmodule ExSDP.ConnectionData do
              {:ok, address_count} <- Utils.parse_numeric_string(address_count) do
           {:ok, ttl, address_count}
         else
-          _ -> {:error, :invalid_ttl_or_address_count}
+          _invalid_ttl_or_address_count -> {:error, :invalid_ttl_or_address_count}
         end
 
-      _ ->
+      _invalid_ttl_or_address_count ->
         {:error, :invalid_ttl_or_address_count}
     end
   end
@@ -88,13 +88,13 @@ defmodule ExSDP.ConnectionData do
       [address_count] ->
         case Utils.parse_numeric_string(address_count) do
           {:ok, address_count} -> {:ok, nil, address_count}
-          _ -> {:error, :invalid_ttl_or_address_count}
+          _invalid_ttl_or_address_count -> {:error, :invalid_ttl_or_address_count}
         end
 
       [_ttl, _address_count] ->
         {:error, :ip6_cannot_have_ttl}
 
-      _ ->
+      _invalid_ttl_or_address_count ->
         {:error, :invalid_ttl_or_address_count}
     end
   end
@@ -103,6 +103,7 @@ end
 defimpl String.Chars, for: ExSDP.ConnectionData do
   alias ExSDP.{Address, ConnectionData}
 
+  @impl true
   def to_string(%ConnectionData{} = connection) do
     """
     #{connection.network_type} \

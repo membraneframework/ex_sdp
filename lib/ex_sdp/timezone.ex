@@ -17,7 +17,7 @@ defmodule ExSDP.Timezone do
   def parse(timezones) do
     case String.split(timezones, " ") do
       list when rem(length(list), 2) == 0 -> parse_timezones(list)
-      _ -> {:error, :invalid_timezone}
+      _invalid_timezone -> {:error, :invalid_timezone}
     end
   end
 
@@ -38,6 +38,7 @@ end
 defimpl String.Chars, for: ExSDP.Timezone do
   alias ExSDP.Timezone
 
+  @impl true
   def to_string(%Timezone{corrections: []}), do: ""
 
   def to_string(%Timezone{corrections: corrections}),

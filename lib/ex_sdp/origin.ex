@@ -89,6 +89,7 @@ end
 defimpl String.Chars, for: ExSDP.Origin do
   alias ExSDP.Address
 
+  @impl true
   def to_string(origin) do
     """
     #{origin.username} \

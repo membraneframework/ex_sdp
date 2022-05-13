@@ -38,7 +38,7 @@ defmodule ExSDP.Attribute.MSID do
 
         {:ok, msid}
 
-      _ ->
+      _invalid_msid ->
         {:error, :invalid_msid}
     end
   end
@@ -47,6 +47,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.MSID do
   alias ExSDP.Attribute.MSID
 
+  @impl true
   def to_string(%MSID{id: id, app_data: nil}), do: "msid:#{id}"
   def to_string(%MSID{id: id, app_data: app_data}), do: "msid:#{id} #{app_data}"
 end

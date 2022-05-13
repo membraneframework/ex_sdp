@@ -31,13 +31,13 @@ defmodule ExSDP.Bandwidth do
 
       {:ok, bandwidth}
     else
-      _ -> {:error, :invalid_bandwidth}
+      _invalid_bandwidth -> {:error, :invalid_bandwidth}
     end
   end
 
   defp parse_type(type) when type in @supported_types, do: {:ok, String.to_atom(type)}
-  defp parse_type("X-" <> _), do: {:error, :experimental_not_supported}
-  defp parse_type(_), do: {:error, :invalid_type}
+  defp parse_type("X-" <> _experimental_rest), do: {:error, :experimental_not_supported}
+  defp parse_type(_invalid_type), do: {:error, :invalid_type}
 
   defp parse_bandwidth(bandwidth) do
     with {value, ""} <- Integer.parse(bandwidth) do
@@ -47,5 +47,6 @@ defmodule ExSDP.Bandwidth do
 end
 
 defimpl String.Chars, for: ExSDP.Bandwidth do
+  @impl true
   def to_string(bandwidth), do: "#{bandwidth.type}:#{bandwidth.bandwidth}"
 end
