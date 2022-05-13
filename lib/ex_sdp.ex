@@ -104,7 +104,7 @@ defmodule ExSDP do
 end
 
 defimpl String.Chars, for: ExSDP do
-  @spec to_string(ExSDP.t()) :: binary
+  @impl true
   def to_string(session) do
     import ExSDP.Sigil
     alias ExSDP.Serializer

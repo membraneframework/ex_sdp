@@ -1,8 +1,8 @@
 defmodule ExSDP.Utils do
   @moduledoc false
 
-  @spec split(binary, binary | [binary] | :binary.cp() | Regex.t(), any) ::
-          {:error, :too_few_fields} | {:ok, [binary]}
+  @spec split(String.t(), String.t() | [String.t()] | :binary.cp() | Regex.t(), any) ::
+          {:error, :too_few_fields} | {:ok, [String.t()]}
   def split(origin, delim, expected_len) do
     split = String.split(origin, delim, parts: expected_len)
     if length(split) == expected_len, do: {:ok, split}, else: {:error, :too_few_fields}

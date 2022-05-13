@@ -44,7 +44,7 @@ defmodule ExSDP.Serializer do
   def maybe_serialize_hex(type, value),
     do: "#{type}=#{Integer.to_string(value, 16) |> String.downcase()}"
 
-  @spec maybe_serialize_list(list() | nil, String.t()) :: String.t()
+  @spec maybe_serialize_list([String.t()] | nil, String.t()) :: String.t()
   def maybe_serialize_list([], _sep), do: ""
   def maybe_serialize_list(nil, _sep), do: ""
   def maybe_serialize_list(list, sep), do: Enum.map_join(list, sep, &"#{&1}")
