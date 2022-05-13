@@ -47,7 +47,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.MSID do
   alias ExSDP.Attribute.MSID
 
-  @spec to_string(ExSDP.Attribute.MSID.t()) :: <<_::40, _::_*8>>
+  @impl true
   def to_string(%MSID{id: id, app_data: nil}), do: "msid:#{id}"
   def to_string(%MSID{id: id, app_data: app_data}), do: "msid:#{id} #{app_data}"
 end

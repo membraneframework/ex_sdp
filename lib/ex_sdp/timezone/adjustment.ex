@@ -39,7 +39,7 @@ defmodule ExSDP.Timezone.Correction do
 end
 
 defimpl String.Chars, for: ExSDP.Timezone.Correction do
-  @spec to_string(ExSDP.Timezone.Correction.t()) :: nonempty_binary
+  @impl true
   def to_string(correction) do
     serialized_offset =
       if correction.offset == 0 do

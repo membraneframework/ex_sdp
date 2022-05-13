@@ -32,7 +32,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.SSRC do
   alias ExSDP.Attribute.SSRC
 
-  @spec to_string(ExSDP.Attribute.SSRC.t()) :: <<_::48, _::_*8>>
+  @impl true
   def to_string(%SSRC{id: id, attribute: attribute, value: nil}), do: "ssrc:#{id} #{attribute}"
 
   def to_string(%SSRC{id: id, attribute: attribute, value: value}),

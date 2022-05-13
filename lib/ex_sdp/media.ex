@@ -226,7 +226,7 @@ defmodule ExSDP.Media do
 end
 
 defimpl String.Chars, for: ExSDP.Media do
-  @spec to_string(ExSDP.Media.t()) :: binary
+  @impl true
   def to_string(media) do
     import ExSDP.Sigil
 

@@ -103,7 +103,7 @@ end
 defimpl String.Chars, for: ExSDP.ConnectionData do
   alias ExSDP.{Address, ConnectionData}
 
-  @spec to_string(ExSDP.ConnectionData.t()) :: <<_::16, _::_*8>>
+  @impl true
   def to_string(%ConnectionData{} = connection) do
     """
     #{connection.network_type} \

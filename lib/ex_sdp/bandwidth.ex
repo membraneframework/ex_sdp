@@ -47,6 +47,6 @@ defmodule ExSDP.Bandwidth do
 end
 
 defimpl String.Chars, for: ExSDP.Bandwidth do
-  @spec to_string(ExSDP.Bandwidth.t()) :: nonempty_binary
+  @impl true
   def to_string(bandwidth), do: "#{bandwidth.type}:#{bandwidth.bandwidth}"
 end

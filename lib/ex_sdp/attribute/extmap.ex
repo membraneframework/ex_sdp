@@ -79,7 +79,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.Extmap do
   alias ExSDP.Attribute.Extmap
 
-  @spec to_string(ExSDP.Attribute.Extmap.t()) :: binary
+  @impl true
   def to_string(%Extmap{id: id, direction: direction, uri: uri, attributes: attributes}) do
     maybe_direction = if direction == nil, do: "", else: "/#{Atom.to_string(direction)}"
 

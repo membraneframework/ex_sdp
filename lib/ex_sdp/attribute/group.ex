@@ -28,7 +28,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.Group do
   alias ExSDP.Attribute.Group
 
-  @spec to_string(ExSDP.Attribute.Group.t()) :: binary
+  @impl true
   def to_string(%Group{semantics: semantics, mids: mids}),
     do: "group:#{semantics} #{Enum.join(mids, " ")}" |> String.trim()
 end

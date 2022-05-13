@@ -89,7 +89,7 @@ end
 defimpl String.Chars, for: ExSDP.Origin do
   alias ExSDP.Address
 
-  @spec to_string(ExSDP.Origin.t()) :: <<_::40, _::_*8>>
+  @impl true
   def to_string(origin) do
     """
     #{origin.username} \

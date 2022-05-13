@@ -38,7 +38,7 @@ end
 defimpl String.Chars, for: ExSDP.Timezone do
   alias ExSDP.Timezone
 
-  @spec to_string(ExSDP.Timezone.t()) :: binary
+  @impl true
   def to_string(%Timezone{corrections: []}), do: ""
 
   def to_string(%Timezone{corrections: corrections}),

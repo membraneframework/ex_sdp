@@ -132,7 +132,7 @@ defmodule ExSDP.RepeatTimes do
 end
 
 defimpl String.Chars, for: ExSDP.RepeatTimes do
-  @spec to_string(ExSDP.RepeatTimes.t()) :: binary
+  @impl true
   def to_string(repeat_times) do
     serialized_fields =
       [

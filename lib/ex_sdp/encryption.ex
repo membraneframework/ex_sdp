@@ -49,7 +49,7 @@ defmodule ExSDP.Encryption do
 end
 
 defimpl String.Chars, for: ExSDP.Encryption do
-  @spec to_string(ExSDP.Encryption.t()) :: binary
+  @impl true
   def to_string(encryption) do
     key = if encryption.key, do: ":" <> encryption.key, else: ""
     "#{encryption.method}#{key}"

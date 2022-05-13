@@ -36,6 +36,6 @@ defmodule ExSDP.Timing do
 end
 
 defimpl String.Chars, for: ExSDP.Timing do
-  @spec to_string(ExSDP.Timing.t()) :: nonempty_binary
+  @impl true
   def to_string(timing), do: "#{timing.start_time} #{timing.stop_time}"
 end

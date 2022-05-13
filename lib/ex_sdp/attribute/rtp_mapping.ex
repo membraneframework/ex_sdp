@@ -52,7 +52,7 @@ end
 defimpl String.Chars, for: ExSDP.Attribute.RTPMapping do
   alias ExSDP.Attribute.RTPMapping
 
-  @spec to_string(ExSDP.Attribute.RTPMapping.t()) :: <<_::64, _::_*8>>
+  @impl true
   def to_string(mapping) do
     "rtpmap:#{mapping.payload_type} #{mapping.encoding}/#{mapping.clock_rate}#{serialize_params(mapping)}"
   end
