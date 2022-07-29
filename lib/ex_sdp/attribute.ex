@@ -5,7 +5,7 @@ defmodule ExSDP.Attribute do
   use Bunch.Typespec
   use Bunch.Access
 
-  alias __MODULE__.{RTPMapping, MSID, FMTP, SSRC, Group, Extmap}
+  alias __MODULE__.{RTPMapping, MSID, FMTP, SSRC, SSRCGroup, Group, Extmap}
 
   @type hash_function :: :sha1 | :sha224 | :sha256 | :sha384 | :sha512
   @type setup_value :: :active | :passive | :actpass | :holdconn
@@ -89,6 +89,7 @@ defmodule ExSDP.Attribute do
   defp do_parse("rtpmap", value, opts), do: RTPMapping.parse(value, opts)
   defp do_parse("msid", value, _opts), do: MSID.parse(value)
   defp do_parse("fmtp", value, _opts), do: FMTP.parse(value)
+  defp do_parse("ssrc-group", value, _opts), do: SSRCGroup.parse(value)
   defp do_parse("ssrc", value, _opts), do: SSRC.parse(value)
   defp do_parse("group", value, _opts), do: Group.parse(value)
   defp do_parse("extmap", value, _opts), do: Extmap.parse(value)
