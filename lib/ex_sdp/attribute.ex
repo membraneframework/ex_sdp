@@ -67,6 +67,7 @@ defmodule ExSDP.Attribute do
           | setup()
           | mid()
           | flag_attributes()
+          | String.t()
 
   @flag_attributes_strings @flag_attributes |> Enum.map(&to_string/1)
 
