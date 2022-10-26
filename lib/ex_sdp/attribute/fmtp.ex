@@ -79,7 +79,7 @@ defmodule ExSDP.Attribute.FMTP do
           dtmf_tones: String.t() | nil,
           # RED
           redundant_payloads: [payload_type_t()] | nil,
-          # unparsed bullshit
+          # params that are currently not supported
           unknown: [String.t()]
         }
 
