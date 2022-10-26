@@ -72,7 +72,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
     test "returns an error when there is unsupported parameter" do
       fmtp = "108 profile-level-id=42e01f;level-asymmetry-allowed=1;unsupported-param=1"
-      assert {:error, :unsupported_parameter} = FMTP.parse(fmtp)
+      assert {:ok, %{unknown: ["unsupported-param=1"]}} = FMTP.parse(fmtp)
     end
   end
 
