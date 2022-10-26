@@ -91,7 +91,7 @@ defmodule ExSDP.Attribute.FMTP do
   @typedoc """
   Reason of parsing failure.
   """
-  @type reason :: :unsupported_parameter | :string_nan | :string_not_hex | :string_not_0_nor_1
+  @type reason :: :string_nan | :string_not_hex | :string_not_0_nor_1
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
