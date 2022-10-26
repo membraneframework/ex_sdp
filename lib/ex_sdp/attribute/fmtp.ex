@@ -46,7 +46,8 @@ defmodule ExSDP.Attribute.FMTP do
                 # Telephone Events
                 :dtmf_tones,
                 # RED
-                :redundant_payloads
+                :redundant_payloads,
+                unknown: []
               ]
 
   @type t :: %__MODULE__{
@@ -77,7 +78,9 @@ defmodule ExSDP.Attribute.FMTP do
           # Telephone Events
           dtmf_tones: String.t() | nil,
           # RED
-          redundant_payloads: [payload_type_t()] | nil
+          redundant_payloads: [payload_type_t()] | nil,
+          # params that are currently not supported
+          unknown: [String.t()]
         }
 
   @typedoc """
@@ -88,7 +91,7 @@ defmodule ExSDP.Attribute.FMTP do
   @typedoc """
   Reason of parsing failure.
   """
-  @type reason :: :unsupported_parameter | :string_nan | :string_not_hex | :string_not_0_nor_1
+  @type reason :: :string_nan | :string_not_hex | :string_not_0_nor_1
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
@@ -203,16 +206,14 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | repair_window: value}}
   end
 
-  defp parse_param([head | _rest] = params, fmtp) do
+  defp parse_param([head | rest] = params, fmtp) do
     # this is for non-key-value parameters as `key=value` format is not mandatory
     cond do
-      String.contains?(head, "=") -> {:error, :unsupported_parameter}
+      String.contains?(head, "=") -> {rest, Map.update!(fmtp, :unknown, &(&1 ++ [head]))}
       String.contains?(head, "/") -> parse_redundant_payloads_param(params, fmtp)
       true -> parse_dtmf_tones_param(params, fmtp)
     end
   end
-
-  defp parse_param(_params, _fmtp), do: {:error, :unsupported_parameter}
 
   defp parse_dtmf_tones_param([head | rest], fmtp) do
     with dtmf_tones <- String.split(head, ","),
