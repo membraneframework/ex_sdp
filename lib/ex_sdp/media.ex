@@ -14,7 +14,16 @@ defmodule ExSDP.Media do
     Encryption
   }
 
-  alias ExSDP.Attribute.{Extmap, FMTP, Group, MSID, RTPMapping, SSRC}
+  alias ExSDP.Attribute.{
+    Extmap,
+    FMTP,
+    Group,
+    MSID,
+    RTCPFeedback,
+    RTPMapping,
+    SSRC,
+    SSRCGroup
+  }
 
   @enforce_keys [:type, :port, :protocol, :fmt]
   defstruct @enforce_keys ++
@@ -54,6 +63,8 @@ defmodule ExSDP.Media do
     :msid => MSID,
     :fmtp => FMTP,
     :ssrc => SSRC,
+    :ssrc_group => SSRCGroup,
+    :rtcp_feedback => RTCPFeedback,
     :group => Group,
     :extmap => Extmap
   }

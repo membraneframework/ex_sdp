@@ -132,4 +132,90 @@ defmodule ExSDP.WebRTCTest do
              version: 0
            }
   end
+
+  test "SDP with rtx and FID ssrc-group" do
+    sdp =
+      """
+      v=0
+      o=- 3308242971272944906 2 IN IP4 127.0.0.1
+      s=-
+      t=0 0
+      a=group:BUNDLE 0 1
+      a=extmap-allow-mixed
+      m=audio 9 UDP/TLS/RTP/SAVPF 111 63 103 104 9 0 8 106 105 13 110 112 113 126
+      c=IN IP4 0.0.0.0
+      a=ice-ufrag:zPE+
+      a=ice-pwd:5uuTJKfWTxRYyERtPlvUeKsU
+      a=ice-options:trickle
+      a=fingerprint:sha-256 99:0A:CB:FF:C2:0E:B0:C5:28:66:1B:69:AD:D6:60:A3:FA:E6:19:87:79:E9:85:9B:EA:69:70:A8:82:4A:AC:05
+      a=setup:actpass
+      a=mid:0
+      a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
+      a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+      a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+      a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+      a=sendrecv
+      a=msid:040ad92b-583f-44d2-93e8-de4d40ac49ec 730bdafa-23f3-4111-85b4-757a666d462c
+      a=rtcp-mux
+      a=rtpmap:111 opus/48000/2
+      a=rtcp-fb:111 transport-cc
+      a=fmtp:111 minptime=10;useinbandfec=1
+      a=rtpmap:63 red/48000/2
+      a=fmtp:63 111/111
+      a=ssrc:10136459 cname:fsp95kJbiDm+35qA
+      a=ssrc:10136459 msid:040ad92b-583f-44d2-93e8-de4d40ac49ec 730bdafa-23f3-4111-85b4-757a666d462c
+      m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127 121 125 107 108 109 124 120 123 119 35 36 41 42 114 115
+      c=IN IP4 0.0.0.0
+      a=ice-ufrag:zPE+
+      a=ice-pwd:5uuTJKfWTxRYyERtPlvUeKsU
+      a=ice-options:trickle
+      a=fingerprint:sha-256 99:0A:CB:FF:C2:0E:B0:C5:28:66:1B:69:AD:D6:60:A3:FA:E6:19:87:79:E9:85:9B:EA:69:70:A8:82:4A:AC:05
+      a=setup:actpass
+      a=mid:1
+      a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+      a=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid
+      a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
+      a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
+      a=sendrecv
+      a=msid:b5f40727-fa04-44db-9f4c-35c5fe8f2c3a a68d0021-2492-4f05-a211-e6b9b19c57ff
+      a=rtcp-mux
+      a=rtcp-rsize
+      a=rtpmap:96 VP8/90000
+      a=rtcp-fb:96 goog-remb
+      a=rtcp-fb:96 transport-cc
+      a=rtcp-fb:96 ccm fir
+      a=rtcp-fb:96 nack
+      a=rtcp-fb:96 nack pli
+      a=rtpmap:97 rtx/90000
+      a=fmtp:97 apt=96
+      a=rtpmap:98 VP9/90000
+      a=rtcp-fb:98 goog-remb
+      a=rtcp-fb:98 transport-cc
+      a=rtcp-fb:98 ccm fir
+      a=rtcp-fb:98 nack
+      a=rtcp-fb:98 nack pli
+      a=fmtp:98 profile-id=0
+      a=rtpmap:99 rtx/90000
+      a=fmtp:99 apt=98
+      a=ssrc-group:FID 1984225447 2555509203
+      a=ssrc:1984225447 cname:fsp95kJbiDm+35qA
+      a=ssrc:1984225447 msid:b5f40727-fa04-44db-9f4c-35c5fe8f2c3a a68d0021-2492-4f05-a211-e6b9b19c57ff
+      a=ssrc:2555509203 cname:fsp95kJbiDm+35qA
+      a=ssrc:2555509203 msid:b5f40727-fa04-44db-9f4c-35c5fe8f2c3a a68d0021-2492-4f05-a211-e6b9b19c57ff
+      """
+      |> String.replace("\n", "\r\n")
+
+    assert {:ok, parsed} = ExSDP.parse(sdp)
+
+    assert %ExSDP{attributes: top_level_attributes, media: [_audio, video]} = parsed
+
+    attributes = MapSet.new(top_level_attributes)
+    assert %ExSDP.Attribute.Group{mids: ["0", "1"], semantics: "BUNDLE"} in attributes
+    assert :extmap_allow_mixed in attributes
+
+    assert video.attributes |> Enum.at(-5) == %ExSDP.Attribute.SSRCGroup{
+             semantics: "FID",
+             ssrcs: [1_984_225_447, 2_555_509_203]
+           }
+  end
 end

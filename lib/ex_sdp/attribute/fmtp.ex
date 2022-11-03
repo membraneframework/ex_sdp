@@ -3,17 +3,19 @@ defmodule ExSDP.Attribute.FMTP do
   This module represents fmtp (RFC 5576).
 
   Parameters for:
+
   * H264 (not all, RFC 6184),
   * VP8, VP9, OPUS (RFC 7587)
   * RTX (RFC 4588)
   * FLEXFEC (RFC 8627)
   * Telephone Events (RFC 4733)
   * RED (RFC 2198)
+
   are currently supported.
   """
-  alias ExSDP.Utils
 
-  @type payload_type_t() :: 0..127
+  alias ExSDP.Attribute.RTPMapping
+  alias ExSDP.Utils
 
   @enforce_keys [:pt]
   defstruct @enforce_keys ++
@@ -71,14 +73,14 @@ defmodule ExSDP.Attribute.FMTP do
           profile_id: non_neg_integer() | nil,
           max_fr: non_neg_integer() | nil,
           # RTX
-          apt: payload_type_t() | nil,
+          apt: RTPMapping.payload_type_t() | nil,
           rtx_time: non_neg_integer() | nil,
           # FLEXFEC
           repair_window: non_neg_integer() | nil,
           # Telephone Events
           dtmf_tones: String.t() | nil,
           # RED
-          redundant_payloads: [payload_type_t()] | nil,
+          redundant_payloads: [RTPMapping.payload_type_t()] | nil,
           # params that are currently not supported
           unknown: [String.t()]
         }
@@ -234,7 +236,7 @@ defmodule ExSDP.Attribute.FMTP do
                other -> other
              end
            end) do
-      {rest, Map.put(fmtp, :redundant_payloads, redundant_payloads)}
+      {rest, Map.put(fmtp, :redundant_payloads, Enum.uniq(redundant_payloads))}
     end
   end
 

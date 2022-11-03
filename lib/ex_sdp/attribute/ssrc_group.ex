@@ -12,7 +12,7 @@ defmodule ExSDP.Attribute.SSRCGroup do
   @typedoc """
   Key that can be used for searching this attribute using `ExSDP.Media.get_attribute/2`.
   """
-  @type attr_key :: :ssrc
+  @type attr_key :: :ssrc_group
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_ssrc}
   def parse(ssrc_group) do

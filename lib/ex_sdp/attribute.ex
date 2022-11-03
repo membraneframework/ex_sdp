@@ -5,7 +5,7 @@ defmodule ExSDP.Attribute do
   use Bunch.Typespec
   use Bunch.Access
 
-  alias __MODULE__.{RTPMapping, MSID, FMTP, SSRC, SSRCGroup, Group, Extmap}
+  alias __MODULE__.{Extmap, FMTP, Group, MSID, RTCPFeedback, RTPMapping, SSRC, SSRCGroup}
 
   @type hash_function :: :sha1 | :sha224 | :sha256 | :sha384 | :sha512
   @type setup_value :: :active | :passive | :actpass | :holdconn
@@ -18,6 +18,7 @@ defmodule ExSDP.Attribute do
                :sendrecv,
                :sendonly,
                :inactive,
+               :extmap_allow_mixed,
                :rtcp_mux,
                :rtcp_rsize
              ]
@@ -42,12 +43,14 @@ defmodule ExSDP.Attribute do
   @type mid :: {:mid, binary()}
 
   @type t ::
-          __MODULE__.RTPMapping.t()
-          | __MODULE__.MSID.t()
-          | __MODULE__.FMTP.t()
-          | __MODULE__.SSRC.t()
-          | __MODULE__.Group.t()
-          | __MODULE__.Extmap.t()
+          Extmap.t()
+          | FMTP.t()
+          | Group.t()
+          | MSID.t()
+          | RTCPFeedback.t()
+          | RTPMapping.t()
+          | SSRC.t()
+          | SSRCGroup.t()
           | cat()
           | charset()
           | keywds()
@@ -67,6 +70,7 @@ defmodule ExSDP.Attribute do
           | setup()
           | mid()
           | flag_attributes()
+          | {String.t(), String.t()}
           | String.t()
 
   @flag_attributes_strings @flag_attributes |> Enum.map(&to_string/1)
@@ -93,6 +97,9 @@ defmodule ExSDP.Attribute do
   defp do_parse("ssrc", value, _opts), do: SSRC.parse(value)
   defp do_parse("group", value, _opts), do: Group.parse(value)
   defp do_parse("extmap", value, _opts), do: Extmap.parse(value)
+  defp do_parse("rtcp-fb", value, _opts), do: RTCPFeedback.parse(value)
+  # Flag allowing to mix one- and two-byte header extensions
+  defp do_parse("extmap-allow-mixed", nil, _opts), do: {:ok, :extmap_allow_mixed}
   defp do_parse("cat", value, _opts), do: {:ok, {:cat, value}}
   defp do_parse("charset", value, _opts), do: {:ok, {:charset, value}}
   defp do_parse("keywds", value, _opts), do: {:ok, {:keywds, value}}

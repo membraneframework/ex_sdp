@@ -1,6 +1,8 @@
 defmodule ExSDP.Attribute.RTPMapping do
   @moduledoc """
-  This module represents RTP mapping.
+  This module represents RTP mapping, a media-level attribute named `rtpmap`.
+
+  This attribute is defined in [Chapter 6.6 of RFC8866 (SDP)](https://datatracker.ietf.org/doc/html/rfc8866#section-6.6)
   """
   use Bunch.Access
 
@@ -10,11 +12,13 @@ defmodule ExSDP.Attribute.RTPMapping do
   defstruct @enforce_keys ++ [:params]
 
   @type t :: %__MODULE__{
-          payload_type: 96..127,
+          payload_type: payload_type_t(),
           encoding: binary(),
           clock_rate: non_neg_integer(),
           params: non_neg_integer() | nil
         }
+
+  @type payload_type_t() :: 0..127
 
   @typedoc """
   Key that can be used for searching this attribute using `ExSDP.Media.get_attribute/2`.
