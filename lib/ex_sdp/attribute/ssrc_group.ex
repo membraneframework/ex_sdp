@@ -30,6 +30,6 @@ defimpl String.Chars, for: ExSDP.Attribute.SSRCGroup do
 
   @impl true
   def to_string(%SSRCGroup{semantics: semantics, ssrcs: ssrcs}) do
-    "ssrc:#{semantics} #{Enum.join(ssrcs, " ")}"
+    "ssrc-group:#{semantics} #{Enum.join(ssrcs, " ")}"
   end
 end

@@ -22,7 +22,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 63,
-        redundant_payloads: [111, 111]
+        redundant_payloads: [111]
       }
 
       assert {:ok, expected} == FMTP.parse(fmtp)

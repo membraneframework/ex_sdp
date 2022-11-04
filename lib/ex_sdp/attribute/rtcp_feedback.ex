@@ -70,6 +70,12 @@ defimpl String.Chars, for: ExSDP.Attribute.RTCPFeedback do
 
   @impl true
   def to_string(%RTCPFeedback{pt: pt, feedback_type: type}) do
-    "rtcp-fb:#{pt} #{RTCPFeedback.serialize_feedback_type(type)}"
+    pt_string =
+      case pt do
+        :all -> "*"
+        pt when is_integer(pt) -> Integer.to_string(pt)
+      end
+
+    "rtcp-fb:#{pt_string} #{RTCPFeedback.serialize_feedback_type(type)}"
   end
 end

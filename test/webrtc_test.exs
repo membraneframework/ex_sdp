@@ -207,11 +207,23 @@ defmodule ExSDP.WebRTCTest do
 
     assert {:ok, parsed} = ExSDP.parse(sdp)
 
-    assert %ExSDP{attributes: top_level_attributes, media: [_audio, video]} = parsed
+    assert %ExSDP{attributes: attributes, media: [audio, video]} = parsed
 
-    attributes = MapSet.new(top_level_attributes)
     assert %ExSDP.Attribute.Group{mids: ["0", "1"], semantics: "BUNDLE"} in attributes
     assert :extmap_allow_mixed in attributes
+
+    assert %ExSDP.Attribute.RTCPFeedback{pt: 111, feedback_type: :twcc} in audio.attributes
+    assert %ExSDP.Attribute.FMTP{pt: 63, redundant_payloads: [111]} in audio.attributes
+
+    assert %ExSDP.Attribute.RTCPFeedback{pt: 96, feedback_type: :remb} in video.attributes
+    assert %ExSDP.Attribute.RTCPFeedback{pt: 96, feedback_type: :twcc} in video.attributes
+    assert %ExSDP.Attribute.RTCPFeedback{pt: 96, feedback_type: :fir} in video.attributes
+    assert %ExSDP.Attribute.RTCPFeedback{pt: 96, feedback_type: :nack} in video.attributes
+    assert %ExSDP.Attribute.RTCPFeedback{pt: 96, feedback_type: :pli} in video.attributes
+    assert %ExSDP.Attribute.FMTP{pt: 97, apt: 96} in video.attributes
+
+    assert %ExSDP.Attribute.RTCPFeedback{pt: 98, feedback_type: :pli} in video.attributes
+    assert %ExSDP.Attribute.FMTP{pt: 99, apt: 98} in video.attributes
 
     assert video.attributes |> Enum.at(-5) == %ExSDP.Attribute.SSRCGroup{
              semantics: "FID",
