@@ -30,7 +30,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
     test "returns an error when RED parameter is invalid" do
       fmtp = "63 111/111/130"
-      assert {:error, :red_not_in_0_128_range} == FMTP.parse(fmtp)
+      assert {:error, :invalid_pt} == FMTP.parse(fmtp)
     end
 
     test "parses proper fmtp with simple DTMF tones parameter" do

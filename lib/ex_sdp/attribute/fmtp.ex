@@ -93,14 +93,20 @@ defmodule ExSDP.Attribute.FMTP do
   @typedoc """
   Reason of parsing failure.
   """
-  @type reason :: :string_nan | :string_not_hex | :string_not_0_nor_1
+  @type reason ::
+          :invalid_fmtp | :invalid_pt | :string_nan | :string_not_hex | :string_not_0_nor_1
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
-    [pt, rest] = String.split(fmtp, " ")
-    fmtp = %__MODULE__{pt: String.to_integer(pt)}
-    params = String.split(rest, ";")
-    do_parse(params, fmtp)
+    with [pt_string, rest] <- String.split(fmtp, " "),
+         {:ok, pt} <- Utils.parse_payload_type(pt_string) do
+      rest
+      |> String.split(";")
+      |> do_parse(%__MODULE__{pt: pt})
+    else
+      {:error, _reason} = err -> err
+      _other -> :invalid_fmtp
+    end
   end
 
   defp do_parse([], fmtp), do: {:ok, fmtp}
@@ -196,7 +202,7 @@ defmodule ExSDP.Attribute.FMTP do
   end
 
   defp parse_param(["apt=" <> value | rest], fmtp) do
-    with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | apt: value}}
+    with {:ok, value} <- Utils.parse_payload_type(value), do: {rest, %{fmtp | apt: value}}
   end
 
   defp parse_param(["rtx-time=" <> value | rest], fmtp) do
@@ -229,13 +235,7 @@ defmodule ExSDP.Attribute.FMTP do
   defp parse_redundant_payloads_param([head | rest], fmtp) do
     with redundant_payloads <- String.split(head, "/"),
          {:ok, redundant_payloads} <-
-           Bunch.Enum.try_map(redundant_payloads, fn redundant_payload ->
-             case Utils.parse_numeric_string(redundant_payload) do
-               {:ok, value} when value >= 0 and value <= 128 -> {:ok, value}
-               {:ok, _value} -> {:error, :red_not_in_0_128_range}
-               other -> other
-             end
-           end) do
+           Bunch.Enum.try_map(redundant_payloads, &Utils.parse_payload_type/1) do
       # We need uniq because Chrome sends 111/111 most likely to avoid confusion with dtmf_tones_param
       {rest, Map.put(fmtp, :redundant_payloads, Enum.uniq(redundant_payloads))}
     end

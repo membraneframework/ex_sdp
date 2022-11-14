@@ -14,6 +14,7 @@ defmodule ExSDP.Attribute.RTCPFeedback do
   """
 
   alias ExSDP.Attribute.RTPMapping
+  alias ExSDP.Utils
 
   @type t :: %__MODULE__{
           pt: RTPMapping.payload_type_t() | :all,
@@ -40,17 +41,15 @@ defmodule ExSDP.Attribute.RTCPFeedback do
 
   @reverse_fb_type_mapping Map.new(@fb_type_mapping, fn {k, v} -> {v, k} end)
 
-  @spec parse(binary()) :: {:ok, t()}
+  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_pt} | {:error, :invalid_rtcp_feedback}
   def parse(rtcp_fb) do
-    [pt_string, rest] = String.split(rtcp_fb, " ", parts: 2)
-
-    pt =
-      case pt_string do
-        "*" -> :all
-        _pt -> String.to_integer(pt_string)
-      end
-
-    {:ok, %__MODULE__{pt: pt, feedback_type: parse_feedback_type(rest)}}
+    with [pt_string, rest] <- String.split(rtcp_fb, " ", parts: 2),
+         {:ok, pt} <- parse_pt(pt_string) do
+      {:ok, %__MODULE__{pt: pt, feedback_type: parse_feedback_type(rest)}}
+    else
+      {:error, _reason} = err -> err
+      _invalid -> {:error, :invalid_rtcp_feedback}
+    end
   end
 
   defp parse_feedback_type(fb_type_string) do
@@ -63,6 +62,9 @@ defmodule ExSDP.Attribute.RTCPFeedback do
   def serialize_feedback_type(fb_type) when is_atom(fb_type) do
     Map.fetch!(@reverse_fb_type_mapping, fb_type)
   end
+
+  defp parse_pt("*"), do: {:ok, :all}
+  defp parse_pt(pt_string), do: Utils.parse_payload_type(pt_string)
 end
 
 defimpl String.Chars, for: ExSDP.Attribute.RTCPFeedback do

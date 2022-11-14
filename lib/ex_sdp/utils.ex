@@ -8,6 +8,14 @@ defmodule ExSDP.Utils do
     if length(split) == expected_len, do: {:ok, split}, else: {:error, :too_few_fields}
   end
 
+  @spec parse_payload_type(binary) :: {:ok, 0..127} | {:errror, :invalid_pt}
+  def parse_payload_type(pt_string) do
+    case Integer.parse(pt_string) do
+      {pt, ""} when pt >= 0 and pt <= 127 -> {:ok, pt}
+      _otherwise -> {:error, :invalid_pt}
+    end
+  end
+
   @spec parse_numeric_string(binary) :: {:error, :string_nan} | {:ok, integer}
   def parse_numeric_string(string) do
     case Integer.parse(string) do

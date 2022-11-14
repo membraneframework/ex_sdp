@@ -26,11 +26,12 @@ defmodule ExSDP.Attribute.RTPMapping do
   @type attr_key :: :rtpmap
 
   @spec parse(binary(), opts :: []) ::
-          {:ok, t()} | {:error, :string_nan | :only_audio_can_have_params | :invalid_rtpmap}
+          {:ok, t()}
+          | {:error, :string_nan | :invalid_pt | :only_audio_can_have_params | :invalid_rtpmap}
   def parse(mapping, opts) do
     with [payload_type, encoding | _] <- String.split(mapping, " "),
          [encoding_name, clock_rate | params] <- String.split(encoding, "/"),
-         {:ok, payload_type} <- Utils.parse_numeric_string(payload_type),
+         {:ok, payload_type} <- Utils.parse_payload_type(payload_type),
          {:ok, clock_rate} <- Utils.parse_numeric_string(clock_rate),
          {:ok, params} <- parse_params(params, opts) do
       mapping = %__MODULE__{
