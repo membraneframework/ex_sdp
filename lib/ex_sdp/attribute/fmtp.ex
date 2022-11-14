@@ -236,7 +236,7 @@ defmodule ExSDP.Attribute.FMTP do
                other -> other
              end
            end) do
-      # We need uniq because Chrome sends 111/111 for Opus ¯\_(ツ)_/¯
+      # We need uniq because Chrome sends 111/111 most likely to avoid confusion with dtmf_tones_param
       {rest, Map.put(fmtp, :redundant_payloads, Enum.uniq(redundant_payloads))}
     end
   end

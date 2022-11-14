@@ -19,4 +19,13 @@ defmodule ExSDP.Attribute.SSRCGroupTest do
       assert to_string(ctx.struct) == "ssrc-group:" <> ctx.attr_string
     end
   end
+
+  test "Error when parsing invalid entry" do
+    assert SSRCGroup.parse("125411114") == {:error, :invalid_ssrc_group}
+    assert SSRCGroup.parse("FID") == {:error, :invalid_ssrc_group}
+
+    assert SSRCGroup.parse("FID 555abcs1234") == {:error, :invalid_ssrc}
+    assert SSRCGroup.parse("FID 555abcs1234 4125411114") == {:error, :invalid_ssrc}
+    assert SSRCGroup.parse("FID 55521331234 a125411114") == {:error, :invalid_ssrc}
+  end
 end

@@ -14,12 +14,13 @@ defmodule ExSDP.Attribute.SSRCGroup do
   """
   @type attr_key :: :ssrc_group
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_ssrc}
+  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_ssrc | :invalid_ssrc_group}
   def parse(ssrc_group) do
-    with [semantics | ssrc_ids] <- String.split(ssrc_group, " "),
+    with [semantics | ssrc_ids] when ssrc_ids != [] <- String.split(ssrc_group, " "),
          {:ok, ssrcs} <- Bunch.Enum.try_map(ssrc_ids, &Utils.parse_numeric_string/1) do
       {:ok, %__MODULE__{semantics: semantics, ssrcs: ssrcs}}
     else
+      [_invalid] -> {:error, :invalid_ssrc_group}
       _invalid_ssrc -> {:error, :invalid_ssrc}
     end
   end
