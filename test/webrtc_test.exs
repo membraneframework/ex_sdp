@@ -134,6 +134,7 @@ defmodule ExSDP.WebRTCTest do
   end
 
   test "SDP with rtx and FID ssrc-group" do
+    # SDP from Chrome, sent to Jitsi Meet with some of the encodings dropped
     sdp =
       """
       v=0
@@ -142,7 +143,7 @@ defmodule ExSDP.WebRTCTest do
       t=0 0
       a=group:BUNDLE 0 1
       a=extmap-allow-mixed
-      m=audio 9 UDP/TLS/RTP/SAVPF 111 63 103 104 9 0 8 106 105 13 110 112 113 126
+      m=audio 9 UDP/TLS/RTP/SAVPF 111 63
       c=IN IP4 0.0.0.0
       a=ice-ufrag:zPE+
       a=ice-pwd:5uuTJKfWTxRYyERtPlvUeKsU
@@ -164,7 +165,7 @@ defmodule ExSDP.WebRTCTest do
       a=fmtp:63 111/111
       a=ssrc:10136459 cname:fsp95kJbiDm+35qA
       a=ssrc:10136459 msid:040ad92b-583f-44d2-93e8-de4d40ac49ec 730bdafa-23f3-4111-85b4-757a666d462c
-      m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 127 121 125 107 108 109 124 120 123 119 35 36 41 42 114 115
+      m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99
       c=IN IP4 0.0.0.0
       a=ice-ufrag:zPE+
       a=ice-pwd:5uuTJKfWTxRYyERtPlvUeKsU
