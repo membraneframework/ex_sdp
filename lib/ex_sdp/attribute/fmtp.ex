@@ -3,17 +3,19 @@ defmodule ExSDP.Attribute.FMTP do
   This module represents fmtp (RFC 5576).
 
   Parameters for:
+
   * H264 (not all, RFC 6184),
   * VP8, VP9, OPUS (RFC 7587)
   * RTX (RFC 4588)
   * FLEXFEC (RFC 8627)
   * Telephone Events (RFC 4733)
   * RED (RFC 2198)
+
   are currently supported.
   """
-  alias ExSDP.Utils
 
-  @type payload_type_t() :: 0..127
+  alias ExSDP.Attribute.RTPMapping
+  alias ExSDP.Utils
 
   @enforce_keys [:pt]
   defstruct @enforce_keys ++
@@ -71,14 +73,14 @@ defmodule ExSDP.Attribute.FMTP do
           profile_id: non_neg_integer() | nil,
           max_fr: non_neg_integer() | nil,
           # RTX
-          apt: payload_type_t() | nil,
+          apt: RTPMapping.payload_type_t() | nil,
           rtx_time: non_neg_integer() | nil,
           # FLEXFEC
           repair_window: non_neg_integer() | nil,
           # Telephone Events
           dtmf_tones: String.t() | nil,
           # RED
-          redundant_payloads: [payload_type_t()] | nil,
+          redundant_payloads: [RTPMapping.payload_type_t()] | nil,
           # params that are currently not supported
           unknown: [String.t()]
         }
@@ -91,14 +93,20 @@ defmodule ExSDP.Attribute.FMTP do
   @typedoc """
   Reason of parsing failure.
   """
-  @type reason :: :string_nan | :string_not_hex | :string_not_0_nor_1
+  @type reason ::
+          :invalid_fmtp | :invalid_pt | :string_nan | :string_not_hex | :string_not_0_nor_1
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
-    [pt, rest] = String.split(fmtp, " ")
-    fmtp = %__MODULE__{pt: String.to_integer(pt)}
-    params = String.split(rest, ";")
-    do_parse(params, fmtp)
+    with [pt_string, rest] <- String.split(fmtp, " "),
+         {:ok, pt} <- Utils.parse_payload_type(pt_string) do
+      rest
+      |> String.split(";")
+      |> do_parse(%__MODULE__{pt: pt})
+    else
+      {:error, _reason} = err -> err
+      _other -> :invalid_fmtp
+    end
   end
 
   defp do_parse([], fmtp), do: {:ok, fmtp}
@@ -194,7 +202,7 @@ defmodule ExSDP.Attribute.FMTP do
   end
 
   defp parse_param(["apt=" <> value | rest], fmtp) do
-    with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | apt: value}}
+    with {:ok, value} <- Utils.parse_payload_type(value), do: {rest, %{fmtp | apt: value}}
   end
 
   defp parse_param(["rtx-time=" <> value | rest], fmtp) do
@@ -227,14 +235,9 @@ defmodule ExSDP.Attribute.FMTP do
   defp parse_redundant_payloads_param([head | rest], fmtp) do
     with redundant_payloads <- String.split(head, "/"),
          {:ok, redundant_payloads} <-
-           Bunch.Enum.try_map(redundant_payloads, fn redundant_payload ->
-             case Utils.parse_numeric_string(redundant_payload) do
-               {:ok, value} when value >= 0 and value <= 128 -> {:ok, value}
-               {:ok, _value} -> {:error, :red_not_in_0_128_range}
-               other -> other
-             end
-           end) do
-      {rest, Map.put(fmtp, :redundant_payloads, redundant_payloads)}
+           Bunch.Enum.try_map(redundant_payloads, &Utils.parse_payload_type/1) do
+      # We need uniq because Chrome sends 111/111 most likely to avoid confusion with dtmf_tones_param
+      {rest, Map.put(fmtp, :redundant_payloads, Enum.uniq(redundant_payloads))}
     end
   end
 

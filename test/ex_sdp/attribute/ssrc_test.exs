@@ -10,6 +10,12 @@ defmodule ExSDP.Attribute.SSRCTest do
       assert {:ok, expected} == SSRC.parse(ssrc)
     end
 
+    test "parses ssrc with cname containing :" do
+      ssrc = "4112531724 cname:UUID:UUID-audio-UUID"
+      expected = %SSRC{id: 4_112_531_724, attribute: "cname", value: "UUID:UUID-audio-UUID"}
+      assert {:ok, expected} == SSRC.parse(ssrc)
+    end
+
     test "parses ssrc only with attribute" do
       ssrc = "4112531724 some-attr"
       expected = %SSRC{id: 4_112_531_724, attribute: "some-attr", value: nil}

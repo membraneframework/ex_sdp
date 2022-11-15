@@ -37,7 +37,8 @@ defmodule ExSDP.Attribute.RTPMappingTest do
     end
 
     test "returns an error when clock_rate or payload type is not a number" do
-      assert {:error, :string_nan} = RTPMapping.parse("9t9 h264/90000", media_type: :video)
+      assert {:error, :invalid_pt} = RTPMapping.parse("9t9 h264/90000", media_type: :video)
+      assert {:error, :string_nan} = RTPMapping.parse("99 h264/r0000", media_type: :video)
     end
   end
 
