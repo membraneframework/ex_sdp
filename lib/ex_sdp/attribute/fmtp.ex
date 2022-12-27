@@ -106,11 +106,12 @@ defmodule ExSDP.Attribute.FMTP do
   def parse(fmtp) do
     with [pt_string | rest] <- String.split(fmtp, " "),
          {:ok, pt} <- Utils.parse_payload_type(pt_string) do
-
-      params = for param <- rest do String.replace(param, ";", "") end
+      params =
+        for param <- rest do
+          String.replace(param, ";", "")
+        end
 
       do_parse(params, %__MODULE__{pt: pt})
-
     else
       {:error, _reason} = err -> err
       _other -> :invalid_fmtp
@@ -176,7 +177,7 @@ defmodule ExSDP.Attribute.FMTP do
 
   defp parse_param(["sprop-maxcapturerate=" <> sprop_maxcapturerate | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(sprop_maxcapturerate),
-          do: {rest, %{fmtp | sprop_maxcapturerate: value}}
+         do: {rest, %{fmtp | sprop_maxcapturerate: value}}
   end
 
   defp parse_param(["maxptime=" <> maxptime | rest], fmtp) do
