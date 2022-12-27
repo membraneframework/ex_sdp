@@ -32,6 +32,9 @@ defmodule ExSDP.Attribute.FMTP do
                 # OPUS
                 :maxaveragebitrate,
                 :maxplaybackrate,
+                :sprop_maxcapturerate,
+                :maxptime,
+                :ptime,
                 :minptime,
                 :stereo,
                 :cbr,
@@ -64,6 +67,9 @@ defmodule ExSDP.Attribute.FMTP do
           # OPUS
           maxaveragebitrate: non_neg_integer() | nil,
           maxplaybackrate: non_neg_integer() | nil,
+          sprop_maxcapturerate: non_neg_integer() | nil,
+          maxptime: non_neg_integer() | nil,
+          ptime: non_neg_integer() | nil,
           minptime: non_neg_integer() | nil,
           stereo: boolean() | nil,
           cbr: boolean() | nil,
@@ -166,6 +172,21 @@ defmodule ExSDP.Attribute.FMTP do
   defp parse_param(["maxplaybackrate=" <> maxplaybackrate | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(maxplaybackrate),
          do: {rest, %{fmtp | maxplaybackrate: value}}
+  end
+
+  defp parse_param(["sprop-maxcapturerate=" <> sprop_maxcapturerate | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(sprop_maxcapturerate),
+          do: {rest, %{fmtp | sprop_maxcapturerate: value}}
+  end
+
+  defp parse_param(["maxptime=" <> maxptime | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(maxptime),
+         do: {rest, %{fmtp | maxptime: value}}
+  end
+
+  defp parse_param(["ptime=" <> ptime | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(ptime),
+         do: {rest, %{fmtp | ptime: value}}
   end
 
   defp parse_param(["minptime=" <> minptime | rest], fmtp) do
@@ -288,6 +309,9 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         # OPUS
         Serializer.maybe_serialize("maxaveragebitrate", fmtp.maxaveragebitrate),
         Serializer.maybe_serialize("maxplaybackrate", fmtp.maxplaybackrate),
+        Serializer.maybe_serialize("sprop_maxcapturerate", fmtp.sprop_maxcapturerate),
+        Serializer.maybe_serialize("maxptime", fmtp.maxptime),
+        Serializer.maybe_serialize("ptime", fmtp.ptime),
         Serializer.maybe_serialize("minptime", fmtp.minptime),
         Serializer.maybe_serialize("stereo", fmtp.stereo),
         Serializer.maybe_serialize("cbr", fmtp.cbr),
