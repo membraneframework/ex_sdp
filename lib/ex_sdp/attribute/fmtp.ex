@@ -104,14 +104,13 @@ defmodule ExSDP.Attribute.FMTP do
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
-    with [pt_string | rest] <- String.split(fmtp, " "),
-         {:ok, pt} <- Utils.parse_payload_type(pt_string) do
-      params =
-        for param <- rest do
-          String.replace(param, ";", "")
-        end
-
-      do_parse(params, %__MODULE__{pt: pt})
+    with [pt_string, rest] <- String.split(fmtp, " ", parts: 2),
+             {:ok, pt} <- Utils.parse_payload_type(pt_string) do
+      rest
+      |> String.split(";")
+      # remove leading whitespaces
+      |> Enum.map(&String.trim(&1))
+      |> do_parse(%__MODULE__{pt: pt})
     else
       {:error, _reason} = err -> err
       _other -> :invalid_fmtp
