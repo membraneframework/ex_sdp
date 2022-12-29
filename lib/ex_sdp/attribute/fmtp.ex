@@ -105,7 +105,7 @@ defmodule ExSDP.Attribute.FMTP do
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
     with [pt_string, rest] <- String.split(fmtp, " ", parts: 2),
-             {:ok, pt} <- Utils.parse_payload_type(pt_string) do
+         {:ok, pt} <- Utils.parse_payload_type(pt_string) do
       rest
       |> String.split(";")
       # remove leading whitespaces

@@ -60,8 +60,8 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 117,
-        maxplaybackrate: 16000,
-        maxaveragebitrate: 24000,
+        maxplaybackrate: 16_000,
+        maxaveragebitrate: 24_000,
         cbr: false,
         usedtx: false,
         useinbandfec: false
@@ -74,14 +74,14 @@ defmodule ExSDP.Attribute.FMTPTest do
       fmtp = "121 ptime=20;maxptime=60;cbr=0;sprop-maxcapturerate=16000"
 
       expected = %FMTP{
-        pt: 117,
+        pt: 121,
         ptime: 20,
         maxptime: 60,
         cbr: false,
-        sprop_maxcapturerate: 16000
+        sprop_maxcapturerate: 16_000
       }
 
-      assert {:ok, expected} = FMTP.parse(fmtp)
+      assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
     test "returns an error when DTMF tone is too big" do
