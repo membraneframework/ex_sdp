@@ -55,6 +55,35 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
+    test "parses fmtp with spaces after semi-colons" do
+      fmtp = "117 maxplaybackrate=16000; maxaveragebitrate=24000; cbr=0; useinbandfec=0; usedtx=0"
+
+      expected = %FMTP{
+        pt: 117,
+        maxplaybackrate: 16000,
+        maxaveragebitrate: 24000,
+        cbr: false,
+        usedtx: false,
+        useinbandfec: false
+      }
+
+      assert {:ok, expected} == FMTP.parse(fmtp)
+    end
+
+    test "parses fmtp with ptime, maxptime, and sprop-maxcapturerate parameters" do
+      fmtp = "121 ptime=20;maxptime=60;cbr=0;sprop-maxcapturerate=16000"
+
+      expected = %FMTP{
+        pt: 117,
+        ptime: 20,
+        maxptime: 60,
+        cbr: false,
+        sprop_maxcapturerate: 16000
+      }
+
+      assert {:ok, expected} = FMTP.parse(fmtp)
+    end
+
     test "returns an error when DTMF tone is too big" do
       fmtp = "100 0-15,256"
       assert {:error, :invalid_dtmf_tones} = FMTP.parse(fmtp)
