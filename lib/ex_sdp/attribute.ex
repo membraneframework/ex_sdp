@@ -135,15 +135,18 @@ defmodule ExSDP.Attribute do
 
   defp parse_orient(orient) do
     case orient do
-      string when string in ["portrait", "landscape", "seascape"] -> String.to_atom(string)
-      _invalid_orient -> {:error, :invalid_orient}
+      string when string in ["portrait", "landscape", "seascape"] ->
+        {:ok, {:orient, String.to_atom(string)}}
+
+      _invalid_orient ->
+        {:error, :invalid_orient}
     end
   end
 
   defp parse_type(type) do
     case type do
       string when string in ["broadcast", "meeting", "moderated", "test", "H332"] ->
-        String.to_atom(string)
+        {:ok, {:type, String.to_atom(string)}}
 
       _invalid_type ->
         {:error, :invalid_type}
