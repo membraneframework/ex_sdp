@@ -2,7 +2,6 @@ defmodule ExSDP.Attribute do
   @moduledoc """
   This module represents Attributes fields of SDP.
   """
-  use Bunch.Typespec
   use Bunch.Access
 
   alias __MODULE__.{Extmap, FMTP, Group, MSID, RTCPFeedback, RTPMapping, SSRC, SSRCGroup}
@@ -13,15 +12,16 @@ defmodule ExSDP.Attribute do
   @type type_value :: :broadcast | :meeting | :moderated | :test | :H332
   @type framerate_value :: float() | {integer(), integer()}
 
-  @list_type flag_attributes :: [
-               :recvonly,
-               :sendrecv,
-               :sendonly,
-               :inactive,
-               :extmap_allow_mixed,
-               :rtcp_mux,
-               :rtcp_rsize
-             ]
+  @flag_attributes [
+    :recvonly,
+    :sendrecv,
+    :sendonly,
+    :inactive,
+    :extmap_allow_mixed,
+    :rtcp_mux,
+    :rtcp_rsize
+  ]
+  @type flag_attributes :: unquote(Bunch.Typespec.enum_to_alternative(@flag_attributes))
 
   @type cat :: {:cat, binary()}
   @type charset :: {:charset, binary()}
