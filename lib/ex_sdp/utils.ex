@@ -40,4 +40,30 @@ defmodule ExSDP.Utils do
       _string_not_0_nor_1 -> {:error, :string_not_0_nor_1}
     end
   end
+
+  @spec parse_sprop_parameter_sets(binary) ::
+          {:error, :invalid_sprop_parameter_sets} | {:ok, %{sps: binary, pps: binary}}
+  def parse_sprop_parameter_sets(string) do
+    result =
+      String.split(string, ",", parts: 2)
+      |> then(fn list -> List.zip([[:sps, :pps], list]) end)
+      |> Enum.map(fn {type, encoded} ->
+        with {:ok, decoded} <- Base.decode64(encoded) do
+          {type, <<0, 0, 0, 1>> <> decoded}
+        else
+          :error -> {type, nil}
+        end
+      end)
+      |> Enum.into(%{})
+
+    ok? =
+      case result do
+        %{sps: nil} -> false
+        %{pps: nil} -> false
+        %{sps: _sps, pps: _pps} -> true
+        _other -> false
+      end
+
+    if ok?, do: {:ok, result}, else: {:error, :invalid_sprop_parameter_sets}
+  end
 end
