@@ -46,24 +46,21 @@ defmodule ExSDP.Utils do
   def parse_sprop_parameter_sets(string) do
     result =
       String.split(string, ",", parts: 2)
-      |> then(fn list -> List.zip([[:sps, :pps], list]) end)
-      |> Enum.map(fn {type, encoded} ->
-        with {:ok, decoded} <- Base.decode64(encoded) do
-          {type, <<0, 0, 0, 1>> <> decoded}
-        else
-          :error -> {type, nil}
-        end
+      |> Enum.zip([:sps, :pps])
+      |> Map.new(fn {encoded, type} ->
+        decoded =
+          case Base.decode64(encoded) do
+            {:ok, decoded} -> decoded
+            :error -> nil
+          end
+
+        {type, decoded}
       end)
-      |> Enum.into(%{})
 
-    ok? =
-      case result do
-        %{sps: nil} -> false
-        %{pps: nil} -> false
-        %{sps: _sps, pps: _pps} -> true
-        _other -> false
-      end
-
-    if ok?, do: {:ok, result}, else: {:error, :invalid_sprop_parameter_sets}
+    if Map.get(result, :sps) && Map.get(result, :pps) do
+      {:ok, result}
+    else
+      {:error, :invalid_sprop_parameter_sets}
+    end
   end
 end
