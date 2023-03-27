@@ -29,6 +29,7 @@ defmodule ExSDP.Attribute.FMTP do
                 :max_fs,
                 :max_dpb,
                 :max_br,
+                :sprop_parameter_sets,
                 # OPUS
                 :maxaveragebitrate,
                 :maxplaybackrate,
@@ -64,6 +65,7 @@ defmodule ExSDP.Attribute.FMTP do
           max_br: non_neg_integer() | nil,
           level_asymmetry_allowed: boolean() | nil,
           packetization_mode: non_neg_integer() | nil,
+          sprop_parameter_sets: %{sps: binary(), pps: binary()} | nil,
           # OPUS
           maxaveragebitrate: non_neg_integer() | nil,
           maxplaybackrate: non_neg_integer() | nil,
@@ -100,7 +102,12 @@ defmodule ExSDP.Attribute.FMTP do
   Reason of parsing failure.
   """
   @type reason ::
-          :invalid_fmtp | :invalid_pt | :string_nan | :string_not_hex | :string_not_0_nor_1
+          :invalid_fmtp
+          | :invalid_pt
+          | :invalid_sprop_parameter_sets
+          | :string_nan
+          | :string_not_hex
+          | :string_not_0_nor_1
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
@@ -139,6 +146,11 @@ defmodule ExSDP.Attribute.FMTP do
   defp parse_param(["packetization-mode=" <> packetization_mode | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(packetization_mode),
          do: {rest, %{fmtp | packetization_mode: value}}
+  end
+
+  defp parse_param(["sprop-parameter-sets=" <> sprop_parameter_sets | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_sprop_parameter_sets(sprop_parameter_sets),
+         do: {rest, %{fmtp | sprop_parameter_sets: value}}
   end
 
   defp parse_param(["max-mbps=" <> max_mbps | rest], fmtp) do
@@ -306,6 +318,7 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("max-br", fmtp.max_br),
         Serializer.maybe_serialize("level-asymmetry-allowed", fmtp.level_asymmetry_allowed),
         Serializer.maybe_serialize("packetization-mode", fmtp.packetization_mode),
+        Serializer.maybe_serialize("sprop-parameter-sets", fmtp.sprop_parameter_sets),
         # OPUS
         Serializer.maybe_serialize("maxaveragebitrate", fmtp.maxaveragebitrate),
         Serializer.maybe_serialize("maxplaybackrate", fmtp.maxplaybackrate),

@@ -84,6 +84,26 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
+    test "parses fmtp with sprop-parameter-sets parameters" do
+      fmtp =
+        "105 profile-level-id=64001f; packetization-mode=1; " <>
+          "sprop-parameter-sets=Z2QAH62EAQwgCGEAQwgCGEAQwgCEO1AoAt03AQEBQAAA+gAAOpgh,aO4xshs="
+
+      expected = %FMTP{
+        pt: 105,
+        profile_level_id: 0x64001F,
+        packetization_mode: 1,
+        sprop_parameter_sets: %{
+          sps:
+            <<103, 100, 0, 31, 173, 132, 1, 12, 32, 8, 97, 0, 67, 8, 2, 24, 64, 16, 194, 0, 132,
+              59, 80, 40, 2, 221, 55, 1, 1, 1, 64, 0, 0, 250, 0, 0, 58, 152, 33>>,
+          pps: <<104, 238, 49, 178, 27>>
+        }
+      }
+
+      assert {:ok, expected} == FMTP.parse(fmtp)
+    end
+
     test "returns an error when DTMF tone is too big" do
       fmtp = "100 0-15,256"
       assert {:error, :invalid_dtmf_tones} = FMTP.parse(fmtp)
@@ -135,6 +155,23 @@ defmodule ExSDP.Attribute.FMTPTest do
       fmtp = %FMTP{
         pt: 63,
         redundant_payloads: [111, 111]
+      }
+
+      assert "#{fmtp}" == expected
+    end
+
+    test "serializes FMTP with sprop-parameter-sets" do
+      expected =
+        "fmtp:96 profile-level-id=420029;packetization-mode=1;sprop-parameter-sets=Z0IAKeKQFAe2AtwEBAaQeJEV,aM48gA=="
+
+      fmtp = %FMTP{
+        pt: 96,
+        packetization_mode: 1,
+        profile_level_id: 0x420029,
+        sprop_parameter_sets: %{
+          sps: <<103, 66, 0, 41, 226, 144, 20, 7, 182, 2, 220, 4, 4, 6, 144, 120, 145, 21>>,
+          pps: <<104, 206, 60, 128>>
+        }
       }
 
       assert "#{fmtp}" == expected
