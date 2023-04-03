@@ -1,7 +1,7 @@
 defmodule ExSDP.MixProject do
   use Mix.Project
 
-  @version "0.10.2"
+  @version "0.11.0"
   @github_url "https://github.com/membraneframework/ex_sdp"
 
   def project do
@@ -59,7 +59,7 @@ defmodule ExSDP.MixProject do
       licenses: ["Apache-2.0"],
       links: %{
         "GitHub" => @github_url,
-        "Membrane Framework Homepage" => "https://membraneframework.org"
+        "Membrane Framework Homepage" => "https://membrane.stream"
       }
     ]
   end
