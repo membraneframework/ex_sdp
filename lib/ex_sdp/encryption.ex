@@ -13,7 +13,7 @@ defmodule ExSDP.Encryption do
   @enforce_keys [:method]
   defstruct @enforce_keys ++ [:key]
 
-  @type methods :: :prompt | :base64 | :clear | :prompt | :uri
+  @type methods :: :prompt | :base64 | :clear | :uri
 
   @type t :: %__MODULE__{
           method: methods(),

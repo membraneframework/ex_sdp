@@ -48,6 +48,13 @@ defmodule ExSDP.Serializer do
   def maybe_serialize_hex(type, value),
     do: "#{type}=#{Integer.to_string(value, 16) |> String.downcase()}"
 
+  @spec maybe_serialize_base64(String.t(), nil | [binary()]) :: binary()
+  def maybe_serialize_base64(_type, nil), do: ""
+  def maybe_serialize_base64(_type, []), do: ""
+
+  def maybe_serialize_base64(type, values) when is_list(values),
+    do: "#{type}=" <> Enum.map_join(values, ",", &Base.encode64(&1))
+
   @spec maybe_serialize_list([String.t()] | nil, String.t()) :: String.t()
   def maybe_serialize_list([], _sep), do: ""
   def maybe_serialize_list(nil, _sep), do: ""
