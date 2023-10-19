@@ -33,6 +33,7 @@ defmodule ExSDP.Attribute.FMTP do
                 :sprop_parameter_sets,
                 # H265
                 :profile_space,
+                :profile_id,
                 :tier_flag,
                 :level_id,
                 :interop_constraints,
@@ -51,7 +52,6 @@ defmodule ExSDP.Attribute.FMTP do
                 :useinbandfec,
                 :usedtx,
                 # VP8/9
-                :profile_id,
                 :max_fr,
                 # RTX
                 :apt,
@@ -95,7 +95,6 @@ defmodule ExSDP.Attribute.FMTP do
           useinbandfec: boolean() | nil,
           usedtx: boolean() | nil,
           # VP8/9
-          profile_id: non_neg_integer() | nil,
           max_fr: non_neg_integer() | nil,
           # RTX
           apt: RTPMapping.payload_type_t() | nil,

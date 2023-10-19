@@ -108,8 +108,8 @@ defmodule ExSDP.Attribute.FMTPTest do
       fmtp =
         "96 profile-space=0;profile-id=1;tier-flag=0;level-id=150;interop-constraints=B00000000000;" <>
           "sprop-vps=QAEMAf//AWAAAAMAAAMAAAMAAAMAlqwJAAAAAQ==;" <>
-          "sprop-sps=QgEBAWAAAAMAAAMAAAMAAAMAlqAB4CACHH+KrTuiS7IAAAAB;" <>
-          "sprop-pps=RAHAcvCcFAobJA=="
+          "sprop-sps=QgEBAWAAAAMAAAMAAAMAAAMAlqAB4CACHH+KrTuiS7IAAAAB,QgEBAWAAAAMAsAAAAwAAAwCZoAHgIAIcWNrkkUvzcBAQEAg=;" <>
+          "sprop-pps=RAHAcvCcFAobJA==,RAHA8vA7NA=="
 
       expected = %FMTP{
         pt: 96,
@@ -124,9 +124,14 @@ defmodule ExSDP.Attribute.FMTPTest do
         ],
         sprop_sps: [
           <<66, 1, 1, 1, 96, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 150, 160, 1, 224, 32, 2, 28,
-            127, 138, 173, 59, 162, 75, 178, 0, 0, 0, 1>>
+            127, 138, 173, 59, 162, 75, 178, 0, 0, 0, 1>>,
+          <<66, 1, 1, 1, 96, 0, 0, 3, 0, 176, 0, 0, 3, 0, 0, 3, 0, 153, 160, 1, 224, 32, 2, 28,
+            88, 218, 228, 145, 75, 243, 112, 16, 16, 16, 8>>
         ],
-        sprop_pps: [<<68, 1, 192, 114, 240, 156, 20, 10, 27, 36>>]
+        sprop_pps: [
+          <<68, 1, 192, 114, 240, 156, 20, 10, 27, 36>>,
+          <<68, 1, 192, 242, 240, 59, 52>>
+        ]
       }
 
       assert {:ok, expected} == FMTP.parse(fmtp)
@@ -207,7 +212,10 @@ defmodule ExSDP.Attribute.FMTPTest do
 
     test "serializes FMTP with sprop-*ps" do
       expected =
-        "fmtp:96 profile-space=0;tier-flag=0;level-id=150;interop-constraints=b00000000000;sprop-vps=QAEMAf//AWAAAAMAAAMAAAMAAAMAlqwJAAAAAQ==;sprop-sps=QgEBAWAAAAMAAAMAAAMAAAMAlqAB4CACHH+KrTuiS7IAAAAB;sprop-pps=RAHAcvCcFAobJA==;profile-id=1"
+        "fmtp:96 profile-space=0;tier-flag=0;level-id=150;interop-constraints=b00000000000;" <>
+          "sprop-vps=QAEMAf//AWAAAAMAAAMAAAMAAAMAlqwJAAAAAQ==;" <>
+          "sprop-sps=QgEBAWAAAAMAAAMAAAMAAAMAlqAB4CACHH+KrTuiS7IAAAAB,QgEBAWAAAAMAsAAAAwAAAwCZoAHgIAIcWNrkkUvzcBAQEAg=;" <>
+          "sprop-pps=RAHAcvCcFAobJA==,RAHA8vA7NA==;profile-id=1"
 
       fmtp = %FMTP{
         pt: 96,
@@ -222,9 +230,14 @@ defmodule ExSDP.Attribute.FMTPTest do
         ],
         sprop_sps: [
           <<66, 1, 1, 1, 96, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 150, 160, 1, 224, 32, 2, 28,
-            127, 138, 173, 59, 162, 75, 178, 0, 0, 0, 1>>
+            127, 138, 173, 59, 162, 75, 178, 0, 0, 0, 1>>,
+          <<66, 1, 1, 1, 96, 0, 0, 3, 0, 176, 0, 0, 3, 0, 0, 3, 0, 153, 160, 1, 224, 32, 2, 28,
+            88, 218, 228, 145, 75, 243, 112, 16, 16, 16, 8>>
         ],
-        sprop_pps: [<<68, 1, 192, 114, 240, 156, 20, 10, 27, 36>>]
+        sprop_pps: [
+          <<68, 1, 192, 114, 240, 156, 20, 10, 27, 36>>,
+          <<68, 1, 192, 242, 240, 59, 52>>
+        ]
       }
 
       assert "#{fmtp}" == expected
