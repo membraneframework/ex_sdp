@@ -64,14 +64,14 @@ defmodule ExSDP.Utils do
     end
   end
 
-  @spec parse_sprop_ps(binary()) :: {:error, :invalid_sprop_parameter_sets} | {:ok, [binary()]}
+  @spec parse_sprop_ps(binary()) :: {:error, :invalid_ps} | {:ok, [binary()]}
   def parse_sprop_ps(pss) do
     pss
     |> String.split(",")
     |> Enum.reduce_while({:ok, []}, fn parameter_set, {:ok, acc} ->
       case Base.decode64(parameter_set) do
         {:ok, decoded} -> {:cont, {:ok, acc ++ [decoded]}}
-        :error -> {:halt, {:error, :invalid_sprop_parameter_sets}}
+        :error -> {:halt, {:error, :invalid_ps}}
       end
     end)
   end

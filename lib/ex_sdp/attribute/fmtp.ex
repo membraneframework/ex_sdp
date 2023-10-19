@@ -80,6 +80,7 @@ defmodule ExSDP.Attribute.FMTP do
           profile_id: non_neg_integer() | nil,
           tier_flag: non_neg_integer() | nil,
           level_id: non_neg_integer() | nil,
+          interop_constraints: non_neg_integer() | nil,
           sprop_vps: [binary()] | nil,
           sprop_sps: [binary()] | nil,
           sprop_pps: [binary()] | nil,
@@ -119,6 +120,7 @@ defmodule ExSDP.Attribute.FMTP do
   """
   @type reason ::
           :invalid_fmtp
+          | :invalid_ps
           | :invalid_pt
           | :invalid_sprop_parameter_sets
           | :string_nan
@@ -169,44 +171,44 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | sprop_parameter_sets: value}}
   end
 
-  defp parse_param(["profile-space=" <> profile_space | rest], fmpt) do
+  defp parse_param(["profile-space=" <> profile_space | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(profile_space),
-         do: {rest, %{fmpt | profile_space: value}}
+         do: {rest, %{fmtp | profile_space: value}}
   end
 
-  defp parse_param(["profile-id=" <> profile_id | rest], fmpt) do
+  defp parse_param(["profile-id=" <> profile_id | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(profile_id),
-         do: {rest, %{fmpt | profile_id: value}}
+         do: {rest, %{fmtp | profile_id: value}}
   end
 
-  defp parse_param(["tier-flag=" <> tier_flag | rest], fmpt) do
+  defp parse_param(["tier-flag=" <> tier_flag | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_bool_string(tier_flag),
-         do: {rest, %{fmpt | tier_flag: value}}
+         do: {rest, %{fmtp | tier_flag: value}}
   end
 
-  defp parse_param(["level-id=" <> level_id | rest], fmpt) do
+  defp parse_param(["level-id=" <> level_id | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(level_id),
-         do: {rest, %{fmpt | level_id: value}}
+         do: {rest, %{fmtp | level_id: value}}
   end
 
-  defp parse_param(["interop-constraints=" <> interop_constraints | rest], fmpt) do
+  defp parse_param(["interop-constraints=" <> interop_constraints | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_hex_string(interop_constraints),
-         do: {rest, %{fmpt | interop_constraints: value}}
+         do: {rest, %{fmtp | interop_constraints: value}}
   end
 
-  defp parse_param(["sprop-vps=" <> vps | rest], fmpt) do
+  defp parse_param(["sprop-vps=" <> vps | rest], fmtp) do
     with {:ok, value} <- Utils.parse_sprop_ps(vps),
-         do: {rest, %{fmpt | sprop_vps: value}}
+         do: {rest, %{fmtp | sprop_vps: value}}
   end
 
-  defp parse_param(["sprop-sps=" <> sps | rest], fmpt) do
+  defp parse_param(["sprop-sps=" <> sps | rest], fmtp) do
     with {:ok, value} <- Utils.parse_sprop_ps(sps),
-         do: {rest, %{fmpt | sprop_sps: value}}
+         do: {rest, %{fmtp | sprop_sps: value}}
   end
 
-  defp parse_param(["sprop-pps=" <> pps | rest], fmpt) do
+  defp parse_param(["sprop-pps=" <> pps | rest], fmtp) do
     with {:ok, value} <- Utils.parse_sprop_ps(pps),
-         do: {rest, %{fmpt | sprop_pps: value}}
+         do: {rest, %{fmtp | sprop_pps: value}}
   end
 
   defp parse_param(["max-mbps=" <> max_mbps | rest], fmtp) do
@@ -372,6 +374,7 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("sprop-parameter-sets", fmtp.sprop_parameter_sets),
         # H265
         Serializer.maybe_serialize("profile-space", fmtp.profile_space),
+        Serializer.maybe_serialize("profile-id", fmtp.profile_id),
         Serializer.maybe_serialize("tier-flag", fmtp.tier_flag),
         Serializer.maybe_serialize("level-id", fmtp.level_id),
         Serializer.maybe_serialize_hex("interop-constraints", fmtp.interop_constraints),
@@ -390,7 +393,6 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("useinbandfec", fmtp.useinbandfec),
         Serializer.maybe_serialize("usedtx", fmtp.usedtx),
         # VP8/9
-        Serializer.maybe_serialize("profile-id", fmtp.profile_id),
         Serializer.maybe_serialize("max-fr", fmtp.max_fr),
         # RTX
         Serializer.maybe_serialize("apt", fmtp.apt),

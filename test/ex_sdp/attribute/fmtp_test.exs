@@ -212,10 +212,10 @@ defmodule ExSDP.Attribute.FMTPTest do
 
     test "serializes FMTP with sprop-*ps" do
       expected =
-        "fmtp:96 profile-space=0;tier-flag=0;level-id=150;interop-constraints=b00000000000;" <>
+        "fmtp:96 profile-space=0;profile-id=1;tier-flag=0;level-id=150;interop-constraints=b00000000000;" <>
           "sprop-vps=QAEMAf//AWAAAAMAAAMAAAMAAAMAlqwJAAAAAQ==;" <>
           "sprop-sps=QgEBAWAAAAMAAAMAAAMAAAMAlqAB4CACHH+KrTuiS7IAAAAB,QgEBAWAAAAMAsAAAAwAAAwCZoAHgIAIcWNrkkUvzcBAQEAg=;" <>
-          "sprop-pps=RAHAcvCcFAobJA==,RAHA8vA7NA==;profile-id=1"
+          "sprop-pps=RAHAcvCcFAobJA==,RAHA8vA7NA=="
 
       fmtp = %FMTP{
         pt: 96,
