@@ -8,4 +8,5 @@ workflows:
     jobs:
       - elixir/build_test
       - elixir/test
-      - elixir/lint
+      - elixir/lint:
+          cache-version: 2
