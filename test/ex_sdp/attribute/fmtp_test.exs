@@ -104,6 +104,39 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
+    test "parses fmtp with sprop-*ps" do
+      fmtp =
+        "96 profile-space=0;profile-id=1;tier-flag=0;level-id=150;interop-constraints=B00000000000;" <>
+          "sprop-vps=QAEMAf//AWAAAAMAAAMAAAMAAAMAlqwJAAAAAQ==;" <>
+          "sprop-sps=QgEBAWAAAAMAAAMAAAMAAAMAlqAB4CACHH+KrTuiS7IAAAAB,QgEBAWAAAAMAsAAAAwAAAwCZoAHgIAIcWNrkkUvzcBAQEAg=;" <>
+          "sprop-pps=RAHAcvCcFAobJA==,RAHA8vA7NA=="
+
+      expected = %FMTP{
+        pt: 96,
+        profile_space: 0,
+        profile_id: 1,
+        tier_flag: false,
+        level_id: 150,
+        interop_constraints: 0xB00000000000,
+        sprop_vps: [
+          <<64, 1, 12, 1, 255, 255, 1, 96, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 150, 172, 9, 0,
+            0, 0, 1>>
+        ],
+        sprop_sps: [
+          <<66, 1, 1, 1, 96, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 150, 160, 1, 224, 32, 2, 28,
+            127, 138, 173, 59, 162, 75, 178, 0, 0, 0, 1>>,
+          <<66, 1, 1, 1, 96, 0, 0, 3, 0, 176, 0, 0, 3, 0, 0, 3, 0, 153, 160, 1, 224, 32, 2, 28,
+            88, 218, 228, 145, 75, 243, 112, 16, 16, 16, 8>>
+        ],
+        sprop_pps: [
+          <<68, 1, 192, 114, 240, 156, 20, 10, 27, 36>>,
+          <<68, 1, 192, 242, 240, 59, 52>>
+        ]
+      }
+
+      assert {:ok, expected} == FMTP.parse(fmtp)
+    end
+
     test "returns an error when DTMF tone is too big" do
       fmtp = "100 0-15,256"
       assert {:error, :invalid_dtmf_tones} = FMTP.parse(fmtp)
@@ -172,6 +205,39 @@ defmodule ExSDP.Attribute.FMTPTest do
           sps: <<103, 66, 0, 41, 226, 144, 20, 7, 182, 2, 220, 4, 4, 6, 144, 120, 145, 21>>,
           pps: <<104, 206, 60, 128>>
         }
+      }
+
+      assert "#{fmtp}" == expected
+    end
+
+    test "serializes FMTP with sprop-*ps" do
+      expected =
+        "fmtp:96 profile-space=0;profile-id=1;tier-flag=0;level-id=150;interop-constraints=b00000000000;" <>
+          "sprop-vps=QAEMAf//AWAAAAMAAAMAAAMAAAMAlqwJAAAAAQ==;" <>
+          "sprop-sps=QgEBAWAAAAMAAAMAAAMAAAMAlqAB4CACHH+KrTuiS7IAAAAB,QgEBAWAAAAMAsAAAAwAAAwCZoAHgIAIcWNrkkUvzcBAQEAg=;" <>
+          "sprop-pps=RAHAcvCcFAobJA==,RAHA8vA7NA=="
+
+      fmtp = %FMTP{
+        pt: 96,
+        profile_space: 0,
+        profile_id: 1,
+        tier_flag: false,
+        level_id: 150,
+        interop_constraints: 0xB00000000000,
+        sprop_vps: [
+          <<64, 1, 12, 1, 255, 255, 1, 96, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 150, 172, 9, 0,
+            0, 0, 1>>
+        ],
+        sprop_sps: [
+          <<66, 1, 1, 1, 96, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 150, 160, 1, 224, 32, 2, 28,
+            127, 138, 173, 59, 162, 75, 178, 0, 0, 0, 1>>,
+          <<66, 1, 1, 1, 96, 0, 0, 3, 0, 176, 0, 0, 3, 0, 0, 3, 0, 153, 160, 1, 224, 32, 2, 28,
+            88, 218, 228, 145, 75, 243, 112, 16, 16, 16, 8>>
+        ],
+        sprop_pps: [
+          <<68, 1, 192, 114, 240, 156, 20, 10, 27, 36>>,
+          <<68, 1, 192, 242, 240, 59, 52>>
+        ]
       }
 
       assert "#{fmtp}" == expected
