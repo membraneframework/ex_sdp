@@ -11,18 +11,8 @@ defmodule ExSDP.Media do
     Attribute,
     Bandwidth,
     ConnectionData,
-    Encryption
-  }
-
-  alias ExSDP.Attribute.{
-    Extmap,
-    FMTP,
-    Group,
-    MSID,
-    RTCPFeedback,
-    RTPMapping,
-    SSRC,
-    SSRCGroup
+    Encryption,
+    Utils
   }
 
   @enforce_keys [:type, :port, :protocol, :fmt]
@@ -57,18 +47,6 @@ defmodule ExSDP.Media do
   """
   @type type :: :audio | :video | :text | :application | :message | binary()
 
-  # For searching struct attributes by atoms
-  @struct_attr_keys %{
-    :rtpmap => RTPMapping,
-    :msid => MSID,
-    :fmtp => FMTP,
-    :ssrc => SSRC,
-    :ssrc_group => SSRCGroup,
-    :rtcp_feedback => RTCPFeedback,
-    :group => Group,
-    :extmap => Extmap
-  }
-
   @spec new(
           type :: type(),
           port :: :inet.port_number(),
@@ -94,30 +72,10 @@ defmodule ExSDP.Media do
     do: Map.update!(media, :attributes, &(&1 ++ attributes))
 
   @spec get_attribute(media :: t(), key :: module() | atom() | binary()) :: Attribute.t() | nil
-  def get_attribute(media, key) do
-    key = Map.get(@struct_attr_keys, key, key)
-
-    media.attributes
-    |> Enum.find(fn
-      %module{} -> module == key
-      {k, _v} -> k == key
-      # for flag attributes
-      k -> k == key
-    end)
-  end
+  def get_attribute(media, key), do: Utils.get_attribute(media, key)
 
   @spec get_attributes(media :: t(), key :: module() | atom() | binary()) :: [Attribute.t()]
-  def get_attributes(media, key) do
-    key = Map.get(@struct_attr_keys, key, key)
-
-    media.attributes
-    |> Enum.filter(fn
-      %module{} -> module == key
-      {k, _v} -> k == key
-      # for flag attributes
-      k -> k == key
-    end)
-  end
+  def get_attributes(media, key), do: Utils.get_attributes(media, key)
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
