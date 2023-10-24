@@ -19,7 +19,8 @@ defmodule ExSDP do
     RepeatTimes,
     Serializer,
     Timezone,
-    Timing
+    Timing,
+    Utils
   }
 
   @enforce_keys [:origin]
@@ -101,6 +102,12 @@ defmodule ExSDP do
   @spec add_attributes(sdp :: t(), attributes :: [Attribute.t()]) :: t()
   def add_attributes(sdp, attributes) when is_list(attributes),
     do: Map.update!(sdp, :attributes, &(&1 ++ attributes))
+
+  @spec get_attribute(sdp :: t(), key :: module() | atom() | binary()) :: Attribute.t() | nil
+  def get_attribute(sdp, key), do: Utils.get_attribute(sdp, key)
+
+  @spec get_attributes(sdp :: t(), key :: module() | atom() | binary()) :: [Attribute.t()]
+  def get_attributes(sdp, key), do: Utils.get_attributes(sdp, key)
 end
 
 defimpl String.Chars, for: ExSDP do

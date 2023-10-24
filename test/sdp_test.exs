@@ -187,4 +187,42 @@ defmodule ExSDPTest do
       end
     end
   end
+
+  describe "get_attribute/2" do
+    test "gets attribute by atom, binary or module" do
+      sdp =
+        ExSDP.new()
+        |> ExSDP.add_attribute({"key", "value"})
+        |> ExSDP.add_attribute(:recvonly)
+        |> ExSDP.add_attribute(%ExSDP.Attribute.Group{semantics: "BUNDLE", mids: [0, 1, 2]})
+
+      assert :recvonly == ExSDP.get_attribute(sdp, :recvonly)
+      assert {"key", "value"} == ExSDP.get_attribute(sdp, "key")
+
+      assert %ExSDP.Attribute.Group{semantics: "BUNDLE", mids: [0, 1, 2]} ==
+               ExSDP.get_attribute(sdp, ExSDP.Attribute.Group)
+
+      assert %ExSDP.Attribute.Group{semantics: "BUNDLE", mids: [0, 1, 2]} ==
+               ExSDP.get_attribute(sdp, :group)
+
+      assert nil == ExSDP.get_attribute(sdp, :non_existing_atom)
+      assert nil == ExSDP.get_attribute(sdp, ExSDP.Attribute.NonExistingModule)
+      assert nil == ExSDP.get_attribute(sdp, "non_existing_string")
+    end
+  end
+
+  describe "get_attributes/2" do
+    test "gets multiple attributes by module" do
+      sdp =
+        ExSDP.new()
+        |> ExSDP.add_attribute(%ExSDP.Attribute.Group{semantics: "BUNDLE", mids: [0, 1, 2]})
+        |> ExSDP.add_attribute(%ExSDP.Attribute.Group{semantics: "BUNDLE", mids: [3, 4, 5]})
+
+      assert [
+               %ExSDP.Attribute.Group{semantics: "BUNDLE", mids: [0, 1, 2]},
+               %ExSDP.Attribute.Group{semantics: "BUNDLE", mids: [3, 4, 5]}
+             ] ==
+               ExSDP.get_attributes(sdp, ExSDP.Attribute.Group)
+    end
+  end
 end

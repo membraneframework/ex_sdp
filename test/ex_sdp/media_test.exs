@@ -256,7 +256,7 @@ defmodule ExSDP.MediaTest do
   end
 
   describe "Utils functions" do
-    test "gets attribute by module" do
+    test "gets attribute by atom or module" do
       rtpmap = %RTPMapping{clock_rate: 8000, encoding: "L8", params: 1, payload_type: 96}
 
       ssrc = %SSRC{id: 12_345, attribute: "cname", value: "HPd3XfRHXYUxzfsJ"}

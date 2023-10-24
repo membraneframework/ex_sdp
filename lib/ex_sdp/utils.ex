@@ -1,6 +1,59 @@
 defmodule ExSDP.Utils do
   @moduledoc false
 
+  alias ExSDP.{Attribute, Media}
+
+  alias ExSDP.Attribute.{
+    Extmap,
+    FMTP,
+    Group,
+    MSID,
+    RTCPFeedback,
+    RTPMapping,
+    SSRC,
+    SSRCGroup
+  }
+
+  # For searching struct attributes by atoms
+  @struct_attr_keys %{
+    :extmap => Extmap,
+    :fmtp => FMTP,
+    :group => Group,
+    :msid => MSID,
+    :rtcp_feedback => RTCPFeedback,
+    :rtpmap => RTPMapping,
+    :ssrc => SSRC,
+    :ssrc_group => SSRCGroup
+  }
+
+  @spec get_attribute(sdp_or_media :: ExSDP.t() | Media.t(), key :: module() | atom() | binary()) ::
+          Attribute.t() | nil
+  def get_attribute(sdp_or_media, key) do
+    key = Map.get(@struct_attr_keys, key, key)
+
+    sdp_or_media.attributes
+    |> Enum.find(fn
+      %module{} -> module == key
+      {k, _v} -> k == key
+      # for flag attributes
+      k -> k == key
+    end)
+  end
+
+  @spec get_attributes(sdp_or_media :: ExSDP.t() | Media.t(), key :: module() | atom() | binary()) ::
+          [Attribute.t()]
+  def get_attributes(sdp_or_media, key) do
+    key = Map.get(@struct_attr_keys, key, key)
+
+    sdp_or_media.attributes
+    |> Enum.filter(fn
+      %module{} -> module == key
+      {k, _v} -> k == key
+      # for flag attributes
+      k -> k == key
+    end)
+  end
+
   @spec split(String.t(), String.t() | [String.t()] | :binary.cp() | Regex.t(), any) ::
           {:error, :too_few_fields} | {:ok, [String.t()]}
   def split(origin, delim, expected_len) do
