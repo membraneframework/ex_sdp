@@ -1,7 +1,7 @@
 defmodule ExSDP.MixProject do
   use Mix.Project
 
-  @version "0.13.0"
+  @version "0.13.1"
   @github_url "https://github.com/membraneframework/ex_sdp"
 
   def project do
@@ -67,7 +67,7 @@ defmodule ExSDP.MixProject do
   defp deps do
     [
       {:bunch, "~> 1.3"},
-      {:uuid, "~> 1.1"},
+      {:elixir_uuid, "~> 1.2"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
