@@ -54,6 +54,28 @@ defmodule ExSDP.Utils do
     end)
   end
 
+  @spec delete_attribute(ExSDP.t() | ExSDP.Media.t(), module() | atom() | binary()) ::
+          ExSDP.t() | ExSDP.Media.t()
+  def delete_attribute(sdp_or_mline, key) do
+    delete_attributes(sdp_or_mline, [key])
+  end
+
+  @spec delete_attributes(ExSDP.t() | ExSDP.Media.t(), [module() | atom() | binary()]) ::
+          ExSDP.t() | ExSDP.Media.t()
+  def delete_attributes(sdp_or_mline, keys) when is_list(keys) do
+    keys = Enum.map(keys, fn key -> Map.get(@struct_attr_keys, key, key) end)
+
+    new_attrs =
+      Enum.reject(sdp_or_mline.attributes, fn
+        %module{} -> module in keys
+        {k, _v} -> k in keys
+        # flag attributes
+        k -> k in keys
+      end)
+
+    Map.put(sdp_or_mline, :attributes, new_attrs)
+  end
+
   @spec split(String.t(), String.t() | [String.t()] | :binary.cp() | Regex.t(), any) ::
           {:error, :too_few_fields} | {:ok, [String.t()]}
   def split(origin, delim, expected_len) do

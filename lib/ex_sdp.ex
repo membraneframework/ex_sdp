@@ -108,6 +108,12 @@ defmodule ExSDP do
 
   @spec get_attributes(sdp :: t(), key :: module() | atom() | binary()) :: [Attribute.t()]
   def get_attributes(sdp, key), do: Utils.get_attributes(sdp, key)
+
+  @spec delete_attribute(sdp :: t(), key :: module() | atom() | binary()) :: t()
+  def delete_attribute(sdp, key), do: Utils.delete_attribute(sdp, key)
+
+  @spec delete_attributes(sdp :: t(), keys :: [module() | atom() | binary()]) :: t()
+  def delete_attributes(sdp, keys), do: Utils.delete_attributes(sdp, keys)
 end
 
 defimpl String.Chars, for: ExSDP do

@@ -77,6 +77,12 @@ defmodule ExSDP.Media do
   @spec get_attributes(media :: t(), key :: module() | atom() | binary()) :: [Attribute.t()]
   def get_attributes(media, key), do: Utils.get_attributes(media, key)
 
+  @spec delete_attribute(media :: t(), key :: module() | atom() | binary()) :: t()
+  def delete_attribute(media, key), do: Utils.delete_attribute(media, key)
+
+  @spec delete_attributes(media :: t(), [key :: module() | atom() | binary()]) :: t()
+  def delete_attributes(media, keys), do: Utils.delete_attributes(media, keys)
+
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
