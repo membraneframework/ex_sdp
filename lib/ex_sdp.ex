@@ -93,7 +93,7 @@ defmodule ExSDP do
     }
   end
 
-  @spec add_media(t(), media :: Media.t() | [Media.t()]) :: t()
+  @spec add_media(t(), Media.t() | [Media.t()]) :: t()
   def add_media(sdp, media), do: Map.update!(sdp, :media, &(&1 ++ Bunch.listify(media)))
 
   @spec add_attribute(t() | Media.t(), Attribute.t()) :: t()
