@@ -93,13 +93,13 @@ defmodule ExSDP do
     }
   end
 
-  @spec add_media(t(), Media.t() | [Media.t()]) :: t()
+  @spec add_media(t(), Media.t() | [Media.t()]) :: t() | Media.t()
   def add_media(sdp, media), do: Map.update!(sdp, :media, &(&1 ++ Bunch.listify(media)))
 
-  @spec add_attribute(t() | Media.t(), Attribute.t()) :: t()
+  @spec add_attribute(t() | Media.t(), Attribute.t()) :: t() | Media.t()
   def add_attribute(sdp_or_media, attribute), do: add_attributes(sdp_or_media, [attribute])
 
-  @spec add_attributes(t() | Media.t(), [Attribute.t()]) :: t()
+  @spec add_attributes(t() | Media.t(), [Attribute.t()]) :: t() | Media.t()
   def add_attributes(sdp_or_media, attributes) when is_list(attributes),
     do: Map.update!(sdp_or_media, :attributes, &(&1 ++ attributes))
 
@@ -109,10 +109,10 @@ defmodule ExSDP do
   @spec get_attributes(t() | Media.t(), Attribute.key()) :: [Attribute.t()]
   def get_attributes(sdp_or_media, key), do: Utils.get_attributes(sdp_or_media, key)
 
-  @spec delete_attribute(t() | Media.t(), Attribute.key()) :: t()
+  @spec delete_attribute(t() | Media.t(), Attribute.key()) :: t() | Media.t()
   def delete_attribute(sdp_or_media, key), do: delete_attributes(sdp_or_media, [key])
 
-  @spec delete_attributes(t() | Media.t(), [Attribute.key()]) :: t()
+  @spec delete_attributes(t() | Media.t(), [Attribute.key()]) :: t() | Media.t()
   def delete_attributes(sdp_or_media, keys), do: Utils.delete_attributes(sdp_or_media, keys)
 end
 
