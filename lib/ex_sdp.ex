@@ -93,21 +93,27 @@ defmodule ExSDP do
     }
   end
 
-  @spec add_media(sdp :: t(), media :: Media.t() | [Media.t()]) :: t()
+  @spec add_media(t(), Media.t() | [Media.t()]) :: t() | Media.t()
   def add_media(sdp, media), do: Map.update!(sdp, :media, &(&1 ++ Bunch.listify(media)))
 
-  @spec add_attribute(sdp :: t(), attribute :: Attribute.t()) :: t()
-  def add_attribute(sdp, attribute), do: add_attributes(sdp, [attribute])
+  @spec add_attribute(t() | Media.t(), Attribute.t()) :: t() | Media.t()
+  def add_attribute(sdp_or_media, attribute), do: add_attributes(sdp_or_media, [attribute])
 
-  @spec add_attributes(sdp :: t(), attributes :: [Attribute.t()]) :: t()
-  def add_attributes(sdp, attributes) when is_list(attributes),
-    do: Map.update!(sdp, :attributes, &(&1 ++ attributes))
+  @spec add_attributes(t() | Media.t(), [Attribute.t()]) :: t() | Media.t()
+  def add_attributes(sdp_or_media, attributes) when is_list(attributes),
+    do: Map.update!(sdp_or_media, :attributes, &(&1 ++ attributes))
 
-  @spec get_attribute(sdp :: t(), key :: module() | atom() | binary()) :: Attribute.t() | nil
-  def get_attribute(sdp, key), do: Utils.get_attribute(sdp, key)
+  @spec get_attribute(t() | Media.t(), Attribute.key()) :: Attribute.t() | nil
+  def get_attribute(sdp_or_media, key), do: Utils.get_attribute(sdp_or_media, key)
 
-  @spec get_attributes(sdp :: t(), key :: module() | atom() | binary()) :: [Attribute.t()]
-  def get_attributes(sdp, key), do: Utils.get_attributes(sdp, key)
+  @spec get_attributes(t() | Media.t(), Attribute.key()) :: [Attribute.t()]
+  def get_attributes(sdp_or_media, key), do: Utils.get_attributes(sdp_or_media, key)
+
+  @spec delete_attribute(t() | Media.t(), Attribute.key()) :: t() | Media.t()
+  def delete_attribute(sdp_or_media, key), do: delete_attributes(sdp_or_media, [key])
+
+  @spec delete_attributes(t() | Media.t(), [Attribute.key()]) :: t() | Media.t()
+  def delete_attributes(sdp_or_media, keys), do: Utils.delete_attributes(sdp_or_media, keys)
 end
 
 defimpl String.Chars, for: ExSDP do

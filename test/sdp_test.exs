@@ -188,8 +188,8 @@ defmodule ExSDPTest do
     end
   end
 
-  describe "get_attribute/2" do
-    test "gets attribute by atom, binary or module" do
+  describe "Utils functions" do
+    test "gets and deletes attribute by atom, binary or module" do
       sdp =
         ExSDP.new()
         |> ExSDP.add_attribute({"key", "value"})
@@ -208,10 +208,19 @@ defmodule ExSDPTest do
       assert nil == ExSDP.get_attribute(sdp, :non_existing_atom)
       assert nil == ExSDP.get_attribute(sdp, ExSDP.Attribute.NonExistingModule)
       assert nil == ExSDP.get_attribute(sdp, "non_existing_string")
-    end
-  end
 
-  describe "get_attributes/2" do
+      assert [:recvonly, %ExSDP.Attribute.Group{}] = ExSDP.delete_attribute(sdp, "key").attributes
+
+      assert [{"key", "value"}, %ExSDP.Attribute.Group{}] =
+               ExSDP.delete_attribute(sdp, :recvonly).attributes
+
+      assert [{"key", "value"}, :recvonly] =
+               ExSDP.delete_attribute(sdp, ExSDP.Attribute.Group).attributes
+
+      assert [] =
+               ExSDP.delete_attributes(sdp, ["key", :recvonly, ExSDP.Attribute.Group]).attributes
+    end
+
     test "gets multiple attributes by module" do
       sdp =
         ExSDP.new()
