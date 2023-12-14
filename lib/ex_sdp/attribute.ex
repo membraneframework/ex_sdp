@@ -73,6 +73,8 @@ defmodule ExSDP.Attribute do
           | {String.t(), String.t()}
           | String.t()
 
+  @type key() :: module() | binary() | atom()
+
   @flag_attributes_strings @flag_attributes |> Enum.map(&to_string/1)
 
   @doc """

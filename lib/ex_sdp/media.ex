@@ -47,12 +47,8 @@ defmodule ExSDP.Media do
   """
   @type type :: :audio | :video | :text | :application | :message | binary()
 
-  @spec new(
-          type :: type(),
-          port :: :inet.port_number(),
-          protocol :: binary(),
-          fmt :: binary() | 0..127 | [0..127],
-          opts :: [port_count: non_neg_integer()]
+  @spec new(type(), :inet.port_number(), binary(), binary() | 0..127 | [0..127],
+          port_count: non_neg_integer()
         ) :: t()
   def new(type, port, protocol, fmt, opts \\ []) do
     %__MODULE__{
@@ -64,24 +60,22 @@ defmodule ExSDP.Media do
     }
   end
 
-  @spec add_attribute(media :: t(), attribute :: Attribute.t()) :: t()
+  @deprecated "Use ExSDP.add_attribute/2 instead"
+  @spec add_attribute(t(), Attribute.t()) :: t()
   def add_attribute(media, attribute), do: add_attributes(media, [attribute])
 
-  @spec add_attributes(media :: t(), attributes :: [Attribute.t()]) :: t()
+  @deprecated "Use ExSDP.add_attributes/2 instead"
+  @spec add_attributes(t(), [Attribute.t()]) :: t()
   def add_attributes(media, attributes) when is_list(attributes),
     do: Map.update!(media, :attributes, &(&1 ++ attributes))
 
-  @spec get_attribute(media :: t(), key :: module() | atom() | binary()) :: Attribute.t() | nil
+  @deprecated "Use ExSDP.get_attribute/2 instead"
+  @spec get_attribute(t(), Attribute.key()) :: Attribute.t() | nil
   def get_attribute(media, key), do: Utils.get_attribute(media, key)
 
-  @spec get_attributes(media :: t(), key :: module() | atom() | binary()) :: [Attribute.t()]
+  @deprecated "Use ExSDP.get_attributes/2 instead"
+  @spec get_attributes(t(), Attribute.key()) :: [Attribute.t()]
   def get_attributes(media, key), do: Utils.get_attributes(media, key)
-
-  @spec delete_attribute(media :: t(), key :: module() | atom() | binary()) :: t()
-  def delete_attribute(media, key), do: Utils.delete_attribute(media, key)
-
-  @spec delete_attributes(media :: t(), [key :: module() | atom() | binary()]) :: t()
-  def delete_attributes(media, keys), do: Utils.delete_attributes(media, keys)
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
   def parse(media) do

@@ -26,7 +26,7 @@ defmodule ExSDP.Utils do
     :ssrc_group => SSRCGroup
   }
 
-  @spec get_attribute(sdp_or_media :: ExSDP.t() | Media.t(), key :: module() | atom() | binary()) ::
+  @spec get_attribute(sdp_or_media :: ExSDP.t() | Media.t(), Attribute.key()) ::
           Attribute.t() | nil
   def get_attribute(sdp_or_media, key) do
     key = Map.get(@struct_attr_keys, key, key)
@@ -40,8 +40,7 @@ defmodule ExSDP.Utils do
     end)
   end
 
-  @spec get_attributes(sdp_or_media :: ExSDP.t() | Media.t(), key :: module() | atom() | binary()) ::
-          [Attribute.t()]
+  @spec get_attributes(sdp_or_media :: ExSDP.t() | Media.t(), Attribute.key()) :: [Attribute.t()]
   def get_attributes(sdp_or_media, key) do
     key = Map.get(@struct_attr_keys, key, key)
 
@@ -54,13 +53,7 @@ defmodule ExSDP.Utils do
     end)
   end
 
-  @spec delete_attribute(ExSDP.t() | ExSDP.Media.t(), module() | atom() | binary()) ::
-          ExSDP.t() | ExSDP.Media.t()
-  def delete_attribute(sdp_or_mline, key) do
-    delete_attributes(sdp_or_mline, [key])
-  end
-
-  @spec delete_attributes(ExSDP.t() | ExSDP.Media.t(), [module() | atom() | binary()]) ::
+  @spec delete_attributes(ExSDP.t() | ExSDP.Media.t(), [Attribute.key()]) ::
           ExSDP.t() | ExSDP.Media.t()
   def delete_attributes(sdp_or_mline, keys) when is_list(keys) do
     keys = Enum.map(keys, fn key -> Map.get(@struct_attr_keys, key, key) end)

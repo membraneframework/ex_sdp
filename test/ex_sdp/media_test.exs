@@ -274,68 +274,68 @@ defmodule ExSDP.MediaTest do
 
       media =
         Media.new(:video, 51_372, "RTP/AVP", [99])
-        |> Media.add_attribute(rtpmap)
-        |> Media.add_attribute(ssrc)
-        |> Media.add_attribute(fmtp)
-        |> Media.add_attribute(msid)
-        |> Media.add_attribute(extmap)
-        |> Media.add_attribute({"key", "value"})
+        |> ExSDP.add_attribute(rtpmap)
+        |> ExSDP.add_attribute(ssrc)
+        |> ExSDP.add_attribute(fmtp)
+        |> ExSDP.add_attribute(msid)
+        |> ExSDP.add_attribute(extmap)
+        |> ExSDP.add_attribute({"key", "value"})
 
-      assert rtpmap == Media.get_attribute(media, RTPMapping)
-      assert rtpmap == Media.get_attribute(media, :rtpmap)
+      assert rtpmap == ExSDP.get_attribute(media, RTPMapping)
+      assert rtpmap == ExSDP.get_attribute(media, :rtpmap)
 
-      assert ssrc == Media.get_attribute(media, SSRC)
-      assert ssrc == Media.get_attribute(media, :ssrc)
+      assert ssrc == ExSDP.get_attribute(media, SSRC)
+      assert ssrc == ExSDP.get_attribute(media, :ssrc)
 
-      assert fmtp == Media.get_attribute(media, FMTP)
-      assert fmtp == Media.get_attribute(media, :fmtp)
+      assert fmtp == ExSDP.get_attribute(media, FMTP)
+      assert fmtp == ExSDP.get_attribute(media, :fmtp)
 
-      assert msid == Media.get_attribute(media, MSID)
-      assert msid == Media.get_attribute(media, :msid)
+      assert msid == ExSDP.get_attribute(media, MSID)
+      assert msid == ExSDP.get_attribute(media, :msid)
 
-      assert extmap == Media.get_attribute(media, Extmap)
-      assert extmap == Media.get_attribute(media, :extmap)
+      assert extmap == ExSDP.get_attribute(media, Extmap)
+      assert extmap == ExSDP.get_attribute(media, :extmap)
 
-      assert {"key", "value"} == Media.get_attribute(media, "key")
-
-      assert [%SSRC{}, %FMTP{}, %MSID{}, %Extmap{}, {"key", "value"}] =
-               Media.delete_attribute(media, RTPMapping).attributes
+      assert {"key", "value"} == ExSDP.get_attribute(media, "key")
 
       assert [%SSRC{}, %FMTP{}, %MSID{}, %Extmap{}, {"key", "value"}] =
-               Media.delete_attribute(media, :rtpmap).attributes
+               ExSDP.delete_attribute(media, RTPMapping).attributes
+
+      assert [%SSRC{}, %FMTP{}, %MSID{}, %Extmap{}, {"key", "value"}] =
+               ExSDP.delete_attribute(media, :rtpmap).attributes
 
       assert [%RTPMapping{}, %FMTP{}, %MSID{}, %Extmap{}, {"key", "value"}] =
-               Media.delete_attribute(media, SSRC).attributes
+               ExSDP.delete_attribute(media, SSRC).attributes
 
       assert [%RTPMapping{}, %FMTP{}, %MSID{}, %Extmap{}, {"key", "value"}] =
-               Media.delete_attribute(media, :ssrc).attributes
+               ExSDP.delete_attribute(media, :ssrc).attributes
 
       assert [%RTPMapping{}, %SSRC{}, %MSID{}, %Extmap{}, {"key", "value"}] =
-               Media.delete_attribute(media, FMTP).attributes
+               ExSDP.delete_attribute(media, FMTP).attributes
 
       assert [%RTPMapping{}, %SSRC{}, %MSID{}, %Extmap{}, {"key", "value"}] =
-               Media.delete_attribute(media, :fmtp).attributes
+               ExSDP.delete_attribute(media, :fmtp).attributes
 
       assert [%RTPMapping{}, %SSRC{}, %FMTP{}, %Extmap{}, {"key", "value"}] =
-               Media.delete_attribute(media, MSID).attributes
+               ExSDP.delete_attribute(media, MSID).attributes
 
       assert [%RTPMapping{}, %SSRC{}, %FMTP{}, %Extmap{}, {"key", "value"}] =
-               Media.delete_attribute(media, :msid).attributes
+               ExSDP.delete_attribute(media, :msid).attributes
 
       assert [%RTPMapping{}, %SSRC{}, %FMTP{}, %MSID{}, {"key", "value"}] =
-               Media.delete_attribute(media, Extmap).attributes
+               ExSDP.delete_attribute(media, Extmap).attributes
 
       assert [%RTPMapping{}, %SSRC{}, %FMTP{}, %MSID{}, {"key", "value"}] =
-               Media.delete_attribute(media, :extmap).attributes
+               ExSDP.delete_attribute(media, :extmap).attributes
 
       assert [%RTPMapping{}, %SSRC{}, %FMTP{}, %MSID{}, %Extmap{}] =
-               Media.delete_attribute(media, "key").attributes
+               ExSDP.delete_attribute(media, "key").attributes
 
       assert [] ==
-               Media.delete_attributes(media, [RTPMapping, SSRC, FMTP, MSID, Extmap, "key"]).attributes
+               ExSDP.delete_attributes(media, [RTPMapping, SSRC, FMTP, MSID, Extmap, "key"]).attributes
 
       assert [] ==
-               Media.delete_attributes(media, [:rtpmap, :ssrc, :fmtp, :msid, :extmap, "key"]).attributes
+               ExSDP.delete_attributes(media, [:rtpmap, :ssrc, :fmtp, :msid, :extmap, "key"]).attributes
     end
   end
 end
