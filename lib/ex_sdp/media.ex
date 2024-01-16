@@ -105,6 +105,9 @@ defmodule ExSDP.Media do
 
   def parse_optional([""], media), do: {:ok, {[""], finalize_optional_parsing(media)}}
 
+  def parse_optional(["" | rest], media),
+    do: parse_optional(rest, media)
+
   def parse_optional(["m=" <> _ | _] = lines, media),
     do: {:ok, {lines, finalize_optional_parsing(media)}}
 
