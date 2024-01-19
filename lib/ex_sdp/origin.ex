@@ -10,7 +10,7 @@ defmodule ExSDP.Origin do
   """
   use Bunch.Access
 
-  alias ExSDP.{Address, Utils}
+  alias ExSDP.{Address}
 
   @enforce_keys [
     :session_id,
@@ -55,7 +55,7 @@ defmodule ExSDP.Origin do
           {:ok, t()} | {:error, :invalid_addrtype | :invalid_address}
   def parse(origin) do
     with {:ok, [username, sess_id, sess_version, nettype, addrtype, address]} <-
-           Utils.split(origin, " ", 6),
+           extract_info(origin),
          {:ok, addrtype} <- Address.parse_addrtype(addrtype),
          {:ok, address} <- Address.parse_address(address) do
       # check whether fqdn
@@ -72,6 +72,23 @@ defmodule ExSDP.Origin do
       {:ok, origin}
     else
       {:error, _reason} = error -> error
+    end
+  end
+
+  @spec extract_info(String.t()) ::
+          {:error, :too_few_fields} | {:ok, [String.t()]}
+  def extract_info(origin) do
+    origin
+    |> String.split(" ", trim: True)
+    |> case do
+      [_username, _sess_id, _sess_version, _nettype, _addrtype, _] = values ->
+        {:ok, values}
+
+      [username, sess_id, sess_version, nettype, _, addrtype, address] ->
+        {:ok, [username, sess_id, sess_version, nettype, addrtype, address]}
+
+      _ ->
+        {:error, :too_few_fields}
     end
   end
 
