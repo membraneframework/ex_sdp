@@ -11,7 +11,7 @@ defmodule ExSDP.BandwidthTest do
 
     test "parse TIAS bandwidth type" do
       assert {:ok, result} = Bandwidth.parse("TIAS:256000")
-      assert %Bandwidth{type: :TIAS, bandwidth: 256000} == result
+      assert %Bandwidth{type: :TIAS, bandwidth: 256_000} == result
     end
 
     test "returns error when property is invalid" do
