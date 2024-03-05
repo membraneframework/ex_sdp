@@ -7,6 +7,7 @@ defmodule ExSDP.Attribute.FMTP do
   * H264 (not all, RFC 6184),
   * H265 (not all, RFC 7798)
   * VP8, VP9, OPUS (RFC 7587)
+  * AV1 (no RFC, https://aomediacodec.github.io/av1-rtp-spec/)
   * RTX (RFC 4588)
   * FLEXFEC (RFC 8627)
   * Telephone Events (RFC 4733)
@@ -53,6 +54,10 @@ defmodule ExSDP.Attribute.FMTP do
                 :usedtx,
                 # VP8/9
                 :max_fr,
+                # AV1
+                :profile,
+                :level_idx,
+                :tier,
                 # RTX
                 :apt,
                 :rtx_time,
@@ -97,6 +102,10 @@ defmodule ExSDP.Attribute.FMTP do
           usedtx: boolean() | nil,
           # VP8/9
           max_fr: non_neg_integer() | nil,
+          # AV1
+          profile: non_neg_integer() | nil,
+          level_idx: non_neg_integer() | nil,
+          tier: non_neg_integer() | nil,
           # RTX
           apt: RTPMapping.payload_type_t() | nil,
           rtx_time: non_neg_integer() | nil,
@@ -289,6 +298,21 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | max_fr: value}}
   end
 
+  defp parse_param(["profile=" <> max_fr | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(max_fr),
+         do: {rest, %{fmtp | profile: value}}
+  end
+
+  defp parse_param(["level-idx=" <> max_fr | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(max_fr),
+         do: {rest, %{fmtp | level_idx: value}}
+  end
+
+  defp parse_param(["tier=" <> max_fr | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(max_fr),
+         do: {rest, %{fmtp | tier: value}}
+  end
+
   defp parse_param(["apt=" <> value | rest], fmtp) do
     with {:ok, value} <- Utils.parse_payload_type(value), do: {rest, %{fmtp | apt: value}}
   end
@@ -397,6 +421,10 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         # RTX
         Serializer.maybe_serialize("apt", fmtp.apt),
         Serializer.maybe_serialize("rtx-time", fmtp.rtx_time),
+        # AV1
+        Serializer.maybe_serialize("profile", fmtp.profile),
+        Serializer.maybe_serialize("level-idx", fmtp.level_idx),
+        Serializer.maybe_serialize("tier", fmtp.tier),
         # FLEXFEC
         Serializer.maybe_serialize("repair-window", fmtp.repair_window),
         # Telephone Events

@@ -137,6 +137,19 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
+    test "parses proper fmtp with av1 parameters" do
+      fmtp = "98 profile=2; level-idx=8; tier=1"
+
+      expected = %FMTP{
+        pt: 98,
+        profile: 2,
+        level_idx: 8,
+        tier: 1
+      }
+
+      assert {:ok, expected} == FMTP.parse(fmtp)
+    end
+
     test "returns an error when DTMF tone is too big" do
       fmtp = "100 0-15,256"
       assert {:error, :invalid_dtmf_tones} = FMTP.parse(fmtp)
