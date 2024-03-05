@@ -165,7 +165,7 @@ defmodule ExSDP.WebRTCTest do
       a=fmtp:63 111/111
       a=ssrc:10136459 cname:fsp95kJbiDm+35qA
       a=ssrc:10136459 msid:040ad92b-583f-44d2-93e8-de4d40ac49ec 730bdafa-23f3-4111-85b4-757a666d462c
-      m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99
+      m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101
       c=IN IP4 0.0.0.0
       a=ice-ufrag:zPE+
       a=ice-pwd:5uuTJKfWTxRYyERtPlvUeKsU
@@ -198,6 +198,19 @@ defmodule ExSDP.WebRTCTest do
       a=fmtp:98 profile-id=0
       a=rtpmap:99 rtx/90000
       a=fmtp:99 apt=98
+      a=rtpmap:100 AV1/90000
+      a=rtcp-fb:100 goog-remb
+      a=rtcp-fb:100 transport-cc
+      a=rtcp-fb:100 ccm fir
+      a=rtcp-fb:100 nack
+      a=rtcp-fb:100 nack pli
+      a=rtpmap:101 AV1/90000
+      a=rtcp-fb:101 goog-remb
+      a=rtcp-fb:101 transport-cc
+      a=rtcp-fb:101 ccm fir
+      a=rtcp-fb:101 nack
+      a=rtcp-fb:101 nack pli
+      a=fmtp:101 profile=1
       a=ssrc-group:FID 1984225447 2555509203
       a=ssrc:1984225447 cname:fsp95kJbiDm+35qA
       a=ssrc:1984225447 msid:b5f40727-fa04-44db-9f4c-35c5fe8f2c3a a68d0021-2492-4f05-a211-e6b9b19c57ff
@@ -225,6 +238,8 @@ defmodule ExSDP.WebRTCTest do
 
     assert %ExSDP.Attribute.RTCPFeedback{pt: 98, feedback_type: :pli} in video.attributes
     assert %ExSDP.Attribute.FMTP{pt: 99, apt: 98} in video.attributes
+
+    assert %ExSDP.Attribute.FMTP{pt: 101, profile: 1} in video.attributes
 
     assert video.attributes |> Enum.at(-5) == %ExSDP.Attribute.SSRCGroup{
              semantics: "FID",
