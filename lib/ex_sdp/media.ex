@@ -103,6 +103,8 @@ defmodule ExSDP.Media do
   @spec parse_optional([binary()], t()) :: {:ok, {[binary()], t()}} | {:error, atom()}
   def parse_optional(lines, media)
 
+  def parse_optional([], media), do: {:ok, {[""], finalize_optional_parsing(media)}}
+
   def parse_optional([""], media), do: {:ok, {[""], finalize_optional_parsing(media)}}
 
   def parse_optional(["" | rest], media),
