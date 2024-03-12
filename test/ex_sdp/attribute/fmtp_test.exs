@@ -33,6 +33,17 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:error, :invalid_pt} == FMTP.parse(fmtp)
     end
 
+    test "parses proper fmtp with G7221 bitrate parameter" do
+      fmtp = "98 bitrate=48000"
+
+      expected = %FMTP{
+        pt: 98,
+        bitrate: 48_000
+      }
+
+      assert {:ok, expected} == FMTP.parse(fmtp)
+    end
+
     test "parses proper fmtp with simple DTMF tones parameter" do
       fmtp = "100 0-15"
 
@@ -252,6 +263,17 @@ defmodule ExSDP.Attribute.FMTPTest do
           <<68, 1, 192, 242, 240, 59, 52>>
         ]
       }
+
+      assert "#{fmtp}" == expected
+    end
+
+    test "serializes FMTP with bitrate parameter for G7221" do
+      fmtp = %FMTP{
+        pt: 98,
+        bitrate: 48_000
+      }
+
+      expected = "fmtp:98 bitrate=48000"
 
       assert "#{fmtp}" == expected
     end
