@@ -6,6 +6,7 @@ defmodule ExSDP.MixProject do
 
   def project do
     [
+      homepage_url: "https://membrane.stream",
       app: :ex_sdp,
       version: @version,
       elixir: "~> 1.12",
