@@ -17,7 +17,8 @@ defmodule ExSDP.MixProject do
       deps: deps(),
       dialyzer: dialyzer(),
       docs: docs(),
-      package: package()
+      package: package(),
+      homepage_url: "https://membrane.stream"
     ]
   end
 
