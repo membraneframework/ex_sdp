@@ -12,6 +12,7 @@ defmodule ExSDP.Attribute.FMTP do
   * FLEXFEC (RFC 8627)
   * Telephone Events (RFC 4733)
   * RED (RFC 2198)
+  * G.722.1 (RFC 5577)
 
   are currently supported.
   """
