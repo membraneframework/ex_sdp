@@ -67,6 +67,8 @@ defmodule ExSDP.Attribute.FMTP do
                 :dtmf_tones,
                 # RED
                 :redundant_payloads,
+                # G7221
+                :bitrate,
                 unknown: []
               ]
 
@@ -115,6 +117,8 @@ defmodule ExSDP.Attribute.FMTP do
           dtmf_tones: String.t() | nil,
           # RED
           redundant_payloads: [RTPMapping.payload_type_t()] | nil,
+          # G7221
+          bitrate: non_neg_integer() | nil,
           # params that are currently not supported
           unknown: [String.t()]
         }
@@ -326,6 +330,10 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | repair_window: value}}
   end
 
+  defp parse_param(["bitrate=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | bitrate: value}}
+  end
+
   defp parse_param([head | rest] = params, fmtp) do
     # this is for non-key-value parameters as `key=value` format is not mandatory
     cond do
@@ -430,7 +438,9 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         # Telephone Events
         Serializer.maybe_serialize("dtmf-tones", fmtp.dtmf_tones),
         # RED
-        Serializer.maybe_serialize_list(fmtp.redundant_payloads, "/")
+        Serializer.maybe_serialize_list(fmtp.redundant_payloads, "/"),
+        # G7221
+        Serializer.maybe_serialize("bitrate", fmtp.bitrate)
       ]
       |> Enum.filter(fn param -> param != "" end)
       |> Enum.join(";")
