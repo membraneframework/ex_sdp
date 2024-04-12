@@ -101,7 +101,7 @@ defmodule ExSDP.MediaTest do
 
       parsed_attributes = [
         %Attribute.RTPMapping{
-          clock_rate: 48000,
+          clock_rate: 48_000,
           encoding: "OPUS",
           params: 2,
           payload_type: 111
@@ -109,7 +109,7 @@ defmodule ExSDP.MediaTest do
         %Attribute.FMTP{
           pt: 111,
           minptime: 10,
-          maxaveragebitrate: 96000,
+          maxaveragebitrate: 96_000,
           stereo: true,
           useinbandfec: true,
           unknown: ["sprop-stereo=1"]
@@ -124,7 +124,7 @@ defmodule ExSDP.MediaTest do
       assert %Media{
                attributes: parsed_attributes,
                fmt: ~c"o",
-               port: 58712,
+               port: 58_712,
                protocol: "UDP/TLS/RTP/SAVPF",
                type: :audio
              } == medium
