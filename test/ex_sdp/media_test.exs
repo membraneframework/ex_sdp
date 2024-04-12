@@ -88,6 +88,47 @@ defmodule ExSDP.MediaTest do
                type: :audio
              } == medium
     end
+
+    test "processes audio with attributes without trailing newlines" do
+      media = "audio 58712 UDP/TLS/RTP/SAVPF 111"
+
+      attributes =
+        """
+        a=rtpmap:111 OPUS/48000/2
+        a=fmtp:111 minptime=10;maxaveragebitrate=96000;stereo=1;sprop-stereo=1;useinbandfec=1
+        """
+        |> String.split("\n", trim: true)
+
+      parsed_attributes = [
+        %Attribute.RTPMapping{
+          clock_rate: 48000,
+          encoding: "OPUS",
+          params: 2,
+          payload_type: 111
+        },
+        %Attribute.FMTP{
+          pt: 111,
+          minptime: 10,
+          maxaveragebitrate: 96000,
+          stereo: true,
+          useinbandfec: true,
+          unknown: ["sprop-stereo=1"]
+        }
+      ]
+
+      {:ok, {[""], medium}} =
+        media
+        |> Media.parse()
+        ~> ({:ok, medium} -> Media.parse_optional(attributes, medium))
+
+      assert %Media{
+               attributes: parsed_attributes,
+               fmt: ~c"o",
+               port: 58712,
+               protocol: "UDP/TLS/RTP/SAVPF",
+               type: :audio
+             } == medium
+    end
   end
 
   describe "Session property inheritance mechanism" do
