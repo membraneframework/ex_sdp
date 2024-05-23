@@ -8,8 +8,10 @@ defmodule ExSDP.Utils do
     FMTP,
     Group,
     MSID,
+    RID,
     RTCPFeedback,
     RTPMapping,
+    Simulcast,
     SSRC,
     SSRCGroup
   }
@@ -23,7 +25,9 @@ defmodule ExSDP.Utils do
     :rtcp_feedback => RTCPFeedback,
     :rtpmap => RTPMapping,
     :ssrc => SSRC,
-    :ssrc_group => SSRCGroup
+    :ssrc_group => SSRCGroup,
+    :simulcast => Simulcast,
+    :rid => RID
   }
 
   @spec get_attribute(sdp_or_media :: ExSDP.t() | Media.t(), Attribute.key()) ::

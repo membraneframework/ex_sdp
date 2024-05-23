@@ -4,7 +4,18 @@ defmodule ExSDP.Attribute do
   """
   use Bunch.Access
 
-  alias __MODULE__.{Extmap, FMTP, Group, MSID, RTCPFeedback, RTPMapping, SSRC, SSRCGroup}
+  alias __MODULE__.{
+    Extmap,
+    FMTP,
+    Group,
+    MSID,
+    RTCPFeedback,
+    RTPMapping,
+    SSRC,
+    SSRCGroup,
+    RID,
+    Simulcast
+  }
 
   @type hash_function :: :sha1 | :sha224 | :sha256 | :sha384 | :sha512
   @type setup_value :: :active | :passive | :actpass | :holdconn
@@ -51,6 +62,8 @@ defmodule ExSDP.Attribute do
           | RTPMapping.t()
           | SSRC.t()
           | SSRCGroup.t()
+          | RID.t()
+          | Simulcast.t()
           | cat()
           | charset()
           | keywds()
@@ -100,6 +113,8 @@ defmodule ExSDP.Attribute do
   defp do_parse("group", value, _opts), do: Group.parse(value)
   defp do_parse("extmap", value, _opts), do: Extmap.parse(value)
   defp do_parse("rtcp-fb", value, _opts), do: RTCPFeedback.parse(value)
+  defp do_parse("rid", value, _opts), do: RID.parse(value)
+  defp do_parse("simulcast", value, _opts), do: Simulcast.parse(value)
   # Flag allowing to mix one- and two-byte header extensions
   defp do_parse("extmap-allow-mixed", nil, _opts), do: {:ok, :extmap_allow_mixed}
   defp do_parse("cat", value, _opts), do: {:ok, {:cat, value}}
