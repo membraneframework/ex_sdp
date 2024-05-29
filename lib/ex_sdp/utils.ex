@@ -8,8 +8,10 @@ defmodule ExSDP.Utils do
     FMTP,
     Group,
     MSID,
+    RID,
     RTCPFeedback,
     RTPMapping,
+    Simulcast,
     SSRC,
     SSRCGroup
   }
@@ -20,8 +22,10 @@ defmodule ExSDP.Utils do
     :fmtp => FMTP,
     :group => Group,
     :msid => MSID,
+    :rid => RID,
     :rtcp_feedback => RTCPFeedback,
     :rtpmap => RTPMapping,
+    :simulcast => Simulcast,
     :ssrc => SSRC,
     :ssrc_group => SSRCGroup
   }
