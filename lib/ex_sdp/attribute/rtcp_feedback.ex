@@ -13,6 +13,7 @@ defmodule ExSDP.Attribute.RTCPFeedback do
 
   """
 
+  use Bunch
   alias ExSDP.Attribute.RTPMapping
   alias ExSDP.Utils
 
@@ -43,12 +44,12 @@ defmodule ExSDP.Attribute.RTCPFeedback do
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_pt} | {:error, :invalid_rtcp_feedback}
   def parse(rtcp_fb) do
-    with [pt_string, rest] <- String.split(rtcp_fb, " ", parts: 2),
-         {:ok, pt} <- parse_pt(pt_string) do
+    withl fb: [pt_string, rest] <- String.split(rtcp_fb, " ", parts: 2),
+          pt: {:ok, pt} <- parse_pt(pt_string) do
       {:ok, %__MODULE__{pt: pt, feedback_type: parse_feedback_type(rest)}}
     else
-      {:error, _reason} = err -> err
-      _invalid -> {:error, :invalid_rtcp_feedback}
+      fb: _invalid -> {:error, :invalid_rtcp_feedback}
+      pt: {:error, _reason} = err -> err
     end
   end
 
