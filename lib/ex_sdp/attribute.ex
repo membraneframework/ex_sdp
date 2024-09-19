@@ -171,12 +171,33 @@ defmodule ExSDP.Attribute do
   end
 
   defp parse_framerate(framerate) do
-    case String.split(framerate, "/") do
-      [value] -> {:ok, {:framerate, String.to_float(value)}}
-      [left, right] -> {:ok, {:framerate, {String.to_integer(left), String.to_integer(right)}}}
-      _invalid_framerate -> {:error, :invalid_framerate}
+    framerate
+    |> String.split("/")
+    |> parse_split_framerate()
+    |> case do
+      {:ok, framerate} -> {:ok, {:framerate, framerate}}
+      :error -> {:error, :invalid_framerate}
     end
   end
+
+  defp parse_split_framerate([value]) do
+    with {number, ""} <- Float.parse(value) do
+      {:ok, number}
+    else
+      _other -> :error
+    end
+  end
+
+  defp parse_split_framerate([left, right]) do
+    with {num, ""} <- Integer.parse(left),
+         {denom, ""} <- Integer.parse(right) do
+      {:ok, {num, denom}}
+    else
+      _other -> :error
+    end
+  end
+
+  defp parse_split_framerate(_invalid_framerate), do: :error
 
   defp parse_fingerprint(fingerprint) do
     case String.split(fingerprint, " ") do
