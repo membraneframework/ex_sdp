@@ -141,7 +141,7 @@ defmodule ExSDP.Attribute.FMTP do
           # AAC
           stream_type: non_neg_integer() | nil,
           config: binary() | nil,
-          mode: String.t() | nil,
+          mode: :generic | :CELP_cbr | :CELP_vbr | :AAC_lbr | :AAC_hbr | nil,
           objecttype: non_neg_integer() | nil,
           constantsize: non_neg_integer() | nil,
           constantduration: non_neg_integer() | nil,
@@ -370,10 +370,95 @@ defmodule ExSDP.Attribute.FMTP do
     with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | bitrate: value}}
   end
 
-  # defp parse_param(["streamtype=" <> value | rest], fmtp) do
-  # with {:ok, value} <- Utils.parse_numeric_string(value),
-  # do: {rest, %{fmtp | repair_window: value}}
-  # end
+  defp parse_param(["streamtype=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | streamtype: value}}
+  end
+
+  defp parse_param(["streamtype=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | streamtype: value}}
+  end
+
+  defp parse_param(["streamtype=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | streamtype: value}}
+  end
+
+  defp parse_param(["config=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_config(value),
+         do: {rest, %{fmtp | config: value}}
+  end
+
+  defp parse_param(["mode=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_mode(value),
+         do: {rest, %{fmtp | mode: value}}
+  end
+
+  defp parse_param(["objecttype=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | objecttype: value}}
+  end
+
+  defp parse_param(["constantsize=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | constantsize: value}}
+  end
+
+  defp parse_param(["constantduration=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | constantduration: value}}
+  end
+
+  defp parse_param(["maxdisplacement=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | maxdisplacement: value}}
+  end
+
+  defp parse_param(["de-interleavebuffersize=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | de_interleavebuffersize: value}}
+  end
+
+  defp parse_param(["sizelength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | sizelength: value}}
+  end
+
+  defp parse_param(["indexlength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | indexlength: value}}
+  end
+
+  defp parse_param(["indexdeltalength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | indexdeltalength: value}}
+  end
+
+  defp parse_param(["ctsdeltalength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | ctsdeltalength: value}}
+  end
+
+  defp parse_param(["dtsdeltalength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | dtsdeltalength: value}}
+  end
+
+  defp parse_param(["randomaccessindication=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_bool_string(value),
+         do: {rest, %{fmtp | randomaccessindication: value}}
+  end
+
+  defp parse_param(["streamstateindication=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | streamstateindication: value}}
+  end
+
+  defp parse_param(["auxillarydatasizelength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | auxillarydatasizelength: value}}
+  end
 
   defp parse_param([head | rest] = params, fmtp) do
     # this is for non-key-value parameters as `key=value` format is not mandatory

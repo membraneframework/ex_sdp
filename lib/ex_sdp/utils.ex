@@ -147,4 +147,25 @@ defmodule ExSDP.Utils do
       end
     end)
   end
+
+  @spec parse_mode(binary()) ::
+          {:error, :invalid_mode} | {:ok, :generic | :CELP_cbr | :CELP_vbr | :AAC_lbr | :AAC_hbr}
+  def parse_mode(mode_string) do
+    case mode_string do
+      "generic" -> {:ok, :generic}
+      "CELP-cbr" -> {:ok, :CELP_cbr}
+      "CELP-vbr" -> {:ok, :CELP_vbr}
+      "AAC-lbr" -> {:ok, :AAC_lbr}
+      "AAC-hbr" -> {:ok, :AAC_hbr}
+      _other -> {:error, :invalid_mode}
+    end
+  end
+
+  @spec parse_config(binary()) :: {:error, :invalid_config} | {:ok, binary()}
+  def parse_config(config_string) do
+    case Base.decode16(config_string) do
+      {:ok, config} -> {:ok, config}
+      :error -> {:error, :invalid_config}
+    end
+  end
 end
