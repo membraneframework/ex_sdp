@@ -6,6 +6,10 @@ defmodule ExSDP.AttributeTest do
   describe "Attribute parser" do
     test "handles framerate" do
       assert {:ok, {:framerate, {30, 1}}} = Attribute.parse("framerate:30/1")
+      assert {:ok, {:framerate, 30.0}} = Attribute.parse("framerate:30")
+      assert {:ok, {:framerate, 30.0}} = Attribute.parse("framerate:30.0")
+      assert {:error, :invalid_framerate} = Attribute.parse("framerate:foobar")
+      assert {:error, :invalid_framerate} = Attribute.parse("framerate:30abc")
     end
 
     test "handles directly assignable attributes" do
