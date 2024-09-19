@@ -72,7 +72,7 @@ defmodule ExSDP.Attribute.FMTP do
                 # G7221
                 :bitrate,
                 # AAC
-                :stream_type,
+                :streamtype,
                 :config,
                 :mode,
                 :objecttype,
@@ -139,7 +139,7 @@ defmodule ExSDP.Attribute.FMTP do
           # G7221
           bitrate: non_neg_integer() | nil,
           # AAC
-          stream_type: non_neg_integer() | nil,
+          streamtype: non_neg_integer() | nil,
           config: binary() | nil,
           mode: :generic | :CELP_cbr | :CELP_vbr | :AAC_lbr | :AAC_hbr | nil,
           objecttype: non_neg_integer() | nil,
@@ -368,16 +368,6 @@ defmodule ExSDP.Attribute.FMTP do
 
   defp parse_param(["bitrate=" <> value | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | bitrate: value}}
-  end
-
-  defp parse_param(["streamtype=" <> value | rest], fmtp) do
-    with {:ok, value} <- Utils.parse_numeric_string(value),
-         do: {rest, %{fmtp | streamtype: value}}
-  end
-
-  defp parse_param(["streamtype=" <> value | rest], fmtp) do
-    with {:ok, value} <- Utils.parse_numeric_string(value),
-         do: {rest, %{fmtp | streamtype: value}}
   end
 
   defp parse_param(["streamtype=" <> value | rest], fmtp) do
