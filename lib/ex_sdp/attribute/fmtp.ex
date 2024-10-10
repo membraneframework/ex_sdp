@@ -13,7 +13,7 @@ defmodule ExSDP.Attribute.FMTP do
   * Telephone Events (RFC 4733)
   * RED (RFC 2198)
   * G.722.1 (RFC 5577)
-
+  * AAC (RFC 3640)
   are currently supported.
   """
 
@@ -71,6 +71,23 @@ defmodule ExSDP.Attribute.FMTP do
                 :redundant_payloads,
                 # G7221
                 :bitrate,
+                # AAC
+                :streamtype,
+                :config,
+                :mode,
+                :objecttype,
+                :constantsize,
+                :constantduration,
+                :maxdisplacement,
+                :de_interleavebuffersize,
+                :sizelength,
+                :indexlength,
+                :indexdeltalength,
+                :ctsdeltalength,
+                :dtsdeltalength,
+                :randomaccessindication,
+                :streamstateindication,
+                :auxillarydatasizelength,
                 unknown: []
               ]
 
@@ -121,6 +138,23 @@ defmodule ExSDP.Attribute.FMTP do
           redundant_payloads: [RTPMapping.payload_type_t()] | nil,
           # G7221
           bitrate: non_neg_integer() | nil,
+          # AAC
+          streamtype: non_neg_integer() | nil,
+          config: binary() | nil,
+          mode: :generic | :CELP_cbr | :CELP_vbr | :AAC_lbr | :AAC_hbr | nil,
+          objecttype: non_neg_integer() | nil,
+          constantsize: non_neg_integer() | nil,
+          constantduration: non_neg_integer() | nil,
+          maxdisplacement: non_neg_integer() | nil,
+          de_interleavebuffersize: non_neg_integer() | nil,
+          sizelength: non_neg_integer() | nil,
+          indexlength: non_neg_integer() | nil,
+          indexdeltalength: non_neg_integer() | nil,
+          ctsdeltalength: non_neg_integer() | nil,
+          dtsdeltalength: non_neg_integer() | nil,
+          randomaccessindication: boolean() | nil,
+          streamstateindication: non_neg_integer() | nil,
+          auxillarydatasizelength: non_neg_integer() | nil,
           # params that are currently not supported
           unknown: [String.t()]
         }
@@ -152,7 +186,7 @@ defmodule ExSDP.Attribute.FMTP do
       |> Enum.map(&String.trim(&1))
       |> do_parse(%__MODULE__{pt: pt})
     else
-      fmtp: _other -> :invalid_fmtp
+      fmtp: _other -> {:error, :invalid_fmtp}
       pt: {:error, _reason} = err -> err
     end
   end
@@ -334,6 +368,86 @@ defmodule ExSDP.Attribute.FMTP do
 
   defp parse_param(["bitrate=" <> value | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(value), do: {rest, %{fmtp | bitrate: value}}
+  end
+
+  defp parse_param(["streamtype=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | streamtype: value}}
+  end
+
+  defp parse_param(["config=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_config(value),
+         do: {rest, %{fmtp | config: value}}
+  end
+
+  defp parse_param(["mode=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_mode(value),
+         do: {rest, %{fmtp | mode: value}}
+  end
+
+  defp parse_param(["objecttype=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | objecttype: value}}
+  end
+
+  defp parse_param(["constantsize=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | constantsize: value}}
+  end
+
+  defp parse_param(["constantduration=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | constantduration: value}}
+  end
+
+  defp parse_param(["maxdisplacement=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | maxdisplacement: value}}
+  end
+
+  defp parse_param(["de-interleavebuffersize=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | de_interleavebuffersize: value}}
+  end
+
+  defp parse_param(["sizelength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | sizelength: value}}
+  end
+
+  defp parse_param(["indexlength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | indexlength: value}}
+  end
+
+  defp parse_param(["indexdeltalength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | indexdeltalength: value}}
+  end
+
+  defp parse_param(["ctsdeltalength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | ctsdeltalength: value}}
+  end
+
+  defp parse_param(["dtsdeltalength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | dtsdeltalength: value}}
+  end
+
+  defp parse_param(["randomaccessindication=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_bool_string(value),
+         do: {rest, %{fmtp | randomaccessindication: value}}
+  end
+
+  defp parse_param(["streamstateindication=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | streamstateindication: value}}
+  end
+
+  defp parse_param(["auxillarydatasizelength=" <> value | rest], fmtp) do
+    with {:ok, value} <- Utils.parse_numeric_string(value),
+         do: {rest, %{fmtp | auxillarydatasizelength: value}}
   end
 
   defp parse_param([head | rest] = params, fmtp) do
