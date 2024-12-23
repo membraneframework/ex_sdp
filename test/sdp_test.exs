@@ -143,6 +143,19 @@ defmodule ExSDPTest do
 
       assert {:error, {:invalid_bandwidth, "b=X-YZ:256"}} == assert(ExSDP.parse(input))
     end
+
+    test "returns an error on invalid line" do
+      input =
+        """
+        v=0
+        o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
+        l=invalid line
+        s=Very fancy session name
+        """
+        |> String.replace("\n", "\r\n")
+
+      assert {:error, {:invalid_line, "l=invalid line"}} = ExSDP.parse(input)
+    end
   end
 
   describe "Parser parse!/1" do
