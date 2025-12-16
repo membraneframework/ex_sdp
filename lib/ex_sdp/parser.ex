@@ -75,28 +75,28 @@ defmodule ExSDP.Parser do
   defp parse_line(["v=" <> version | rest], %ExSDP{} = spec),
     do: {rest, %ExSDP{spec | version: String.to_integer(version)}}
 
-  defp parse_line(["o=" <> origin | rest],  %ExSDP{} = spec) do
+  defp parse_line(["o=" <> origin | rest], %ExSDP{} = spec) do
     with {:ok, %Origin{} = origin} <- Origin.parse(origin) do
       {rest, %ExSDP{spec | origin: origin}}
     end
   end
 
-  defp parse_line(["s=" <> session_name | rest], %ExSDP{} =  spec),
+  defp parse_line(["s=" <> session_name | rest], %ExSDP{} = spec),
     do: {rest, %ExSDP{spec | session_name: session_name}}
 
-  defp parse_line(["i=" <> session_information | rest],  %ExSDP{} = spec),
+  defp parse_line(["i=" <> session_information | rest], %ExSDP{} = spec),
     do: {rest, %ExSDP{spec | session_information: session_information}}
 
-  defp parse_line(["u=" <> uri | rest],  %ExSDP{} = spec),
+  defp parse_line(["u=" <> uri | rest], %ExSDP{} = spec),
     do: {rest, %ExSDP{spec | uri: uri}}
 
-  defp parse_line(["e=" <> email | rest],  %ExSDP{} = spec),
+  defp parse_line(["e=" <> email | rest], %ExSDP{} = spec),
     do: {rest, %ExSDP{spec | email: email}}
 
-  defp parse_line(["p=" <> phone_number | rest],  %ExSDP{} = spec),
+  defp parse_line(["p=" <> phone_number | rest], %ExSDP{} = spec),
     do: {rest, %ExSDP{spec | phone_number: phone_number}}
 
-  defp parse_line(["c=" <> connection_data | rest], %ExSDP{} =  spec) do
+  defp parse_line(["c=" <> connection_data | rest], %ExSDP{} = spec) do
     with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(connection_data) do
       {rest, %ExSDP{spec | connection_data: connection_data}}
     end
@@ -108,7 +108,7 @@ defmodule ExSDP.Parser do
     end
   end
 
-  defp parse_line(["t=" <> timing | rest], %ExSDP{} =  spec) do
+  defp parse_line(["t=" <> timing | rest], %ExSDP{} = spec) do
     with {:ok, timing} <- Timing.parse(timing) do
       {rest, %ExSDP{spec | timing: timing}}
     end
@@ -120,13 +120,13 @@ defmodule ExSDP.Parser do
     end
   end
 
-  defp parse_line(["z=" <> timezones | rest],  %ExSDP{} = spec) do
+  defp parse_line(["z=" <> timezones | rest], %ExSDP{} = spec) do
     with {:ok, timezones} <- Timezone.parse(timezones) do
       {rest, %ExSDP{spec | time_zones_adjustments: timezones}}
     end
   end
 
-  defp parse_line(["k=" <> encryption | rest],  %ExSDP{} = spec) do
+  defp parse_line(["k=" <> encryption | rest], %ExSDP{} = spec) do
     with {:ok, encryption} <- Encryption.parse(encryption) do
       {rest, %ExSDP{spec | encryption: encryption}}
     end
