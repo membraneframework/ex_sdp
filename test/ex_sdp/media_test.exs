@@ -197,7 +197,7 @@ defmodule ExSDP.MediaTest do
       result =
         options
         |> Media.parse_optional(media)
-        ~> ({:ok, {_, medium}} -> Media.apply_session(medium, session))
+        ~> ({:ok, {_binaries, medium}} -> Media.apply_session(medium, session))
 
       assert %Media{
                bandwidth: [%Bandwidth{bandwidth: 128, type: :AS}],

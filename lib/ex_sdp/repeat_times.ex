@@ -77,7 +77,7 @@ defmodule ExSDP.RepeatTimes do
 
       {:ok, explicit_repeat}
     else
-      {:error, _} = error -> error
+      {:error, _reason} = error -> error
       _other_error -> {:error, :malformed_repeat}
     end
   end
@@ -88,12 +88,12 @@ defmodule ExSDP.RepeatTimes do
   defp process_offsets([offset | rest], acc) do
     case Integer.parse(offset) do
       {offset, ""} when offset >= 0 -> process_offsets(rest, [offset | acc])
-      {_, _} -> {:error, {:invalid_offset, offset}}
+      {__error, _reason} -> {:error, {:invalid_offset, offset}}
     end
   end
 
   defp parse_compact(list) do
-    with [_ | _] = result <- decode_compact(list) do
+    with [_first | _rest] = result <- decode_compact(list) do
       result
       |> Enum.reverse()
       |> build_compact()
@@ -111,14 +111,14 @@ defmodule ExSDP.RepeatTimes do
             time = value * @unit_mappings[unit]
             {:cont, [time | acc]}
 
-          {_, invalid_unit} ->
+          {_error, invalid_unit} ->
             {:halt, {:error, {:invalid_unit, invalid_unit}}}
         end
     end)
   end
 
   defp build_compact(list)
-  defp build_compact([_, _]), do: {:error, :no_offsets}
+  defp build_compact([_first, _second]), do: {:error, :no_offsets}
 
   defp build_compact([interval, duration | offsets]) do
     compact = %__MODULE__{

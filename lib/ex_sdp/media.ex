@@ -93,9 +93,9 @@ defmodule ExSDP.Media do
 
       {:ok, media}
     else
-      conn: _ -> {:error, :invalid_media_spec}
-      port: _ -> {:error, :invalid_port_number}
-      port_count: _ -> {:error, :invalid_port_count}
+      conn: _error -> {:error, :invalid_media_spec}
+      port: _error -> {:error, :invalid_port_number}
+      port_count: _error -> {:error, :invalid_port_count}
       fmt: error -> error
     end
   end
@@ -110,7 +110,7 @@ defmodule ExSDP.Media do
   def parse_optional(["" | rest], media),
     do: parse_optional(rest, media)
 
-  def parse_optional(["m=" <> _ | _] = lines, media),
+  def parse_optional(["m=" <> _media_attribute | _rest] = lines, media),
     do: {:ok, {lines, finalize_optional_parsing(media)}}
 
   def parse_optional(["i=" <> title | rest], media),

@@ -168,7 +168,7 @@ defmodule ExSDP.Parser do
     """
   end
 
-  defp format_error([line | _], reason) do
+  defp format_error([line | _rest], reason) do
     """
     An error has occurred while parsing following SDP line:
     #{line}

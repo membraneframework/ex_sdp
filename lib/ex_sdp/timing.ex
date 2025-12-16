@@ -28,9 +28,9 @@ defmodule ExSDP.Timing do
 
       {:ok, timing}
     else
-      split: _ -> {:error, :invalid_timing}
-      parse_start: _ -> {:error, :time_nan}
-      parse_stop: _ -> {:error, :time_nan}
+      split: _error -> {:error, :invalid_timing}
+      parse_start: _error -> {:error, :time_nan}
+      parse_stop: _error -> {:error, :time_nan}
     end
   end
 end
