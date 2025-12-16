@@ -74,10 +74,15 @@ defmodule ExSDP.Utils do
   end
 
   @spec split(String.t(), String.t() | [String.t()] | :binary.cp() | Regex.t(), any) ::
-          {:error, :too_few_fields} | {:ok, [String.t()]}
+          {:error, :too_few_fields | :too_many_fields} | {:ok, [String.t()]}
   def split(origin, delim, expected_len) do
-    split = String.split(origin, delim, parts: expected_len)
-    if length(split) == expected_len, do: {:ok, split}, else: {:error, :too_few_fields}
+    split = String.split(origin, delim)
+
+    cond do
+      length(split) == expected_len -> {:ok, split}
+      length(split) < expected_len -> {:error, :too_few_fields}
+      length(split) > expected_len -> {:error, :too_many_fields}
+    end
   end
 
   @spec parse_payload_type(binary) :: {:ok, 0..127} | {:errror, :invalid_pt}
