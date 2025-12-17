@@ -55,41 +55,25 @@ defmodule ExSDP.Origin do
           {:ok, t()}
           | {:error, :invalid_addrtype | :invalid_address | :too_few_fields | :too_many_fields}
   def parse(origin_binary) do
-    with {:ok, origin} <- do_parse(origin_binary, 6) do
-      {:ok, origin}
-    else
-      {:error, :too_many_fields} -> do_parse(origin_binary, 7)
-      error -> error
-    end
-  end
-
-  defp do_parse(origin, 6) do
     with {:ok, [username, sess_id, sess_version, nettype, addrtype, address]} <-
-           Utils.split(origin, " ", 6),
-         {:ok, addrtype} <- Address.parse_addrtype(addrtype),
-         {:ok, address} <- Address.parse_address(address) do
-      # check whether fqdn
-      address = if is_binary(address), do: {addrtype, address}, else: address
-
-      origin = %__MODULE__{
-        username: username,
-        session_id: String.to_integer(sess_id),
-        session_version: String.to_integer(sess_version),
-        network_type: nettype,
-        address: address
-      }
-
-      {:ok, origin}
+           Utils.split(origin_binary, " ", 6) do
+      do_parse(username, sess_id, sess_version, nettype, addrtype, address)
     else
+      # a workaround to support SDP sent by Tapo C320WS camera which puts an additional junk byte in the origin attribute
+      {:error, :too_many_fields} ->
+        case Utils.split(origin_binary, " ", 7) do
+          {:ok, [username, sess_id, sess_version, _junk, nettype, addrtype, address]} ->
+            do_parse(username, sess_id, sess_version, nettype, addrtype, address)
+
+          {:error, _reason} = error ->
+            error
+        end
       {:error, _reason} = error -> error
     end
   end
 
-  # a workaround to support SDP sent by Tapo C320WS camera which puts an additional junk byte in the origin attribute
-  defp do_parse(origin, 7) do
-    with {:ok, [username, sess_id, sess_version, _junk, nettype, addrtype, address]} <-
-           Utils.split(origin, " ", 7),
-         {:ok, addrtype} <- Address.parse_addrtype(addrtype),
+  defp do_parse(username, sess_id, sess_version, nettype, addrtype, address) do
+    with {:ok, addrtype} <- Address.parse_addrtype(addrtype),
          {:ok, address} <- Address.parse_address(address) do
       # check whether fqdn
       address = if is_binary(address), do: {addrtype, address}, else: address
