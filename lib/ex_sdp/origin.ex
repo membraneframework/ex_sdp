@@ -61,12 +61,9 @@ defmodule ExSDP.Origin do
     else
       # a workaround to support SDP sent by Tapo C320WS camera which puts an additional junk byte in the origin attribute
       {:error, :too_many_fields} ->
-        case Utils.split(origin_binary, " ", 7) do
-          {:ok, [username, sess_id, sess_version, _junk, nettype, addrtype, address]} ->
-            do_parse(username, sess_id, sess_version, nettype, addrtype, address)
-
-          {:error, _reason} = error ->
-            error
+        with {:ok, [username, sess_id, sess_version, _junk, nettype, addrtype, address]} <-
+               Utils.split(origin_binary, " ", 7) do
+          do_parse(username, sess_id, sess_version, nettype, addrtype, address)
         end
 
       {:error, _reason} = error ->
