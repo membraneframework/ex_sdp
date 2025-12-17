@@ -44,7 +44,7 @@ defmodule ExSDP.Attribute.RID do
           |> String.split(",")
           |> Enum.map(&Integer.parse(&1, 10))
           |> Enum.flat_map(fn
-            {int, _} -> [int]
+            {int, _remainder} -> [int]
             :error -> []
           end)
 

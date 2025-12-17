@@ -29,7 +29,7 @@ defmodule ExSDP.Attribute.RTPMapping do
           {:ok, t()}
           | {:error, :string_nan | :invalid_pt | :only_audio_can_have_params | :invalid_rtpmap}
   def parse(mapping, opts) do
-    with [payload_type, encoding | _] <- String.split(mapping, " "),
+    with [payload_type, encoding | _rest] <- String.split(mapping, " "),
          [encoding_name, clock_rate | params] <- String.split(encoding, "/"),
          {:ok, payload_type} <- Utils.parse_payload_type(payload_type),
          {:ok, clock_rate} <- Utils.parse_numeric_string(clock_rate),

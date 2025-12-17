@@ -93,9 +93,9 @@ defmodule ExSDP.Media do
 
       {:ok, media}
     else
-      conn: _ -> {:error, :invalid_media_spec}
-      port: _ -> {:error, :invalid_port_number}
-      port_count: _ -> {:error, :invalid_port_count}
+      conn: _error -> {:error, :invalid_media_spec}
+      port: _error -> {:error, :invalid_port_number}
+      port_count: _error -> {:error, :invalid_port_count}
       fmt: error -> error
     end
   end
@@ -103,20 +103,22 @@ defmodule ExSDP.Media do
   @spec parse_optional([binary()], t()) :: {:ok, {[binary()], t()}} | {:error, atom()}
   def parse_optional(lines, media)
 
-  def parse_optional([], media), do: {:ok, {[""], finalize_optional_parsing(media)}}
+  def parse_optional([], %__MODULE__{} = media),
+    do: {:ok, {[""], finalize_optional_parsing(media)}}
 
-  def parse_optional([""], media), do: {:ok, {[""], finalize_optional_parsing(media)}}
+  def parse_optional([""], %__MODULE__{} = media),
+    do: {:ok, {[""], finalize_optional_parsing(media)}}
 
-  def parse_optional(["" | rest], media),
+  def parse_optional(["" | rest], %__MODULE__{} = media),
     do: parse_optional(rest, media)
 
-  def parse_optional(["m=" <> _ | _] = lines, media),
+  def parse_optional(["m=" <> _media_attribute | _rest] = lines, %__MODULE__{} = media),
     do: {:ok, {lines, finalize_optional_parsing(media)}}
 
-  def parse_optional(["i=" <> title | rest], media),
+  def parse_optional(["i=" <> title | rest], %__MODULE__{} = media),
     do: parse_optional(rest, %__MODULE__{media | title: title})
 
-  def parse_optional(["c=" <> conn | rest], media) do
+  def parse_optional(["c=" <> conn | rest], %__MODULE__{} = media) do
     with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(conn) do
       connection_data = media.connection_data ++ [connection_data]
       connection_data = %__MODULE__{media | connection_data: connection_data}
@@ -131,7 +133,7 @@ defmodule ExSDP.Media do
     end
   end
 
-  def parse_optional(["k=" <> encryption | rest], media) do
+  def parse_optional(["k=" <> encryption | rest], %__MODULE__{} = media) do
     with {:ok, encryption} <- Encryption.parse(encryption) do
       encryption = %__MODULE__{media | encryption: encryption}
       parse_optional(rest, encryption)

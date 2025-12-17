@@ -43,6 +43,17 @@ defmodule ExSDP.OriginTest do
                 username: "jdoe"
               }} = Origin.parse("jdoe 2890844526 2890842807 IN IP4 host.origin.name")
     end
+
+    test "supports improper SDP provided by Tapo C320WS cameras" do
+      assert {:ok, origin} = Origin.parse("jdoe 2890844526 2890842807 1 IN IP4 10.47.16.5")
+
+      assert origin == %Origin{
+               session_id: 2_890_844_526,
+               address: {10, 47, 16, 5},
+               session_version: 2_890_842_807,
+               username: "jdoe"
+             }
+    end
   end
 
   describe "Origin serializer" do

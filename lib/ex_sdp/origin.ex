@@ -52,11 +52,27 @@ defmodule ExSDP.Origin do
   end
 
   @spec parse(binary()) ::
-          {:ok, t()} | {:error, :invalid_addrtype | :invalid_address}
-  def parse(origin) do
+          {:ok, t()}
+          | {:error, :invalid_addrtype | :invalid_address | :too_few_fields | :too_many_fields}
+  def parse(origin_binary) do
     with {:ok, [username, sess_id, sess_version, nettype, addrtype, address]} <-
-           Utils.split(origin, " ", 6),
-         {:ok, addrtype} <- Address.parse_addrtype(addrtype),
+           Utils.split(origin_binary, " ", 6) do
+      do_parse(username, sess_id, sess_version, nettype, addrtype, address)
+    else
+      # a workaround to support SDP sent by Tapo C320WS camera which puts an additional junk byte in the origin attribute
+      {:error, :too_many_fields} ->
+        with {:ok, [username, sess_id, sess_version, _junk, nettype, addrtype, address]} <-
+               Utils.split(origin_binary, " ", 7) do
+          do_parse(username, sess_id, sess_version, nettype, addrtype, address)
+        end
+
+      {:error, _reason} = error ->
+        error
+    end
+  end
+
+  defp do_parse(username, sess_id, sess_version, nettype, addrtype, address) do
+    with {:ok, addrtype} <- Address.parse_addrtype(addrtype),
          {:ok, address} <- Address.parse_address(address) do
       # check whether fqdn
       address = if is_binary(address), do: {addrtype, address}, else: address
