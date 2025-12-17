@@ -68,7 +68,9 @@ defmodule ExSDP.Origin do
           {:error, _reason} = error ->
             error
         end
-      {:error, _reason} = error -> error
+
+      {:error, _reason} = error ->
+        error
     end
   end
 
