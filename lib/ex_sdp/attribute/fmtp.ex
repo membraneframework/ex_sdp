@@ -556,7 +556,16 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         # RED
         Serializer.maybe_serialize_list(fmtp.redundant_payloads, "/"),
         # G7221
-        Serializer.maybe_serialize("bitrate", fmtp.bitrate)
+        Serializer.maybe_serialize("bitrate", fmtp.bitrate),
+        # MPEG4 GENERIC
+        Serializer.maybe_serialize("streamtype", fmtp.streamtype),
+        Serializer.maybe_serialize("mode", fmtp.mode),
+        Serializer.maybe_serialize_hex("config", fmtp.config),
+        Serializer.maybe_serialize("sizelength", fmtp.sizelength),
+        Serializer.maybe_serialize("indexlength", fmtp.indexlength),
+        Serializer.maybe_serialize("indexdeltalength", fmtp.indexdeltalength),
+        Serializer.maybe_serialize("constantduration", fmtp.constantduration),
+        Serializer.maybe_serialize("maxdisplacement", fmtp.maxdisplacement)
       ]
       |> Enum.filter(fn param -> param != "" end)
       |> Enum.join(";")

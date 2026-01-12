@@ -39,11 +39,27 @@ defmodule ExSDP.Serializer do
   def maybe_serialize("sprop-parameter-sets", %{sps: sps, pps: pps}),
     do: "sprop-parameter-sets=#{Base.encode64(sps)},#{Base.encode64(pps)}"
 
+  def maybe_serialize("mode", mode) do
+    mode =
+      case mode do
+        :AAC_hbr -> "AAC-hbr"
+        :AAC_lbr -> "AAC-lbr"
+        :CELP_vbr -> "CELP-vbr"
+        :CELP_cbr -> "CELP-cbr"
+        :generic -> "generic"
+      end
+
+    "mode=#{mode}"
+  end
+
   def maybe_serialize(type, {key, value}), do: "#{type}=#{key}:#{value}"
   def maybe_serialize(type, value), do: "#{type}=#{value}"
 
   @spec maybe_serialize_hex(String.t(), nil | integer) :: binary
   def maybe_serialize_hex(_type, nil), do: ""
+
+  def maybe_serialize_hex(type, value) when is_binary(value),
+    do: "#{type}=#{Base.encode16(value)}"
 
   def maybe_serialize_hex(type, value),
     do: "#{type}=#{Integer.to_string(value, 16) |> String.downcase()}"

@@ -180,6 +180,22 @@ defmodule ExSDP.Attribute.FMTPTest do
       fmtp = "108 profile-level-id=42e01f;level-asymmetry-allowed=1;unsupported-param=1"
       assert {:ok, %{unknown: ["unsupported-param=1"]}} = FMTP.parse(fmtp)
     end
+
+    test "parses fmtp with mpeg4-generic" do
+      fmtp =
+        "97 mode=AAC-hbr;config=121056E500;sizelength=13;indexlength=3;constantduration=1024;indexdeltalength=3"
+
+      assert {:ok,
+              %FMTP{
+                pt: 97,
+                mode: :AAC_hbr,
+                config: <<18, 16, 86, 229, 0>>,
+                sizelength: 13,
+                indexlength: 3,
+                constantduration: 1024,
+                indexdeltalength: 3
+              }} = FMTP.parse(fmtp)
+    end
   end
 
   describe "FMTP serializer" do
@@ -276,6 +292,22 @@ defmodule ExSDP.Attribute.FMTPTest do
       expected = "fmtp:98 bitrate=48000"
 
       assert "#{fmtp}" == expected
+    end
+
+    test "serializes FMTP with mpeg4-generic fields" do
+      fmtp =
+        %FMTP{
+          pt: 97,
+          mode: :AAC_hbr,
+          config: <<18, 16, 86, 229, 0>>,
+          sizelength: 13,
+          indexlength: 3,
+          constantduration: 1024,
+          indexdeltalength: 3
+        }
+
+      assert "#{fmtp}" ==
+               "fmtp:97 mode=AAC-hbr;config=121056E500;sizelength=13;indexlength=3;indexdeltalength=3;constantduration=1024"
     end
   end
 end
