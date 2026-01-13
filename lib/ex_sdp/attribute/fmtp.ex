@@ -184,6 +184,7 @@ defmodule ExSDP.Attribute.FMTP do
       |> String.split(";")
       # remove leading whitespaces
       |> Enum.map(&String.trim(&1))
+      |> Enum.reject(&(&1 == ""))
       |> do_parse(%__MODULE__{pt: pt})
     else
       fmtp: _other -> {:error, :invalid_fmtp}
