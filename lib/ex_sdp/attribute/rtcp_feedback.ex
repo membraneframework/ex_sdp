@@ -54,6 +54,7 @@ defmodule ExSDP.Attribute.RTCPFeedback do
   end
 
   defp parse_feedback_type(fb_type_string) do
+    fb_type_string = String.trim(fb_type_string)
     Map.get(@fb_type_mapping, fb_type_string, fb_type_string)
   end
 
