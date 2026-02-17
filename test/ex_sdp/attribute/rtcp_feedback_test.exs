@@ -21,6 +21,10 @@ defmodule ExSDP.Attribute.RTCPFeedbackTest do
                {:ok, %RTCPFeedback{pt: 98, feedback_type: :pli}}
     end
 
+    test "trailing space in nack feedback type" do
+      assert RTCPFeedback.parse("* nack ") == {:ok, %RTCPFeedback{pt: :all, feedback_type: :nack}}
+    end
+
     test "unknown feedback type" do
       assert RTCPFeedback.parse("96 unknown") ==
                {:ok, %RTCPFeedback{pt: 96, feedback_type: "unknown"}}
