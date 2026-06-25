@@ -1,7 +1,7 @@
 defmodule ExSDP.MixProject do
   use Mix.Project
 
-  @version "1.1.3"
+  @version "1.1.4"
   @github_url "https://github.com/membraneframework/ex_sdp"
 
   def project do
@@ -18,7 +18,8 @@ defmodule ExSDP.MixProject do
       dialyzer: dialyzer(),
       docs: docs(),
       package: package(),
-      homepage_url: "https://membrane.stream"
+      homepage_url: "https://membrane.stream",
+      aliases: [docs: ["docs", &prepend_llms_links/1]]
     ]
   end
 
@@ -35,7 +36,6 @@ defmodule ExSDP.MixProject do
     [
       main: "readme",
       extras: ["README.md", "LICENSE"],
-      formatters: ["html"],
       source_ref: "v#{@version}",
       nest_modules_by_prefix: [ExSDP]
     ]
@@ -70,10 +70,32 @@ defmodule ExSDP.MixProject do
     [
       {:bunch, "~> 1.3"},
       {:elixir_uuid, "~> 1.2"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.40", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
       {:mix_test_watch, ">= 0.0.0", only: :dev, runtime: false}
     ]
+  end
+
+  defp prepend_llms_links(_) do
+    output_dir = docs()[:output] || "doc"
+    path = Path.join(output_dir, "llms.txt")
+
+    if File.exists?(path) do
+      existing = File.read!(path)
+
+      footer = """
+
+
+      ## See Also
+
+      - [Membrane Framework AI Skill](https://hexdocs.pm/membrane_core/skill.md)
+      - [Membrane Core](https://hexdocs.pm/membrane_core/llms.txt)
+      """
+
+      File.write!(path, String.trim_trailing(existing) <> footer)
+    else
+      IO.warn("#{path} not found — llms.txt was not generated, check your ex_doc configuration")
+    end
   end
 end
