@@ -118,6 +118,9 @@ defmodule ExSDP.Media do
   def parse_optional(["i=" <> title | rest], %__MODULE__{} = media),
     do: parse_optional(rest, %__MODULE__{media | title: title})
 
+  def parse_optional(["t=" <> _timing | rest], %__MODULE__{} = media),
+    do: parse_optional(rest, media)
+
   def parse_optional(["c=" <> conn | rest], %__MODULE__{} = media) do
     with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(conn) do
       connection_data = media.connection_data ++ [connection_data]
