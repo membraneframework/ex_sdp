@@ -70,7 +70,7 @@ defmodule ExSDP.MixProject do
     [
       {:bunch, "~> 1.3"},
       {:elixir_uuid, "~> 1.2"},
-      {:ex_doc, "~> 0.40", only: :dev, runtime: false},
+      {:ex_doc, ">= 0.40.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
       {:mix_test_watch, ">= 0.0.0", only: :dev, runtime: false}
