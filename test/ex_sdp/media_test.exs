@@ -29,6 +29,28 @@ defmodule ExSDP.MediaTest do
              } = media
     end
 
+    test "parses the fmt list as payload types for every RTP-based protocol" do
+      # RFC 4566 Section 5.14: when <proto> is an RTP profile, the fmt
+      # sub-fields are RTP payload types. All six RTP-based protocols must
+      # yield the same integer list — not a raw string for some of them.
+      for proto <- [
+            "RTP/AVP",
+            "RTP/AVPF",
+            "RTP/SAVP",
+            "RTP/SAVPF",
+            "UDP/TLS/RTP/SAVP",
+            "UDP/TLS/RTP/SAVPF"
+          ] do
+        assert {:ok, %Media{fmt: [96, 97, 98], protocol: ^proto}} =
+                 Media.parse("video 49170 #{proto} 96 97 98"),
+               "fmt of #{proto} was not parsed as payload types"
+      end
+    end
+
+    test "rejects a non-numeric fmt on an RTP-based feedback protocol" do
+      assert {:error, :invalid_fmt} = Media.parse("video 49170 RTP/AVPF 96 t140")
+    end
+
     test "processes valid media description with multiple ports" do
       assert {:ok, media} =
                "video 49170/2 RTP/AVP 31"
