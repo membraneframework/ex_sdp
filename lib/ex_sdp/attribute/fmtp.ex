@@ -24,6 +24,13 @@ defmodule ExSDP.Attribute.FMTP do
   @enforce_keys [:pt]
   defstruct @enforce_keys ++
               [
+                # The verbatim parameter string, exactly as it appeared after
+                # "a=fmtp:<pt> " (RFC 8866 Section 6.15: the parameters are
+                # format-specific and opaque to SDP, so a relay must be able to
+                # forward them byte for byte — the typed fields below normalize
+                # values and lose ordering). Set by parse/1, ignored by the
+                # serializer, which keeps building the line from typed fields.
+                :raw,
                 # H264
                 :profile_level_id,
                 :level_asymmetry_allowed,
@@ -156,7 +163,9 @@ defmodule ExSDP.Attribute.FMTP do
           streamstateindication: non_neg_integer() | nil,
           auxillarydatasizelength: non_neg_integer() | nil,
           # params that are currently not supported
-          unknown: [String.t()]
+          unknown: [String.t()],
+          # the parameter string exactly as parsed, for byte-for-byte relaying
+          raw: binary() | nil
         }
 
   @typedoc """
@@ -185,7 +194,7 @@ defmodule ExSDP.Attribute.FMTP do
       # remove leading whitespaces
       |> Enum.map(&String.trim(&1))
       |> Enum.reject(&(&1 == ""))
-      |> do_parse(%__MODULE__{pt: pt})
+      |> do_parse(%__MODULE__{pt: pt, raw: rest})
     else
       fmtp: _other -> {:error, :invalid_fmtp}
       pt: {:error, _reason} = err -> err

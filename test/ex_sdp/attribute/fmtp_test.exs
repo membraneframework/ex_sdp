@@ -4,11 +4,22 @@ defmodule ExSDP.Attribute.FMTPTest do
   alias ExSDP.Attribute.FMTP
 
   describe "FMTP parser" do
+    test "keeps the verbatim parameter string for byte-for-byte relaying" do
+      # RFC 8866 Section 6.15: fmtp parameters are format-specific and opaque
+      # to SDP. The typed fields normalize (hex case and parameter order are
+      # lost, unknown parameters are reordered), so a relay needs the string
+      # exactly as the peer wrote it.
+      params = "Profile-Level-Id=42E01F;some-vendor-param=7;packetization-mode=1"
+
+      assert {:ok, %FMTP{raw: ^params}} = FMTP.parse("108 " <> params)
+    end
+
     test "parses proper fmtp" do
       fmtp = "108 profile-level-id=42e01f;level-asymmetry-allowed=1;packetization-mode=1"
 
       expected = %FMTP{
         pt: 108,
+        raw: "profile-level-id=42e01f;level-asymmetry-allowed=1;packetization-mode=1",
         profile_level_id: 0x42E01F,
         level_asymmetry_allowed: true,
         packetization_mode: 1
@@ -22,6 +33,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 63,
+        raw: "111/111",
         redundant_payloads: [111]
       }
 
@@ -38,6 +50,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 98,
+        raw: "bitrate=48000",
         bitrate: 48_000
       }
 
@@ -49,6 +62,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 100,
+        raw: "0-15",
         dtmf_tones: "0-15"
       }
 
@@ -60,6 +74,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 100,
+        raw: "0-15,66,70",
         dtmf_tones: "0-15,66,70"
       }
 
@@ -71,6 +86,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 117,
+        raw: "maxplaybackrate=16000; maxaveragebitrate=24000; cbr=0; useinbandfec=0; usedtx=0",
         maxplaybackrate: 16_000,
         maxaveragebitrate: 24_000,
         cbr: false,
@@ -86,6 +102,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 121,
+        raw: "ptime=20;maxptime=60;cbr=0;sprop-maxcapturerate=16000",
         ptime: 20,
         maxptime: 60,
         cbr: false,
@@ -102,6 +119,9 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 105,
+        raw:
+          "profile-level-id=64001f; packetization-mode=1; " <>
+            "sprop-parameter-sets=Z2QAH62EAQwgCGEAQwgCGEAQwgCEO1AoAt03AQEBQAAA+gAAOpgh,aO4xshs=",
         profile_level_id: 0x64001F,
         packetization_mode: 1,
         sprop_parameter_sets: %{
@@ -124,6 +144,11 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 96,
+        raw:
+          "profile-space=0;profile-id=1;tier-flag=0;level-id=150;interop-constraints=B00000000000;" <>
+            "sprop-vps=QAEMAf//AWAAAAMAAAMAAAMAAAMAlqwJAAAAAQ==;" <>
+            "sprop-sps=QgEBAWAAAAMAAAMAAAMAAAMAlqAB4CACHH+KrTuiS7IAAAAB,QgEBAWAAAAMAsAAAAwAAAwCZoAHgIAIcWNrkkUvzcBAQEAg=;" <>
+            "sprop-pps=RAHAcvCcFAobJA==,RAHA8vA7NA==",
         profile_space: 0,
         profile_id: 1,
         tier_flag: false,
@@ -153,6 +178,7 @@ defmodule ExSDP.Attribute.FMTPTest do
 
       expected = %FMTP{
         pt: 98,
+        raw: "profile=2; level-idx=8; tier=1",
         profile: 2,
         level_idx: 8,
         tier: 1

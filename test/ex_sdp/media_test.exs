@@ -108,6 +108,7 @@ defmodule ExSDP.MediaTest do
         },
         %Attribute.FMTP{
           pt: 111,
+          raw: "minptime=10;maxaveragebitrate=96000;stereo=1;sprop-stereo=1;useinbandfec=1",
           minptime: 10,
           maxaveragebitrate: 96_000,
           stereo: true,
