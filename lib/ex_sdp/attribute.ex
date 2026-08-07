@@ -199,9 +199,6 @@ defmodule ExSDP.Attribute do
 
   defp parse_split_framerate(_invalid_framerate), do: :error
 
-  # RFC 8122 Section 5: the hash-func token is compared case-insensitively
-  # (RFC 4572 before it) — some stacks emit "SHA-256". Only the token is
-  # folded; the fingerprint value keeps its case.
   defp parse_fingerprint(fingerprint) do
     case String.split(fingerprint, " ") do
       [hash_function, value] -> do_parse_fingerprint(String.downcase(hash_function), value)
