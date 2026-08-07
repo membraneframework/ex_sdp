@@ -178,7 +178,16 @@ defmodule ExSDP.Media do
 
   defp parse_type(type) when is_binary(type), do: type
 
-  defp parse_fmt(fmt, proto) when proto in ["RTP/AVP", "RTP/SAVP", "UDP/TLS/RTP/SAVPF"] do
+  @rtp_protocols [
+    "RTP/AVP",
+    "RTP/AVPF",
+    "RTP/SAVP",
+    "RTP/SAVPF",
+    "UDP/TLS/RTP/SAVP",
+    "UDP/TLS/RTP/SAVPF"
+  ]
+
+  defp parse_fmt(fmt, proto) when proto in @rtp_protocols do
     fmt
     |> String.split(" ")
     |> Bunch.Enum.try_map(fn single_fmt ->
