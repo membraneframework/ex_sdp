@@ -33,8 +33,6 @@ defmodule ExSDP.AttributeTest do
     end
 
     test "handles fingerprint with a hash-func token in any case" do
-      # RFC 8122 Section 5: the hash-func token is case-insensitive; the
-      # fingerprint value must be left untouched.
       value = "3B:1E:81:0E:64:41:BC:F5:A2:96:8C:A6:1F:11:26:2C:D5:B7:52:5C"
 
       assert {:ok, {:fingerprint, {:sha1, ^value}}} =
