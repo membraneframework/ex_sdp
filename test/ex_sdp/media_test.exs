@@ -30,9 +30,6 @@ defmodule ExSDP.MediaTest do
     end
 
     test "parses the fmt list as payload types for every RTP-based protocol" do
-      # RFC 4566 Section 5.14: when <proto> is an RTP profile, the fmt
-      # sub-fields are RTP payload types. All six RTP-based protocols must
-      # yield the same integer list — not a raw string for some of them.
       for proto <- [
             "RTP/AVP",
             "RTP/AVPF",

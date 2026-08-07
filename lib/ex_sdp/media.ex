@@ -178,10 +178,6 @@ defmodule ExSDP.Media do
 
   defp parse_type(type) when is_binary(type), do: type
 
-  # RTP-based protocols, for which the fmt sub-fields are RTP payload types
-  # (RFC 4566 Section 5.14): RTP/AVP (RFC 3551), RTP/AVPF (RFC 4585),
-  # RTP/SAVP (RFC 3711), RTP/SAVPF (RFC 5124) and their DTLS-SRTP forms
-  # UDP/TLS/RTP/SAVP and UDP/TLS/RTP/SAVPF (RFC 5764).
   @rtp_protocols [
     "RTP/AVP",
     "RTP/AVPF",
