@@ -31,5 +31,25 @@ defmodule ExSDP.AttributeTest do
     test "handles unknown attribute" do
       assert {:ok, "otherattr"} = Attribute.parse("otherattr")
     end
+
+    test "handles fingerprint with a hash-func token in any case" do
+      value = "3B:1E:81:0E:64:41:BC:F5:A2:96:8C:A6:1F:11:26:2C:D5:B7:52:5C"
+
+      assert {:ok, {:fingerprint, {:sha1, ^value}}} =
+               Attribute.parse("fingerprint:sha-1 " <> value)
+
+      assert {:ok, {:fingerprint, {:sha1, ^value}}} =
+               Attribute.parse("fingerprint:SHA-1 " <> value)
+
+      assert {:ok, {:fingerprint, {:sha256, ^value}}} =
+               Attribute.parse("fingerprint:SHA-256 " <> value)
+
+      assert {:ok, {:fingerprint, {:sha256, ^value}}} =
+               Attribute.parse("fingerprint:Sha-256 " <> value)
+    end
+
+    test "rejects a fingerprint with an unknown hash function" do
+      assert {:error, :invalid_fingerprint} = Attribute.parse("fingerprint:md5 AB:CD")
+    end
   end
 end
