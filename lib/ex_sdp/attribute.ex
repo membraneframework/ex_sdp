@@ -200,18 +200,19 @@ defmodule ExSDP.Attribute do
   defp parse_split_framerate(_invalid_framerate), do: :error
 
   defp parse_fingerprint(fingerprint) do
-    case String.split(fingerprint, " ") do
-      [hash_function, value] -> do_parse_fingerprint(String.downcase(hash_function), value)
-      _invalid_fingerprint -> {:error, :invalid_fingerprint}
+    with [sha, sha_value] <- String.split(fingerprint, " ") do
+      case String.downcase(sha) do
+        "sha-1" -> {:ok, {:fingerprint, {:sha1, sha_value}}}
+        "sha-224" -> {:ok, {:fingerprint, {:sha224, sha_value}}}
+        "sha-256" -> {:ok, {:fingerprint, {:sha256, sha_value}}}
+        "sha-384" -> {:ok, {:fingerprint, {:sha384, sha_value}}}
+        "sha-512" -> {:ok, {:fingerprint, {:sha512, sha_value}}}
+        _hash_function -> {:error, :invalid_fingerprint}
+      end
+    else
+      _fingerprint -> {:error, :invalid_fingerprint}
     end
   end
-
-  defp do_parse_fingerprint("sha-1", value), do: {:ok, {:fingerprint, {:sha1, value}}}
-  defp do_parse_fingerprint("sha-224", value), do: {:ok, {:fingerprint, {:sha224, value}}}
-  defp do_parse_fingerprint("sha-256", value), do: {:ok, {:fingerprint, {:sha256, value}}}
-  defp do_parse_fingerprint("sha-384", value), do: {:ok, {:fingerprint, {:sha384, value}}}
-  defp do_parse_fingerprint("sha-512", value), do: {:ok, {:fingerprint, {:sha512, value}}}
-  defp do_parse_fingerprint(_hash_function, _value), do: {:error, :invalid_fingerprint}
 
   defp parse_setup(setup) do
     case setup do
