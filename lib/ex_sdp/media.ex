@@ -7,6 +7,8 @@ defmodule ExSDP.Media do
   use Bunch
   use Bunch.Access
 
+  require Logger
+
   alias ExSDP.{
     Attribute,
     Bandwidth,
@@ -118,6 +120,12 @@ defmodule ExSDP.Media do
   def parse_optional(["i=" <> title | rest], %__MODULE__{} = media),
     do: parse_optional(rest, %__MODULE__{media | title: title})
 
+  # Some RTSP cameras (Sony / Vivotek-OEM) put a session-level t= (timing) line
+  # inside a media section, even though it's not allowed by the SDP standard.
+  # Here we skip it.
+  def parse_optional(["t=" <> _timing | rest], %__MODULE__{} = media),
+    do: parse_optional(rest, media)
+
   def parse_optional(["c=" <> conn | rest], %__MODULE__{} = media) do
     with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(conn) do
       connection_data = media.connection_data ++ [connection_data]
@@ -145,6 +153,11 @@ defmodule ExSDP.Media do
       media = %__MODULE__{media | attributes: [attribute | attrs]}
       parse_optional(rest, media)
     end
+  end
+
+  def parse_optional([line | rest], %__MODULE__{} = media) do
+    Logger.warning("Ignoring invalid or unsupported line in media section: #{inspect(line)}")
+    parse_optional(rest, media)
   end
 
   @spec apply_session(__MODULE__.t(), ExSDP.t()) :: __MODULE__.t()

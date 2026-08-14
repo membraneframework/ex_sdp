@@ -108,6 +108,50 @@ defmodule ExSDP.MediaTest do
              } == medium
     end
 
+    test "tolerates a stray session-level timing line (t=) inside a media section" do
+      media = "video 0 RTP/AVP 98"
+
+      attributes =
+        """
+        t=0 0
+        a=charset:Shift_JIS
+        a=rtpmap:98 H264/90000
+        a=control:trackID=3
+        a=x-onvif-track:
+        """
+        |> String.split("\n")
+
+      {:ok, {[""], medium}} =
+        media
+        |> Media.parse()
+        ~> ({:ok, medium} -> Media.parse_optional(attributes, medium))
+
+      assert %Media{type: :video, fmt: [98]} = medium
+    end
+
+    test "ignores invalid or unsupported lines with a warning" do
+      media = "video 0 RTP/AVP 98"
+
+      attributes =
+        """
+        x=not a real SDP line
+        a=rtpmap:98 H264/90000
+        """
+        |> String.split("\n")
+
+      log =
+        ExUnit.CaptureLog.capture_log(fn ->
+          {:ok, {[""], medium}} =
+            media
+            |> Media.parse()
+            ~> ({:ok, medium} -> Media.parse_optional(attributes, medium))
+
+          assert %Media{type: :video, fmt: [98]} = medium
+        end)
+
+      assert log =~ "Ignoring invalid or unsupported line"
+    end
+
     test "processes audio with attributes without trailing newlines" do
       media = "audio 58712 UDP/TLS/RTP/SAVPF 111"
 
