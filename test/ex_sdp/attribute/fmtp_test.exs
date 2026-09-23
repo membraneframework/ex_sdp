@@ -115,22 +115,13 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
-    test "parses H265 tx-mode with SRST as the default" do
-      explicit = "98 profile-id=1;tier-flag=0;level-id=153;tx-mode=SRST"
-      absent = "98 profile-id=1;tier-flag=0;level-id=153"
+    test "parses H265 tx-mode" do
+      for tx_mode <- [:SRST, :MRST, :MRMT] do
+        assert {:ok, %FMTP{tx_mode: ^tx_mode}} =
+                 FMTP.parse("98 profile-id=1;tier-flag=0;level-id=153;tx-mode=#{tx_mode}")
+      end
 
-      assert {:ok, %FMTP{tx_mode: :SRST} = parsed_explicit} = FMTP.parse(explicit)
-      assert {:ok, parsed_absent} = FMTP.parse(absent)
-      assert parsed_explicit == parsed_absent
-
-      assert parsed_explicit ==
-               %FMTP{pt: 98, profile_id: 1, tier_flag: false, level_id: 153}
-
-      assert {:ok, %FMTP{tx_mode: :MRST}} =
-               FMTP.parse("98 profile-id=1;tier-flag=0;level-id=153;tx-mode=MRST")
-
-      assert {:ok, %FMTP{tx_mode: :MRMT}} =
-               FMTP.parse("98 profile-id=1;tier-flag=0;level-id=153;tx-mode=MRMT")
+      assert {:ok, %FMTP{tx_mode: nil}} = FMTP.parse("98 profile-id=1;tier-flag=0;level-id=153")
 
       assert {:error, :invalid_tx_mode} =
                FMTP.parse("98 profile-id=1;tx-mode=BOGUS")
@@ -271,7 +262,7 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert "#{fmtp}" == expected
     end
 
-    test "serializes tx-mode only when it differs from the SRST default" do
+    test "serializes tx-mode only when set" do
       base = %FMTP{pt: 98, profile_id: 1, tier_flag: false, level_id: 153}
 
       assert "#{base}" == "fmtp:98 profile-id=1;tier-flag=0;level-id=153"

@@ -43,6 +43,7 @@ defmodule ExSDP.Attribute.FMTP do
                 :sprop_vps,
                 :sprop_sps,
                 :sprop_pps,
+                :tx_mode,
                 # OPUS
                 :maxaveragebitrate,
                 :maxplaybackrate,
@@ -88,7 +89,6 @@ defmodule ExSDP.Attribute.FMTP do
                 :randomaccessindication,
                 :streamstateindication,
                 :auxillarydatasizelength,
-                tx_mode: :SRST,
                 unknown: []
               ]
 
@@ -111,7 +111,7 @@ defmodule ExSDP.Attribute.FMTP do
           sprop_vps: [binary()] | nil,
           sprop_sps: [binary()] | nil,
           sprop_pps: [binary()] | nil,
-          tx_mode: :SRST | :MRST | :MRMT,
+          tx_mode: :SRST | :MRST | :MRMT | nil,
           # OPUS
           maxaveragebitrate: non_neg_integer() | nil,
           maxplaybackrate: non_neg_integer() | nil,
@@ -174,10 +174,10 @@ defmodule ExSDP.Attribute.FMTP do
           | :invalid_ps
           | :invalid_pt
           | :invalid_sprop_parameter_sets
+          | :invalid_tx_mode
           | :string_nan
           | :string_not_hex
           | :string_not_0_nor_1
-          | :invalid_tx_mode
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
