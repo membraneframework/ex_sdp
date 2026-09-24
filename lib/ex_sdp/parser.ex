@@ -4,8 +4,6 @@ defmodule ExSDP.Parser do
   """
   use Bunch.Access
 
-  require Logger
-
   alias ExSDP
 
   alias ExSDP.{
