@@ -2,7 +2,6 @@
 
 [![Hex.pm](https://img.shields.io/hexpm/v/ex_sdp.svg)](https://hex.pm/packages/ex_sdp)
 [![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/ex_sdp/)
-[![CircleCI](https://circleci.com/gh/membraneframework/ex_sdp.svg?style=svg)](https://circleci.com/gh/membraneframework/ex_sdp)
 
 Parser and serializer for Session Description Protocol. Based on [RFC4566](https://tools.ietf.org/html/rfc4566)
 
