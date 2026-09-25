@@ -43,6 +43,7 @@ defmodule ExSDP.Attribute.FMTP do
                 :sprop_vps,
                 :sprop_sps,
                 :sprop_pps,
+                :tx_mode,
                 # OPUS
                 :maxaveragebitrate,
                 :maxplaybackrate,
@@ -110,6 +111,7 @@ defmodule ExSDP.Attribute.FMTP do
           sprop_vps: [binary()] | nil,
           sprop_sps: [binary()] | nil,
           sprop_pps: [binary()] | nil,
+          tx_mode: :SRST | :MRST | :MRMT | nil,
           # OPUS
           maxaveragebitrate: non_neg_integer() | nil,
           maxplaybackrate: non_neg_integer() | nil,
@@ -172,6 +174,7 @@ defmodule ExSDP.Attribute.FMTP do
           | :invalid_ps
           | :invalid_pt
           | :invalid_sprop_parameter_sets
+          | :invalid_tx_mode
           | :string_nan
           | :string_not_hex
           | :string_not_0_nor_1
@@ -239,6 +242,15 @@ defmodule ExSDP.Attribute.FMTP do
   defp parse_param(["level-id=" <> level_id | rest], fmtp) do
     with {:ok, value} <- Utils.parse_numeric_string(level_id),
          do: {rest, %{fmtp | level_id: value}}
+  end
+
+  defp parse_param(["tx-mode=" <> tx_mode | rest], fmtp) do
+    case tx_mode do
+      "SRST" -> {rest, %{fmtp | tx_mode: :SRST}}
+      "MRST" -> {rest, %{fmtp | tx_mode: :MRST}}
+      "MRMT" -> {rest, %{fmtp | tx_mode: :MRMT}}
+      _other -> {:error, :invalid_tx_mode}
+    end
   end
 
   defp parse_param(["interop-constraints=" <> interop_constraints | rest], fmtp) do
@@ -530,6 +542,7 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize_base64("sprop-vps", fmtp.sprop_vps),
         Serializer.maybe_serialize_base64("sprop-sps", fmtp.sprop_sps),
         Serializer.maybe_serialize_base64("sprop-pps", fmtp.sprop_pps),
+        Serializer.maybe_serialize("tx-mode", fmtp.tx_mode),
         # OPUS
         Serializer.maybe_serialize("maxaveragebitrate", fmtp.maxaveragebitrate),
         Serializer.maybe_serialize("maxplaybackrate", fmtp.maxplaybackrate),

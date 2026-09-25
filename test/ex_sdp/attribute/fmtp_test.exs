@@ -115,6 +115,18 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
+    test "parses H265 tx-mode" do
+      for tx_mode <- [:SRST, :MRST, :MRMT] do
+        assert {:ok, %FMTP{tx_mode: ^tx_mode}} =
+                 FMTP.parse("98 profile-id=1;tier-flag=0;level-id=153;tx-mode=#{tx_mode}")
+      end
+
+      assert {:ok, %FMTP{tx_mode: nil}} = FMTP.parse("98 profile-id=1;tier-flag=0;level-id=153")
+
+      assert {:error, :invalid_tx_mode} =
+               FMTP.parse("98 profile-id=1;tx-mode=BOGUS")
+    end
+
     test "parses fmtp with sprop-*ps" do
       fmtp =
         "96 profile-space=0;profile-id=1;tier-flag=0;level-id=150;interop-constraints=B00000000000;" <>
@@ -248,6 +260,15 @@ defmodule ExSDP.Attribute.FMTPTest do
       }
 
       assert "#{fmtp}" == expected
+    end
+
+    test "serializes tx-mode only when set" do
+      base = %FMTP{pt: 98, profile_id: 1, tier_flag: false, level_id: 153}
+
+      assert "#{base}" == "fmtp:98 profile-id=1;tier-flag=0;level-id=153"
+
+      assert "#{%{base | tx_mode: :MRST}}" ==
+               "fmtp:98 profile-id=1;tier-flag=0;level-id=153;tx-mode=MRST"
     end
 
     test "serializes FMTP with sprop-*ps" do
