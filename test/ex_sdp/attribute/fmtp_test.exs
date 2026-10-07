@@ -115,6 +115,21 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
+    test "parses fmtp with an empty sprop-parameter-sets as if it were absent" do
+      # Some cameras (e.g. Hikvision door stations) send the key with no value
+      # and carry SPS/PPS in-band.
+      fmtp = "96 profile-level-id=420029; packetization-mode=1; sprop-parameter-sets="
+
+      expected = %FMTP{pt: 96, profile_level_id: 0x420029, packetization_mode: 1}
+
+      assert {:ok, expected} == FMTP.parse(fmtp)
+    end
+
+    test "still refuses a sprop-parameter-sets that is not valid base64" do
+      assert {:error, :invalid_sprop_parameter_sets} ==
+               FMTP.parse("96 packetization-mode=1; sprop-parameter-sets=not-base64,*")
+    end
+
     test "parses H265 tx-mode" do
       for tx_mode <- [:SRST, :MRST, :MRMT] do
         assert {:ok, %FMTP{tx_mode: ^tx_mode}} =
