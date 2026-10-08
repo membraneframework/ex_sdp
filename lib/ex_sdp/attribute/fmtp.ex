@@ -219,6 +219,9 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | packetization_mode: value}}
   end
 
+  # Some cameras send the key with no value and carry SPS/PPS in-band.
+  defp parse_param(["sprop-parameter-sets=" | rest], fmtp), do: {rest, fmtp}
+
   defp parse_param(["sprop-parameter-sets=" <> sprop_parameter_sets | rest], fmtp) do
     with {:ok, value} <- Utils.parse_sprop_parameter_sets(sprop_parameter_sets),
          do: {rest, %{fmtp | sprop_parameter_sets: value}}
