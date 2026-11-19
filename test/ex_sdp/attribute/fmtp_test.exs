@@ -125,6 +125,39 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
+    test "parses fmtp with more than two sets in sprop-parameter-sets" do
+      sps = <<103, 66, 0, 31>>
+      pps = <<104, 206, 60, 128>>
+      sets = &Enum.map_join(&1, ",", fn set -> Base.encode64(set) end)
+
+      import ExUnit.CaptureLog
+
+      for list <- [[sps, pps, <<104, 238, 49, 178>>], [sps, <<103, 100, 0, 31>>, pps]] do
+        {result, log} = with_log(fn -> FMTP.parse("96 sprop-parameter-sets=#{sets.(list)}") end)
+
+        assert {:ok, %FMTP{sprop_parameter_sets: %{sps: ^sps, pps: ^pps}}} = result
+        assert log =~ "sprop-parameter-sets"
+      end
+
+      assert {:ok, %FMTP{sprop_parameter_sets: %{sps: ^sps, pps: ^pps}}} =
+               FMTP.parse("96 sprop-parameter-sets=#{sets.([sps, pps])},")
+
+      assert {:error, :invalid_sprop_parameter_sets} =
+               FMTP.parse("96 sprop-parameter-sets=#{sets.([sps, pps])},!!!")
+
+      assert {:error, :invalid_sprop_parameter_sets} =
+               FMTP.parse("96 sprop-parameter-sets=#{sets.([sps, sps, sps])}")
+    end
+
+    test "parses fmtp with sprop-parameter-sets that lack base64 padding" do
+      assert {:ok,
+              %FMTP{sprop_parameter_sets: %{sps: <<103, 66, 0, 31>>, pps: <<104, 206, 60, 128>>}}} =
+               FMTP.parse("96 sprop-parameter-sets=Z0IAHw,aM48gA")
+
+      assert {:ok, %FMTP{sprop_sps: [<<66, 1, 1>>], sprop_pps: [<<68, 1, 192>>]}} =
+               FMTP.parse("96 sprop-sps=QgEB;sprop-pps=RAHA")
+    end
+
     test "still refuses a sprop-parameter-sets that is not valid base64" do
       assert {:error, :invalid_sprop_parameter_sets} ==
                FMTP.parse("96 packetization-mode=1; sprop-parameter-sets=not-base64,*")
