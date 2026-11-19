@@ -141,6 +141,16 @@ a=rtpmap:99 h263-1998/90000
  }}
 ```
 
+#### Lenient parsing
+
+By default a line, section or an attribute that cannot be parsed makes `ExSDP.parse/2`
+return an error. With the `lenient: true` option it is logged and skipped or kept
+unparsed instead:
+
+```elixir
+ExSDP.parse(sdp, lenient: true)
+```
+
 ### Serializer
 
 Serializer serializes `ExSDP` struct to a string with `\r\n` terminated lines.

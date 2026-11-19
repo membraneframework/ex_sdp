@@ -4,6 +4,8 @@ defmodule ExSDP.Parser do
   """
   use Bunch.Access
 
+  require Logger
+
   alias ExSDP
 
   alias ExSDP.{
@@ -20,24 +22,39 @@ defmodule ExSDP.Parser do
 
   @line_ending ["\r\n", "\r", "\n"]
 
+  @typedoc """
+  Options of the parser:
+  * `:lenient` - when `true`, a line, section or an attribute that cannot be parsed is
+    logged and skipped or kept unparsed instead of failing the whole description.
+    Defaults to `false`.
+  """
+  @type parse_opts :: [lenient: boolean()]
+
   @doc """
   Parses SDP Multimedia Session.
+
+  See `t:parse_opts/0` for the options.
   """
-  @spec parse(binary()) ::
+  @spec parse(binary(), parse_opts()) ::
           {:ok, ExSDP.t()} | {:error, atom() | {:not_supported_addr_type, binary()}}
-  def parse(binary) do
+  def parse(binary, opts \\ []) do
     binary
     |> String.split(@line_ending)
-    |> do_parse()
+    |> do_parse(struct(ExSDP), opts)
   end
 
-  defp do_parse(lines, session \\ struct(ExSDP))
-  defp do_parse([""], session), do: {:ok, flip_media(session)}
+  defp do_parse(lines, session, _opts) when lines in [[""], []],
+    do: {:ok, flip_media(session)}
 
-  defp do_parse(lines, session) do
-    case parse_line(lines, session) do
+  defp do_parse(lines, session, opts) do
+    lenient? = Keyword.get(opts, :lenient, false)
+
+    case parse_line_safely(lines, session, opts) do
       {rest, %ExSDP{} = session} ->
-        do_parse(rest, session)
+        do_parse(rest, session, opts)
+
+      {:error, reason} when lenient? ->
+        lines |> skip_line(reason) |> do_parse(session, opts)
 
       {:error, reason} ->
         {:error, {reason, List.first(lines)}}
@@ -46,27 +63,78 @@ defmodule ExSDP.Parser do
 
   @doc """
   Parses SDP Multimedia Session raising an exception in case of failure.
+
+  See `t:parse_opts/0` for the options.
   """
-  @spec parse!(binary()) :: ExSDP.t()
-  def parse!(binary) do
+  @spec parse!(binary(), parse_opts()) :: ExSDP.t()
+  def parse!(binary, opts \\ []) do
     binary
     |> String.split(@line_ending)
-    |> do_parse!()
+    |> do_parse!(struct(ExSDP), opts)
   end
 
-  defp do_parse!(lines, session \\ struct(ExSDP))
-  defp do_parse!([""], session), do: flip_media(session)
+  defp do_parse!(lines, session, _opts) when lines in [[""], []], do: flip_media(session)
 
-  defp do_parse!(lines, session) do
-    case parse_line(lines, session) do
+  defp do_parse!(lines, session, opts) do
+    lenient? = Keyword.get(opts, :lenient, false)
+
+    case parse_line_safely(lines, session, opts) do
+      {rest, %ExSDP{} = session} ->
+        do_parse!(rest, session, opts)
+
+      {:error, reason} when lenient? ->
+        lines |> skip_line(reason) |> do_parse!(session, opts)
+
       {:error, reason} ->
         error_message = format_error(lines, reason)
         raise error_message
-
-      {rest, %ExSDP{} = session} ->
-        do_parse!(rest, session)
     end
   end
+
+  defp parse_line_safely(lines, session, opts) do
+    if Keyword.get(opts, :lenient, false) do
+      # catches the errors that the parsers do not handle explicitly
+      try do
+        parse_line(lines, session, opts)
+      rescue
+        exception -> {:error, {:exception, Exception.message(exception)}}
+      end
+    else
+      parse_line(lines, session, opts)
+    end
+  end
+
+  # A media line that cannot be parsed takes its section with it: the lines that
+  # follow describe that media and must not be attached to anything else.
+  defp skip_line(["m=" <> _medium = line | rest], reason) do
+    Logger.warning("Ignoring SDP media section #{inspect(line)}: #{inspect(reason)}")
+    Enum.drop_while(rest, &(not String.starts_with?(&1, "m=")))
+  end
+
+  defp skip_line([line | rest], reason) do
+    Logger.warning("Ignoring SDP line #{inspect(line)}: #{inspect(reason)}")
+    rest
+  end
+
+  defp parse_line(lines, session, opts)
+
+  defp parse_line(["a=" <> attribute | rest], %ExSDP{attributes: attrs} = session, opts) do
+    with {:ok, attribute} <- Attribute.parse(attribute, Keyword.take(opts, [:lenient])) do
+      {rest, %ExSDP{session | attributes: [attribute | attrs]}}
+    end
+  end
+
+  defp parse_line(["m=" <> medium | rest], %ExSDP{media: media} = session, opts) do
+    with {:ok, medium} <- Media.parse(medium, opts),
+         {:ok, {rest, medium}} <- Media.parse_optional(rest, medium, opts) do
+      medium = Media.apply_session(medium, session)
+      {rest, %ExSDP{session | media: [medium | media]}}
+    end
+  end
+
+  defp parse_line(["" | rest], session, _opts), do: {rest, session}
+
+  defp parse_line(lines, session, _opts), do: parse_line(lines, session)
 
   defp parse_line(lines, session)
 
@@ -133,22 +201,6 @@ defmodule ExSDP.Parser do
       {rest, %ExSDP{spec | encryption: encryption}}
     end
   end
-
-  defp parse_line(["a=" <> attribute | rest], %ExSDP{attributes: attrs} = session) do
-    with {:ok, attribute} <- Attribute.parse(attribute) do
-      {rest, %ExSDP{session | attributes: [attribute | attrs]}}
-    end
-  end
-
-  defp parse_line(["m=" <> medium | rest], %ExSDP{media: media} = session) do
-    with {:ok, medium} <- Media.parse(medium),
-         {:ok, {rest, medium}} <- Media.parse_optional(rest, medium) do
-      medium = Media.apply_session(medium, session)
-      {rest, %ExSDP{session | media: [medium | media]}}
-    end
-  end
-
-  defp parse_line(["" | rest], session), do: {rest, session}
 
   defp parse_line(_lines, _session), do: {:error, :invalid_line}
 

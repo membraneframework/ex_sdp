@@ -18,6 +18,9 @@ defmodule ExSDP.Attribute.FMTP do
   """
 
   use Bunch
+
+  require Logger
+
   alias ExSDP.Attribute.RTPMapping
   alias ExSDP.Utils
 
@@ -179,8 +182,8 @@ defmodule ExSDP.Attribute.FMTP do
           | :string_not_hex
           | :string_not_0_nor_1
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
-  def parse(fmtp) do
+  @spec parse(binary(), lenient: boolean()) :: {:ok, t()} | {:error, reason()}
+  def parse(fmtp, opts \\ []) do
     withl fmtp: [pt_string, rest] <- String.split(fmtp, " ", parts: 2),
           pt: {:ok, pt} <- Utils.parse_payload_type(pt_string) do
       rest
@@ -188,27 +191,33 @@ defmodule ExSDP.Attribute.FMTP do
       # remove leading whitespaces
       |> Enum.map(&String.trim(&1))
       |> Enum.reject(&(&1 == ""))
-      |> do_parse(%__MODULE__{pt: pt})
+      |> do_parse(%__MODULE__{pt: pt}, Keyword.get(opts, :lenient, false))
     else
       fmtp: _other -> {:error, :invalid_fmtp}
       pt: {:error, _reason} = err -> err
     end
   end
 
-  defp do_parse([], fmtp), do: {:ok, fmtp}
+  defp do_parse([], fmtp, _lenient?), do: {:ok, fmtp}
 
-  defp do_parse([param | rest], fmtp) do
+  defp do_parse([param | rest], fmtp, lenient?) do
     normalized_param = downcase_name(param)
 
     case parse_param([normalized_param | rest], fmtp) do
       {rest, %__MODULE__{} = fmtp} ->
-        do_parse(rest, fmtp)
+        do_parse(rest, fmtp, lenient?)
 
       :unknown ->
-        do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])))
+        do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])), lenient?)
 
-      {:error, _reason} when normalized_param != param ->
-        do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])))
+      {:error, reason} when lenient? or normalized_param != param ->
+        if lenient? do
+          Logger.warning(
+            "Keeping SDP fmtp parameter #{inspect(param)} unparsed: #{inspect(reason)}"
+          )
+        end
+
+        do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])), lenient?)
 
       {:error, _reason} = error ->
         error
