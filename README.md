@@ -12,7 +12,7 @@ The package can be installed by adding `ex_sdp` to your list of dependencies in 
 ```elixir
 def deps do
   [
-    {:ex_sdp, "~> 1.3"}
+    {:ex_sdp, "~> 1.4"}
   ]
 end
 ```
