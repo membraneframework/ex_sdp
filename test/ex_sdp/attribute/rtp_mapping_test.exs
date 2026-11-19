@@ -36,6 +36,14 @@ defmodule ExSDP.Attribute.RTPMappingTest do
              } = mapping
     end
 
+    test "parses a mapping with several spaces after the payload type" do
+      assert {:ok, %RTPMapping{payload_type: 96, encoding: "H264", clock_rate: 90_000}} =
+               RTPMapping.parse("96  H264/90000", media_type: :video)
+
+      assert {:ok, %RTPMapping{payload_type: 8, encoding: "PCMA", clock_rate: 8000, params: 1}} =
+               RTPMapping.parse("8\tPCMA/8000 ", media_type: :audio)
+    end
+
     test "returns an error when clock_rate or payload type is not a number" do
       assert {:error, :invalid_pt} = RTPMapping.parse("9t9 h264/90000", media_type: :video)
       assert {:error, :string_nan} = RTPMapping.parse("99 h264/r0000", media_type: :video)
