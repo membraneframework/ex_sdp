@@ -144,6 +144,8 @@ defmodule ExSDP.Parser do
     end
   end
 
+  defp parse_line(["" | rest], session), do: {rest, session}
+
   defp parse_line(_lines, _session), do: {:error, :invalid_line}
 
   defp format_error(["m=" <> _rest = line | rest], reason) do

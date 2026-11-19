@@ -158,6 +158,15 @@ defmodule ExSDPTest do
     end
   end
 
+  describe "Parser parse/1 skips empty lines" do
+    test "in the session section" do
+      input = "v=0\r\n\r\no=- 1 1 IN IP4 10.0.0.1\r\ns=x\r\n\r\nt=0 0\r\nm=video 0 RTP/AVP 96\r\n"
+
+      assert {:ok, %ExSDP{session_name: "x", timing: %ExSDP.Timing{}, media: [_video]}} =
+               ExSDP.parse(input)
+    end
+  end
+
   describe "Parser parse!/1" do
     test "returns SDP spec when parsing valid input" do
       assert @expected_output == ExSDP.parse!(@input)
