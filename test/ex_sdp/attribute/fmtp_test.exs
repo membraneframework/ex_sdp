@@ -297,6 +297,29 @@ defmodule ExSDP.Attribute.FMTPTest do
     end
   end
 
+  describe "FMTP of mpeg4-generic" do
+    test "is parsed when config is written in lower-case hexadecimal" do
+      assert {:ok, %FMTP{config: <<0x11, 0xB0>>}} = FMTP.parse("97 mode=AAC-hbr;config=11b0")
+      assert {:ok, %FMTP{config: <<0xEB, 0x09, 0x88, 0x00>>}} = FMTP.parse("97 config=eB098800")
+    end
+
+    test "is parsed when the mode is spelt in another case or with an underscore" do
+      for {mode, expected} <- [
+            {"aac-hbr", :AAC_hbr},
+            {"AAC-HBR", :AAC_hbr},
+            {"AAC_hbr", :AAC_hbr},
+            {"aac-lbr", :AAC_lbr},
+            {"GENERIC", :generic},
+            {"celp-CBR", :CELP_cbr},
+            {"Celp-vbr", :CELP_vbr}
+          ] do
+        assert {:ok, %FMTP{mode: ^expected}} = FMTP.parse("97 mode=#{mode};config=1190")
+      end
+
+      assert {:error, :invalid_mode} = FMTP.parse("97 mode=AAC-xbr")
+    end
+  end
+
   describe "FMTP serializer" do
     test "serializes FMTP with numeric and boolean values" do
       fmtp = %FMTP{
