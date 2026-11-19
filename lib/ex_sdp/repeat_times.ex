@@ -113,6 +113,9 @@ defmodule ExSDP.RepeatTimes do
 
           {_error, invalid_unit} ->
             {:halt, {:error, {:invalid_unit, invalid_unit}}}
+
+          :error ->
+            {:halt, {:error, :malformed_repeat}}
         end
     end)
   end

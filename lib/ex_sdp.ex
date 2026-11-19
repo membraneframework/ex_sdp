@@ -63,8 +63,8 @@ defmodule ExSDP do
           media: [Media.t()]
         }
 
-  defdelegate parse(text), to: Parser
-  defdelegate parse!(text), to: Parser
+  defdelegate parse(text, opts \\ []), to: Parser
+  defdelegate parse!(text, opts \\ []), to: Parser
 
   @doc """
   Returns new sdp struct.
