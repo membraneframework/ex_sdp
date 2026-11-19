@@ -225,6 +225,45 @@ defmodule ExSDP.Attribute.FMTPTest do
     end
   end
 
+  describe "FMTP parameter names" do
+    test "are matched whatever their case" do
+      for sizelength <- ["sizelength", "sizeLength", "SizeLength", "SIZELENGTH"] do
+        fmtp =
+          "104 profile-level-id=15; streamtype=5; Mode=AAC-hbr; config=1408;" <>
+            "#{sizelength}=13; IndexLength=3; IndexDeltaLength=3;"
+
+        assert {:ok,
+                %FMTP{
+                  pt: 104,
+                  streamtype: 5,
+                  mode: :AAC_hbr,
+                  config: <<0x14, 0x08>>,
+                  sizelength: 13,
+                  indexlength: 3,
+                  indexdeltalength: 3,
+                  unknown: []
+                }} = FMTP.parse(fmtp)
+      end
+    end
+
+    test "are matched whatever their case for video too" do
+      assert {:ok, %FMTP{packetization_mode: 1, profile_level_id: 0x42E01F}} =
+               FMTP.parse("96 Packetization-Mode=1;PROFILE-LEVEL-ID=42e01f")
+    end
+
+    test "written in another case with a value that does not fit stay unknown" do
+      assert {:ok, %FMTP{mode: nil, cbr: nil, unknown: ["Mode=20", "CBR=64"]}} =
+               FMTP.parse("97 Mode=20;CBR=64")
+
+      assert {:error, :invalid_mode} = FMTP.parse("97 mode=20")
+    end
+
+    test "that are not known are kept as they were written" do
+      assert {:ok, %FMTP{unknown: ["DecoderTag=h3c-v3", "X-Custom=AbC"]}} =
+               FMTP.parse("96 DecoderTag=h3c-v3;X-Custom=AbC")
+    end
+  end
+
   describe "FMTP serializer" do
     test "serializes FMTP with numeric and boolean values" do
       fmtp = %FMTP{

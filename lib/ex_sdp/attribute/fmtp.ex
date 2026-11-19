@@ -197,10 +197,21 @@ defmodule ExSDP.Attribute.FMTP do
 
   defp do_parse([], fmtp), do: {:ok, fmtp}
 
-  defp do_parse(params, fmtp) do
-    case parse_param(params, fmtp) do
-      {rest, %__MODULE__{} = fmtp} -> do_parse(rest, fmtp)
-      {:error, _reason} = error -> error
+  defp do_parse([param | rest], fmtp) do
+    normalized_param = downcase_name(param)
+
+    case parse_param([normalized_param | rest], fmtp) do
+      {rest, %__MODULE__{} = fmtp} ->
+        do_parse(rest, fmtp)
+
+      :unknown ->
+        do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])))
+
+      {:error, _reason} when normalized_param != param ->
+        do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])))
+
+      {:error, _reason} = error ->
+        error
     end
   end
 
@@ -466,12 +477,19 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | auxillarydatasizelength: value}}
   end
 
-  defp parse_param([head | rest] = params, fmtp) do
+  defp parse_param([head | _rest] = params, fmtp) do
     # this is for non-key-value parameters as `key=value` format is not mandatory
     cond do
-      String.contains?(head, "=") -> {rest, Map.update!(fmtp, :unknown, &(&1 ++ [head]))}
+      String.contains?(head, "=") -> :unknown
       String.contains?(head, "/") -> parse_redundant_payloads_param(params, fmtp)
       true -> parse_dtmf_tones_param(params, fmtp)
+    end
+  end
+
+  defp downcase_name(param) do
+    case String.split(param, "=", parts: 2) do
+      [name, value] -> String.downcase(name, :ascii) <> "=" <> value
+      [_no_value] -> param
     end
   end
 
