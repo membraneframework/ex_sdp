@@ -15,9 +15,9 @@ defmodule ExSDP.Bandwidth do
           bandwidth: non_neg_integer()
         }
 
-  @type type :: :CT | :AS | :TIAS
+  @type type :: :CT | :AS | :TIAS | :RS | :RR
 
-  @supported_types ["CT", "AS", "TIAS"]
+  @supported_types ["CT", "AS", "TIAS", "RS", "RR"]
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_bandwidth}
   def parse(bandwidth) do
