@@ -48,6 +48,11 @@ defmodule ExSDP.MediaTest do
       assert {:error, :invalid_fmt} = Media.parse("video 49170 RTP/AVPF 96 t140")
     end
 
+    test "parses fmt as payload types for RTP/AVP/TCP" do
+      assert {:ok, %Media{protocol: "RTP/AVP/TCP", fmt: [96, 97]}} =
+               Media.parse("video 0 RTP/AVP/TCP 96 97")
+    end
+
     test "processes valid media description with multiple ports" do
       assert {:ok, media} =
                "video 49170/2 RTP/AVP 31"

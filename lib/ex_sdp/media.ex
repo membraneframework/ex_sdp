@@ -180,6 +180,7 @@ defmodule ExSDP.Media do
 
   @rtp_protocols [
     "RTP/AVP",
+    "RTP/AVP/TCP",
     "RTP/AVPF",
     "RTP/SAVP",
     "RTP/SAVPF",
