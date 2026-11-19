@@ -8,10 +8,14 @@ defmodule ExSDP.Address do
 
   @spec parse_address(binary()) :: {:ok, t()} | {:error, :invalid_address}
   def parse_address(address) do
-    case address |> to_charlist() |> :inet.parse_address() do
-      {:ok, address} -> {:ok, address}
-      # for fqdn
-      {:error, :einval} -> {:ok, address}
+    if String.valid?(address) do
+      case address |> to_charlist() |> :inet.parse_address() do
+        {:ok, address} -> {:ok, address}
+        # for fqdn
+        {:error, :einval} -> {:ok, address}
+      end
+    else
+      {:error, :invalid_address}
     end
   end
 

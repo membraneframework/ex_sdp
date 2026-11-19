@@ -70,8 +70,12 @@ defmodule ExSDP.Parser do
 
   defp parse_line(lines, session)
 
-  defp parse_line(["v=" <> version | rest], %ExSDP{} = spec),
-    do: {rest, %ExSDP{spec | version: String.to_integer(version)}}
+  defp parse_line(["v=" <> version | rest], %ExSDP{} = spec) do
+    case version |> String.trim() |> Integer.parse() do
+      {version, ""} -> {rest, %ExSDP{spec | version: version}}
+      _other -> {:error, :invalid_version}
+    end
+  end
 
   defp parse_line(["o=" <> origin | rest], %ExSDP{} = spec) do
     with {:ok, %Origin{} = origin} <- Origin.parse(origin) do

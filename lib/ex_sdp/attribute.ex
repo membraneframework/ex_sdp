@@ -105,6 +105,12 @@ defmodule ExSDP.Attribute do
     do_parse(attribute, List.first(value), opts)
   end
 
+  @valued_attributes ~w(rtpmap msid fmtp ssrc-group ssrc group extmap rtcp-fb rid simulcast
+                        framerate ice-options fingerprint maxptime ptime quality)
+
+  defp do_parse(attribute, nil, _opts) when attribute in @valued_attributes,
+    do: {:error, :missing_attribute_value}
+
   defp do_parse("rtpmap", value, opts), do: RTPMapping.parse(value, opts)
   defp do_parse("msid", value, _opts), do: MSID.parse(value)
   defp do_parse("fmtp", value, _opts), do: FMTP.parse(value)

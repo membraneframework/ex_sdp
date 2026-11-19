@@ -158,6 +158,77 @@ defmodule ExSDPTest do
     end
   end
 
+  describe "Parser parse/1 on malformed input returns an error instead of raising" do
+    defp parse_session(lines) do
+      (["v=0", "o=- 1 1 IN IP4 10.0.0.1", "s=x", "t=0 0"] ++ lines)
+      |> Enum.map_join(&(&1 <> "\r\n"))
+      |> ExSDP.parse()
+    end
+
+    test "when the version is not a number" do
+      assert {:error, {:invalid_version, "v=zero"}} = ExSDP.parse("v=zero\r\ns=x\r\n")
+    end
+
+    test "when the origin carries identifiers that are not numbers" do
+      assert {:error, {:invalid_session_id, "o=- abc 1 IN IP4 10.0.0.1"}} =
+               ExSDP.parse("v=0\r\no=- abc 1 IN IP4 10.0.0.1\r\ns=x\r\n")
+
+      assert {:error, {:invalid_session_version, "o=- 1 1.5 IN IP4 10.0.0.1"}} =
+               ExSDP.parse("v=0\r\no=- 1 1.5 IN IP4 10.0.0.1\r\ns=x\r\n")
+    end
+
+    test "when a line that belongs to the session section appears in a media section" do
+      assert {:error, {:invalid_line, "m=video 0 RTP/AVP 96"}} =
+               parse_session(["m=video 0 RTP/AVP 96", "a=rtpmap:96 H264/90000", "t=0 0"])
+    end
+
+    test "when a media section holds a line of an unknown type" do
+      assert {:error, {:invalid_line, "m=video 0 RTP/AVP 96"}} =
+               parse_session(["m=video 0 RTP/AVP 96", "y=0100000001"])
+    end
+
+    test "when the number of channels in rtpmap is not a number" do
+      assert {:error, {:invalid_rtpmap, "m=audio 0 RTP/AVP 97"}} =
+               parse_session(["m=audio 0 RTP/AVP 97", "a=rtpmap:97 PCMU/8000/x"])
+    end
+
+    test "when rtpmap appears at the session level" do
+      assert {:ok,
+              %ExSDP{attributes: [%ExSDP.Attribute.RTPMapping{encoding: "H264", params: nil}]}} =
+               parse_session(["a=rtpmap:96 H264/90000"])
+    end
+
+    test "when the port of a media line is not a number or a number and a count" do
+      for port <- ["0-1", "0abc", "0/abc", "0/0", "0/"] do
+        assert {:error, {reason, "m=video " <> _rest}} =
+                 parse_session(["m=video #{port} RTP/AVP 96"])
+
+        assert reason in [:invalid_port_number, :invalid_port_count]
+      end
+    end
+
+    test "when an address is not valid text" do
+      assert {:error, {:invalid_address, "c=IN IP4 " <> _rest}} =
+               ExSDP.parse("v=0\r\nc=IN IP4 " <> <<0xFF, 0xFE>> <> "\r\n")
+
+      assert {:error, {:invalid_address, "o=- 1 1 IN IP4 " <> _rest}} =
+               ExSDP.parse("v=0\r\no=- 1 1 IN IP4 " <> <<0xFF, 0xFE>> <> "\r\n")
+    end
+
+    test "when a repeat time in the compact form is followed by something that is not a time" do
+      assert {:error, {_reason, "r=7d 1h 0 25h x"}} =
+               ExSDP.parse("v=0\r\nt=0 0\r\nr=7d 1h 0 25h x\r\n")
+    end
+
+    test "when an attribute that takes a value comes without one" do
+      for attribute <-
+            ~w(rtpmap fmtp framerate ptime fingerprint ssrc msid extmap rtcp-fb ice-options) do
+        assert {:error, {:missing_attribute_value, "m=video 0 RTP/AVP 96"}} =
+                 parse_session(["m=video 0 RTP/AVP 96", "a=#{attribute}"])
+      end
+    end
+  end
+
   describe "Parser parse/1 skips empty lines" do
     test "in the session section" do
       input = "v=0\r\n\r\no=- 1 1 IN IP4 10.0.0.1\r\ns=x\r\n\r\nt=0 0\r\nm=video 0 RTP/AVP 96\r\n"

@@ -53,7 +53,13 @@ defmodule ExSDP.Origin do
 
   @spec parse(binary()) ::
           {:ok, t()}
-          | {:error, :invalid_addrtype | :invalid_address | :too_few_fields | :too_many_fields}
+          | {:error,
+             :invalid_addrtype
+             | :invalid_address
+             | :invalid_session_id
+             | :invalid_session_version
+             | :too_few_fields
+             | :too_many_fields}
   def parse(origin_binary) do
     with {:ok, [username, sess_id, sess_version, nettype, addrtype, address]} <-
            Utils.split(origin_binary, " ", 6) do
@@ -73,14 +79,16 @@ defmodule ExSDP.Origin do
 
   defp do_parse(username, sess_id, sess_version, nettype, addrtype, address) do
     with {:ok, addrtype} <- Address.parse_addrtype(addrtype),
-         {:ok, address} <- Address.parse_address(address) do
+         {:ok, address} <- Address.parse_address(address),
+         {:ok, sess_id} <- parse_integer(sess_id, :invalid_session_id),
+         {:ok, sess_version} <- parse_integer(sess_version, :invalid_session_version) do
       # check whether fqdn
       address = if is_binary(address), do: {addrtype, address}, else: address
 
       origin = %__MODULE__{
         username: username,
-        session_id: String.to_integer(sess_id),
-        session_version: String.to_integer(sess_version),
+        session_id: sess_id,
+        session_version: sess_version,
         network_type: nettype,
         address: address
       }
@@ -88,6 +96,13 @@ defmodule ExSDP.Origin do
       {:ok, origin}
     else
       {:error, _reason} = error -> error
+    end
+  end
+
+  defp parse_integer(string, error_reason) do
+    case Integer.parse(string) do
+      {integer, ""} -> {:ok, integer}
+      _other -> {:error, error_reason}
     end
   end
 

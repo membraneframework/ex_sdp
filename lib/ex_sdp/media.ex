@@ -81,7 +81,9 @@ defmodule ExSDP.Media do
   def parse(media) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
           port: {port, port_count} when port in 0..65_535 <- Integer.parse(port),
-          port_count: port_count when port_count > 0 <- parse_port_count(port_count),
+          port_count:
+            port_count when is_integer(port_count) and port_count > 0 <-
+              parse_port_count(port_count),
           fmt: {:ok, fmt} <- parse_fmt(fmt, proto) do
       media = %__MODULE__{
         type: parse_type(type),
@@ -147,6 +149,8 @@ defmodule ExSDP.Media do
     end
   end
 
+  def parse_optional([_line | _rest], %__MODULE__{}), do: {:error, :invalid_line}
+
   @spec apply_session(__MODULE__.t(), ExSDP.t()) :: __MODULE__.t()
   def apply_session(media, session) do
     session
@@ -209,6 +213,8 @@ defmodule ExSDP.Media do
       _not_matched -> :error
     end
   end
+
+  defp parse_port_count(_not_a_port_count), do: :error
 end
 
 defimpl String.Chars, for: ExSDP.Media do
