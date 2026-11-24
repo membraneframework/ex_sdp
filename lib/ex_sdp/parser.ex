@@ -49,7 +49,7 @@ defmodule ExSDP.Parser do
   defp do_parse(lines, session, opts) do
     lenient? = Keyword.get(opts, :lenient, false)
 
-    case parse_line_safely(lines, session, opts) do
+    case parse_line(lines, session, opts) do
       {rest, %ExSDP{} = session} ->
         do_parse(rest, session, opts)
 
@@ -78,7 +78,7 @@ defmodule ExSDP.Parser do
   defp do_parse!(lines, session, opts) do
     lenient? = Keyword.get(opts, :lenient, false)
 
-    case parse_line_safely(lines, session, opts) do
+    case parse_line(lines, session, opts) do
       {rest, %ExSDP{} = session} ->
         do_parse!(rest, session, opts)
 
@@ -88,19 +88,6 @@ defmodule ExSDP.Parser do
       {:error, reason} ->
         error_message = format_error(lines, reason)
         raise error_message
-    end
-  end
-
-  defp parse_line_safely(lines, session, opts) do
-    if Keyword.get(opts, :lenient, false) do
-      # catches the errors that the parsers do not handle explicitly
-      try do
-        parse_line(lines, session, opts)
-      rescue
-        exception -> {:error, {:exception, Exception.message(exception)}}
-      end
-    else
-      parse_line(lines, session, opts)
     end
   end
 

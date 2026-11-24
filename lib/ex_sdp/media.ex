@@ -122,31 +122,17 @@ defmodule ExSDP.Media do
     do: {:ok, {lines, finalize_optional_parsing(media)}}
 
   def parse_optional([line | rest], %__MODULE__{} = media, opts) do
-    lenient? = Keyword.get(opts, :lenient, false)
-
-    case parse_optional_line_safely(line, media, opts) do
+    case parse_optional_line(line, media, opts) do
       {:ok, %__MODULE__{} = media} ->
         parse_optional(rest, media, opts)
 
-      {:error, reason} when lenient? ->
-        Logger.warning("Ignoring SDP line #{inspect(line)}: #{inspect(reason)}")
-        parse_optional(rest, media, opts)
-
       {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  defp parse_optional_line_safely(line, media, opts) do
-    if Keyword.get(opts, :lenient, false) do
-      # catches the errors that the parsers do not handle explicitly
-      try do
-        parse_optional_line(line, media, opts)
-      rescue
-        exception -> {:error, {:exception, Exception.message(exception)}}
-      end
-    else
-      parse_optional_line(line, media, opts)
+        if Keyword.get(opts, :lenient, false) do
+          Logger.warning("Ignoring SDP line #{inspect(line)}: #{inspect(reason)}")
+          parse_optional(rest, media, opts)
+        else
+          {:error, reason}
+        end
     end
   end
 
