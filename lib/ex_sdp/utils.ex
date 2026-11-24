@@ -139,6 +139,7 @@ defmodule ExSDP.Utils do
   end
 
   # NAL unit type 7 is a sequence parameter set, type 8 a picture parameter set
+  # In 2.0 all the parameter sets should be kept, not only the first SPS and PPS
   defp first_sps_and_pps(decoded) do
     sets = for {:ok, set} <- decoded, do: set
     sps = Enum.find(sets, &match?(<<_header::3, 7::5, _rest::binary>>, &1))

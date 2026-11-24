@@ -116,7 +116,8 @@ defmodule ExSDP.Attribute do
 
       {:error, reason} when lenient? ->
         Logger.warning("Keeping SDP attribute #{inspect(line)} unparsed: #{inspect(reason)}")
-        {:ok, if(value == nil, do: attribute, else: {attribute, value})}
+        result = if value == nil, do: attribute, else: {attribute, value}
+        {:ok, result}
 
       {:error, reason} ->
         {:error, reason}
