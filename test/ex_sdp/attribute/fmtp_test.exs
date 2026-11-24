@@ -284,10 +284,8 @@ defmodule ExSDP.Attribute.FMTPTest do
                FMTP.parse("96 Packetization-Mode=1;PROFILE-LEVEL-ID=42e01f")
     end
 
-    test "written in another case with a value that does not fit stay unknown" do
-      assert {:ok, %FMTP{mode: nil, cbr: nil, unknown: ["Mode=20", "CBR=64"]}} =
-               FMTP.parse("97 Mode=20;CBR=64")
-
+    test "written in another case with a value that does not fit are an error" do
+      assert {:error, :invalid_mode} = FMTP.parse("97 Mode=20;CBR=64")
       assert {:error, :invalid_mode} = FMTP.parse("97 mode=20")
     end
 

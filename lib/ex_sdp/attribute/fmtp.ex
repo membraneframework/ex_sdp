@@ -201,21 +201,17 @@ defmodule ExSDP.Attribute.FMTP do
   defp do_parse([], fmtp, _lenient?), do: {:ok, fmtp}
 
   defp do_parse([param | rest], fmtp, lenient?) do
-    normalized_param = downcase_name(param)
-
-    case parse_param([normalized_param | rest], fmtp) do
+    case parse_param([downcase_name(param) | rest], fmtp) do
       {rest, %__MODULE__{} = fmtp} ->
         do_parse(rest, fmtp, lenient?)
 
       :unknown ->
         do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])), lenient?)
 
-      {:error, reason} when lenient? or normalized_param != param ->
-        if lenient? do
-          Logger.warning(
-            "Keeping SDP fmtp parameter #{inspect(param)} unparsed: #{inspect(reason)}"
-          )
-        end
+      {:error, reason} when lenient? ->
+        Logger.warning(
+          "Keeping SDP fmtp parameter #{inspect(param)} unparsed: #{inspect(reason)}"
+        )
 
         do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])), lenient?)
 
