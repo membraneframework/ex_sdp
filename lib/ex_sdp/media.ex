@@ -213,13 +213,14 @@ defmodule ExSDP.Media do
   ]
 
   defp parse_fmt(fmt, proto, opts) when proto in @rtp_protocols do
-    parsed = fmt |> String.split(" ") |> Enum.map(&Integer.parse/1)
+    parsed = fmt |> String.split() |> Enum.map(&Integer.parse/1)
 
     cond do
       Enum.all?(parsed, &match?({_payload_type, ""}, &1)) ->
         {:ok, Enum.map(parsed, fn {payload_type, ""} -> payload_type end)}
 
-      Keyword.get(opts, :lenient, false) ->
+      # for backward compatibility, invalid formats of RTP/AVP/TCP are never an error
+      Keyword.get(opts, :lenient, false) or proto == "RTP/AVP/TCP" ->
         Logger.warning(
           "SDP media formats #{inspect(fmt)} are not RTP payload types, keeping them as they are"
         )

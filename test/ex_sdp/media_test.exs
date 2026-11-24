@@ -53,6 +53,14 @@ defmodule ExSDP.MediaTest do
                Media.parse("video 0 RTP/AVP/TCP 96 97")
     end
 
+    test "keeps fmt of RTP/AVP/TCP that are not payload types as they are" do
+      {result, log} =
+        ExUnit.CaptureLog.with_log(fn -> Media.parse("video 0 RTP/AVP/TCP 96 t140") end)
+
+      assert {:ok, %Media{protocol: "RTP/AVP/TCP", fmt: "96 t140"}} = result
+      assert log =~ "are not RTP payload types"
+    end
+
     test "processes valid media description with multiple ports" do
       assert {:ok, media} =
                "video 49170/2 RTP/AVP 31"
