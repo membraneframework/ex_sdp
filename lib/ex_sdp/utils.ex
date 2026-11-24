@@ -121,13 +121,16 @@ defmodule ExSDP.Utils do
   end
 
   @spec parse_sprop_parameter_sets(binary) ::
-          {:error, :invalid_sprop_parameter_sets} | {:ok, %{sps: binary, pps: binary}}
+          {:error, :invalid_sprop_parameter_sets} | {:ok, %{sps: binary, pps: binary | nil}}
   def parse_sprop_parameter_sets(string) do
     decoded = string |> String.split(",", trim: true) |> Enum.map(&decode_parameter_set/1)
 
     case decoded do
       [{:ok, sps}, {:ok, pps}] ->
         {:ok, %{sps: sps, pps: pps}}
+
+      [{:ok, <<_header::3, 7::5, _rest::binary>> = sps}] ->
+        {:ok, %{sps: sps, pps: nil}}
 
       [_first, _second, _third | _rest] ->
         Logger.warning("sprop-parameter-sets lists more than two sets: #{inspect(string)}")

@@ -104,7 +104,7 @@ defmodule ExSDP.Attribute.FMTP do
           max_br: non_neg_integer() | nil,
           level_asymmetry_allowed: boolean() | nil,
           packetization_mode: non_neg_integer() | nil,
-          sprop_parameter_sets: %{sps: binary(), pps: binary()} | nil,
+          sprop_parameter_sets: %{sps: binary(), pps: binary() | nil} | nil,
           # H265
           profile_space: non_neg_integer() | nil,
           profile_id: non_neg_integer() | nil,

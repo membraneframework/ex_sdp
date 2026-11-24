@@ -158,6 +158,16 @@ defmodule ExSDP.Attribute.FMTPTest do
                FMTP.parse("96 sprop-sps=QgEB;sprop-pps=RAHA")
     end
 
+    test "parses fmtp with sprop-parameter-sets that carry only an SPS" do
+      assert {:ok, %FMTP{sprop_parameter_sets: %{sps: <<103, 66, 0, 31>>, pps: nil}} = fmtp} =
+               FMTP.parse("96 sprop-parameter-sets=Z0IAHw==")
+
+      assert to_string(fmtp) == "fmtp:96 sprop-parameter-sets=Z0IAHw=="
+
+      assert {:error, :invalid_sprop_parameter_sets} =
+               FMTP.parse("96 sprop-parameter-sets=aM48gA==")
+    end
+
     test "still refuses a sprop-parameter-sets that is not valid base64" do
       assert {:error, :invalid_sprop_parameter_sets} ==
                FMTP.parse("96 packetization-mode=1; sprop-parameter-sets=not-base64,*")
