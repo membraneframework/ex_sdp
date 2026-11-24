@@ -107,32 +107,30 @@ defmodule ExSDP.Media do
 
   @spec parse_optional([binary()], t(), ExSDP.Parser.parse_opts()) ::
           {:ok, {[binary()], t()}} | {:error, atom()}
-  def parse_optional(lines, media, opts \\ [])
+  def parse_optional(lines, %__MODULE__{} = media, opts \\ []) do
+    lenient? = Keyword.get(opts, :lenient, false)
+    {media_lines, rest} = Enum.split_while(lines, fn line -> not match?("m=" <> _media, line) end)
 
-  def parse_optional([], %__MODULE__{} = media, _opts),
-    do: {:ok, {[""], finalize_optional_parsing(media)}}
+    result =
+      media_lines
+      |> Enum.reject(fn line -> line == "" end)
+      |> Enum.reduce_while({:ok, media}, fn line, {:ok, media} ->
+        case parse_optional_line(line, media, opts) do
+          {:ok, %__MODULE__{} = media} ->
+            {:cont, {:ok, media}}
 
-  def parse_optional([""], %__MODULE__{} = media, _opts),
-    do: {:ok, {[""], finalize_optional_parsing(media)}}
+          {:error, reason} when lenient? ->
+            Logger.warning("Ignoring SDP line #{inspect(line)}: #{inspect(reason)}")
+            {:cont, {:ok, media}}
 
-  def parse_optional(["" | rest], %__MODULE__{} = media, opts),
-    do: parse_optional(rest, media, opts)
-
-  def parse_optional(["m=" <> _media_attribute | _rest] = lines, %__MODULE__{} = media, _opts),
-    do: {:ok, {lines, finalize_optional_parsing(media)}}
-
-  def parse_optional([line | rest], %__MODULE__{} = media, opts) do
-    case parse_optional_line(line, media, opts) do
-      {:ok, %__MODULE__{} = media} ->
-        parse_optional(rest, media, opts)
-
-      {:error, reason} ->
-        if Keyword.get(opts, :lenient, false) do
-          Logger.warning("Ignoring SDP line #{inspect(line)}: #{inspect(reason)}")
-          parse_optional(rest, media, opts)
-        else
-          {:error, reason}
+          {:error, reason} ->
+            {:halt, {:error, reason}}
         end
+      end)
+
+    with {:ok, media} <- result do
+      rest = if rest == [], do: [""], else: rest
+      {:ok, {rest, finalize_optional_parsing(media)}}
     end
   end
 
