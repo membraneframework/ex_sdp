@@ -413,6 +413,8 @@ defmodule ExSDP.Attribute.FMTP do
   end
 
   defp parse_param(["mode=" <> value | rest], fmtp) do
+    # `mode` means different things in different codecs, so a value that is not
+    # recognised is kept in `unknown` instead of being an error
     case Utils.parse_mode(value) do
       {:ok, mode} -> {rest, %{fmtp | mode: mode}}
       {:error, :invalid_mode} -> :unknown
