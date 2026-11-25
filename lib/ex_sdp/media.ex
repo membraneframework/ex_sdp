@@ -217,7 +217,6 @@ defmodule ExSDP.Media do
       Enum.all?(parsed, &match?({_payload_type, ""}, &1)) ->
         {:ok, Enum.map(parsed, fn {payload_type, ""} -> payload_type end)}
 
-      # for backward compatibility, invalid formats of RTP/AVP/TCP are never an error
       Keyword.get(opts, :lenient, false) or proto == "RTP/AVP/TCP" ->
         Logger.warning(
           "SDP media formats #{inspect(fmt)} are not RTP payload types, keeping them as they are"
