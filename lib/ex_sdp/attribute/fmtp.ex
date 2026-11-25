@@ -413,9 +413,6 @@ defmodule ExSDP.Attribute.FMTP do
   end
 
   defp parse_param(["mode=" <> value | rest], fmtp) do
-    # Only the modes of MPEG-4 streams (RFC 3640) are recognised. Other codecs have a
-    # `mode` parameter with different values, e.g. the frame size in iLBC (RFC 3952),
-    # so a value that is not recognised is not an error.
     case Utils.parse_mode(value) do
       {:ok, mode} -> {rest, %{fmtp | mode: mode}}
       {:error, :invalid_mode} -> :unknown
