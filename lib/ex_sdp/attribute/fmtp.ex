@@ -413,8 +413,11 @@ defmodule ExSDP.Attribute.FMTP do
   end
 
   defp parse_param(["mode=" <> value | rest], fmtp) do
-    with {:ok, value} <- Utils.parse_mode(value),
-         do: {rest, %{fmtp | mode: value}}
+    case Utils.parse_mode(value) do
+      {:ok, mode} -> {rest, %{fmtp | mode: mode}}
+      # other payload formats use `mode` too, e.g. iLBC for the frame size (RFC 3952)
+      {:error, :invalid_mode} -> :unknown
+    end
   end
 
   defp parse_param(["objecttype=" <> value | rest], fmtp) do

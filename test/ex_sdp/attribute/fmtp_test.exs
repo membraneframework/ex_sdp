@@ -294,9 +294,9 @@ defmodule ExSDP.Attribute.FMTPTest do
                FMTP.parse("96 Packetization-Mode=1;PROFILE-LEVEL-ID=42e01f")
     end
 
-    test "written in another case with a value that does not fit are an error" do
-      assert {:error, :invalid_mode} = FMTP.parse("97 Mode=20;CBR=64")
-      assert {:error, :invalid_mode} = FMTP.parse("97 mode=20")
+    test "keeps a mode that is not an MPEG-4 one unknown, whatever the case of the name" do
+      assert {:ok, %FMTP{mode: nil, unknown: ["mode=20"]}} = FMTP.parse("97 mode=20")
+      assert {:ok, %FMTP{mode: nil, unknown: ["Mode=20"]}} = FMTP.parse("97 Mode=20")
     end
 
     test "that are not known are kept as they were written" do
@@ -324,7 +324,7 @@ defmodule ExSDP.Attribute.FMTPTest do
         assert {:ok, %FMTP{mode: ^expected}} = FMTP.parse("97 mode=#{mode};config=1190")
       end
 
-      assert {:error, :invalid_mode} = FMTP.parse("97 mode=AAC-xbr")
+      assert {:ok, %FMTP{mode: nil, unknown: ["mode=AAC-xbr"]}} = FMTP.parse("97 mode=AAC-xbr")
     end
   end
 
