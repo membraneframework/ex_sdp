@@ -146,7 +146,9 @@ defmodule ExSDP.Attribute.FMTPTest do
                FMTP.parse("96 sprop-parameter-sets=#{sets.([sps, pps])},!!!")
 
       assert {:error, :invalid_sprop_parameter_sets} =
-               FMTP.parse("96 sprop-parameter-sets=#{sets.([sps, sps, sps])}")
+               FMTP.parse(
+                 "96 sprop-parameter-sets=#{sets.([<<101, 1>>, <<101, 2>>, <<101, 3>>])}"
+               )
     end
 
     test "parses fmtp with sprop-parameter-sets that lack base64 padding" do
@@ -165,7 +167,18 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert to_string(fmtp) == "fmtp:96 sprop-parameter-sets=Z0IAHw=="
 
       assert {:error, :invalid_sprop_parameter_sets} =
+               FMTP.parse("96 sprop-parameter-sets=ZQECAw==")
+    end
+
+    test "parses fmtp with sprop-parameter-sets that carry only a PPS or list the PPS first" do
+      assert {:ok, %FMTP{sprop_parameter_sets: %{sps: nil, pps: <<104, 206, 60, 128>>}} = fmtp} =
                FMTP.parse("96 sprop-parameter-sets=aM48gA==")
+
+      assert to_string(fmtp) == "fmtp:96 sprop-parameter-sets=aM48gA=="
+
+      assert {:ok,
+              %FMTP{sprop_parameter_sets: %{sps: <<103, 66, 0, 31>>, pps: <<104, 206, 60, 128>>}}} =
+               FMTP.parse("96 sprop-parameter-sets=aM48gA==,Z0IAHw==")
     end
 
     test "still refuses a sprop-parameter-sets that is not valid base64" do

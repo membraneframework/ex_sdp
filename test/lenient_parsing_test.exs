@@ -230,12 +230,12 @@ defmodule ExSDP.LenientParsingTest do
       assert log =~ "sprop-parameter-sets"
     end
 
-    test "sprop-parameter-sets with a single parameter set that is not an SPS" do
-      {fmtp, _log} = parse_fmtp_leniently("packetization-mode=1;sprop-parameter-sets=aM48gA==")
+    test "sprop-parameter-sets with a single NAL unit that is not a parameter set" do
+      {fmtp, _log} = parse_fmtp_leniently("packetization-mode=1;sprop-parameter-sets=ZQECAw==")
 
       assert fmtp.packetization_mode == 1
       assert fmtp.sprop_parameter_sets == nil
-      assert fmtp.unknown == ["sprop-parameter-sets=aM48gA=="]
+      assert fmtp.unknown == ["sprop-parameter-sets=ZQECAw=="]
     end
 
     test "profile-level-id that is not hexadecimal" do

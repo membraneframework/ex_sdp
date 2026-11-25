@@ -121,36 +121,43 @@ defmodule ExSDP.Utils do
   end
 
   @spec parse_sprop_parameter_sets(binary) ::
-          {:error, :invalid_sprop_parameter_sets} | {:ok, %{sps: binary, pps: binary | nil}}
+          {:error, :invalid_sprop_parameter_sets}
+          | {:ok, %{sps: binary | nil, pps: binary | nil}}
   def parse_sprop_parameter_sets(string) do
     decoded = string |> String.split(",", trim: true) |> Enum.map(&decode_parameter_set/1)
 
-    case decoded do
-      [{:ok, sps}, {:ok, pps}] ->
-        {:ok, %{sps: sps, pps: pps}}
-
-      [{:ok, <<_header::3, 7::5, _rest::binary>> = sps}] ->
-        {:ok, %{sps: sps, pps: nil}}
-
-      [_first, _second, _third | _rest] ->
-        Logger.warning("sprop-parameter-sets lists more than two sets: #{inspect(string)}")
-        first_sps_and_pps(decoded)
-
-      _other ->
-        {:error, :invalid_sprop_parameter_sets}
+    if decoded != [] and Enum.all?(decoded, fn result -> match?({:ok, _set}, result) end) do
+      decoded
+      |> Enum.map(fn {:ok, set} -> set end)
+      |> pick_sps_and_pps()
+    else
+      {:error, :invalid_sprop_parameter_sets}
     end
   end
 
   # NAL unit type 7 is a sequence parameter set, type 8 a picture parameter set
-  # In 2.0 all the parameter sets should be kept, not only the first SPS and PPS
-  defp first_sps_and_pps(decoded) do
-    sets = for {:ok, set} <- decoded, do: set
-    sps = Enum.find(sets, &match?(<<_header::3, 7::5, _rest::binary>>, &1))
-    pps = Enum.find(sets, &match?(<<_header::3, 8::5, _rest::binary>>, &1))
+  defp pick_sps_and_pps([
+         <<_pps_header::3, 8::5, _pps_rest::binary>> = pps,
+         <<_sps_header::3, 7::5, _sps_rest::binary>> = sps
+       ]),
+       do: {:ok, %{sps: sps, pps: pps}}
 
-    if length(sets) == length(decoded) and sps != nil and pps != nil,
-      do: {:ok, %{sps: sps, pps: pps}},
-      else: {:error, :invalid_sprop_parameter_sets}
+  defp pick_sps_and_pps([sps, pps]), do: {:ok, %{sps: sps, pps: pps}}
+
+  # In 2.0 all the parameter sets should be kept, not only the first SPS and PPS
+  defp pick_sps_and_pps(sets) do
+    sps = Enum.find(sets, fn set -> match?(<<_header::3, 7::5, _rest::binary>>, set) end)
+    pps = Enum.find(sets, fn set -> match?(<<_header::3, 8::5, _rest::binary>>, set) end)
+
+    if length(sets) > 2 do
+      Logger.warning(
+        "sprop-parameter-sets lists more than two sets, keeping the first SPS and PPS"
+      )
+    end
+
+    if sps == nil and pps == nil,
+      do: {:error, :invalid_sprop_parameter_sets},
+      else: {:ok, %{sps: sps, pps: pps}}
   end
 
   @spec parse_sprop_ps(binary()) :: {:error, :invalid_ps} | {:ok, [binary()]}
