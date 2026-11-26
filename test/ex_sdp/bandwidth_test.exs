@@ -14,8 +14,18 @@ defmodule ExSDP.BandwidthTest do
       assert %Bandwidth{type: :TIAS, bandwidth: 256_000} == result
     end
 
+    test "parse RS and RR bandwidth types" do
+      assert {:ok, %Bandwidth{type: :RS, bandwidth: 0}} == Bandwidth.parse("RS:0")
+      assert {:ok, %Bandwidth{type: :RR, bandwidth: 4000}} == Bandwidth.parse("RR:4000")
+      assert "#{%Bandwidth{type: :RR, bandwidth: 4000}}" == "RR:4000"
+    end
+
     test "returns error when property is invalid" do
       assert {:error, :invalid_bandwidth} == Bandwidth.parse("gibberish")
+    end
+
+    test "returns error when the type is unknown" do
+      assert {:error, :unknown_type} == Bandwidth.parse("X-YZ:256")
     end
   end
 

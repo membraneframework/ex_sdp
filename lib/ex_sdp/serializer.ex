@@ -36,8 +36,10 @@ defmodule ExSDP.Serializer do
   def maybe_serialize(type, false), do: "#{type}=0"
   def maybe_serialize("dtmf-tones", value), do: "#{value}"
 
-  def maybe_serialize("sprop-parameter-sets", %{sps: sps, pps: pps}),
-    do: "sprop-parameter-sets=#{Base.encode64(sps)},#{Base.encode64(pps)}"
+  def maybe_serialize("sprop-parameter-sets", %{sps: sps, pps: pps}) do
+    sets = [sps, pps] |> Enum.reject(&is_nil/1) |> Enum.map_join(",", &Base.encode64/1)
+    "sprop-parameter-sets=#{sets}"
+  end
 
   def maybe_serialize("mode", mode) do
     mode =

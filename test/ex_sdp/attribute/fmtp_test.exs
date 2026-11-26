@@ -125,6 +125,62 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, expected} == FMTP.parse(fmtp)
     end
 
+    test "parses fmtp with more than two sets in sprop-parameter-sets" do
+      sps = <<103, 66, 0, 31>>
+      pps = <<104, 206, 60, 128>>
+      sets = &Enum.map_join(&1, ",", fn set -> Base.encode64(set) end)
+
+      import ExUnit.CaptureLog
+
+      for list <- [[sps, pps, <<104, 238, 49, 178>>], [sps, <<103, 100, 0, 31>>, pps]] do
+        {result, log} = with_log(fn -> FMTP.parse("96 sprop-parameter-sets=#{sets.(list)}") end)
+
+        assert {:ok, %FMTP{sprop_parameter_sets: %{sps: ^sps, pps: ^pps}}} = result
+        assert log =~ "sprop-parameter-sets"
+      end
+
+      assert {:ok, %FMTP{sprop_parameter_sets: %{sps: ^sps, pps: ^pps}}} =
+               FMTP.parse("96 sprop-parameter-sets=#{sets.([sps, pps])},")
+
+      assert {:error, :invalid_sprop_parameter_sets} =
+               FMTP.parse("96 sprop-parameter-sets=#{sets.([sps, pps])},!!!")
+
+      assert {:error, :invalid_sprop_parameter_sets} =
+               FMTP.parse(
+                 "96 sprop-parameter-sets=#{sets.([<<101, 1>>, <<101, 2>>, <<101, 3>>])}"
+               )
+    end
+
+    test "parses fmtp with sprop-parameter-sets that lack base64 padding" do
+      assert {:ok,
+              %FMTP{sprop_parameter_sets: %{sps: <<103, 66, 0, 31>>, pps: <<104, 206, 60, 128>>}}} =
+               FMTP.parse("96 sprop-parameter-sets=Z0IAHw,aM48gA")
+
+      assert {:ok, %FMTP{sprop_sps: [<<66, 1, 1>>], sprop_pps: [<<68, 1, 192>>]}} =
+               FMTP.parse("96 sprop-sps=QgEB;sprop-pps=RAHA")
+    end
+
+    test "parses fmtp with sprop-parameter-sets that carry only an SPS" do
+      assert {:ok, %FMTP{sprop_parameter_sets: %{sps: <<103, 66, 0, 31>>, pps: nil}} = fmtp} =
+               FMTP.parse("96 sprop-parameter-sets=Z0IAHw==")
+
+      assert to_string(fmtp) == "fmtp:96 sprop-parameter-sets=Z0IAHw=="
+
+      assert {:error, :invalid_sprop_parameter_sets} =
+               FMTP.parse("96 sprop-parameter-sets=ZQECAw==")
+    end
+
+    test "parses fmtp with sprop-parameter-sets that carry only a PPS or list the PPS first" do
+      assert {:ok, %FMTP{sprop_parameter_sets: %{sps: nil, pps: <<104, 206, 60, 128>>}} = fmtp} =
+               FMTP.parse("96 sprop-parameter-sets=aM48gA==")
+
+      assert to_string(fmtp) == "fmtp:96 sprop-parameter-sets=aM48gA=="
+
+      assert {:ok,
+              %FMTP{sprop_parameter_sets: %{sps: <<103, 66, 0, 31>>, pps: <<104, 206, 60, 128>>}}} =
+               FMTP.parse("96 sprop-parameter-sets=aM48gA==,Z0IAHw==")
+    end
+
     test "still refuses a sprop-parameter-sets that is not valid base64" do
       assert {:error, :invalid_sprop_parameter_sets} ==
                FMTP.parse("96 packetization-mode=1; sprop-parameter-sets=not-base64,*")
@@ -222,6 +278,66 @@ defmodule ExSDP.Attribute.FMTPTest do
                 constantduration: 1024,
                 indexdeltalength: 3
               }} = FMTP.parse(fmtp)
+    end
+  end
+
+  describe "FMTP parameter names" do
+    test "are matched whatever their case" do
+      for sizelength <- ["sizelength", "sizeLength", "SizeLength", "SIZELENGTH"] do
+        fmtp =
+          "104 profile-level-id=15; streamtype=5; Mode=AAC-hbr; config=1408;" <>
+            "#{sizelength}=13; IndexLength=3; IndexDeltaLength=3;"
+
+        assert {:ok,
+                %FMTP{
+                  pt: 104,
+                  streamtype: 5,
+                  mode: :AAC_hbr,
+                  config: <<0x14, 0x08>>,
+                  sizelength: 13,
+                  indexlength: 3,
+                  indexdeltalength: 3,
+                  unknown: []
+                }} = FMTP.parse(fmtp)
+      end
+    end
+
+    test "are matched whatever their case for video too" do
+      assert {:ok, %FMTP{packetization_mode: 1, profile_level_id: 0x42E01F}} =
+               FMTP.parse("96 Packetization-Mode=1;PROFILE-LEVEL-ID=42e01f")
+    end
+
+    test "keeps a mode that is not an MPEG-4 one unknown, whatever the case of the name" do
+      assert {:ok, %FMTP{mode: nil, unknown: ["mode=20"]}} = FMTP.parse("97 mode=20")
+      assert {:ok, %FMTP{mode: nil, unknown: ["Mode=20"]}} = FMTP.parse("97 Mode=20")
+    end
+
+    test "that are not known are kept as they were written" do
+      assert {:ok, %FMTP{unknown: ["DecoderTag=h3c-v3", "X-Custom=AbC"]}} =
+               FMTP.parse("96 DecoderTag=h3c-v3;X-Custom=AbC")
+    end
+  end
+
+  describe "FMTP of mpeg4-generic" do
+    test "is parsed when config is written in lower-case hexadecimal" do
+      assert {:ok, %FMTP{config: <<0x11, 0xB0>>}} = FMTP.parse("97 mode=AAC-hbr;config=11b0")
+      assert {:ok, %FMTP{config: <<0xEB, 0x09, 0x88, 0x00>>}} = FMTP.parse("97 config=eB098800")
+    end
+
+    test "is parsed when the mode is spelt in another case or with an underscore" do
+      for {mode, expected} <- [
+            {"aac-hbr", :AAC_hbr},
+            {"AAC-HBR", :AAC_hbr},
+            {"AAC_hbr", :AAC_hbr},
+            {"aac-lbr", :AAC_lbr},
+            {"GENERIC", :generic},
+            {"celp-CBR", :CELP_cbr},
+            {"Celp-vbr", :CELP_vbr}
+          ] do
+        assert {:ok, %FMTP{mode: ^expected}} = FMTP.parse("97 mode=#{mode};config=1190")
+      end
+
+      assert {:ok, %FMTP{mode: nil, unknown: ["mode=AAC-xbr"]}} = FMTP.parse("97 mode=AAC-xbr")
     end
   end
 

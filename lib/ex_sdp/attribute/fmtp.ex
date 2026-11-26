@@ -18,6 +18,9 @@ defmodule ExSDP.Attribute.FMTP do
   """
 
   use Bunch
+
+  require Logger
+
   alias ExSDP.Attribute.RTPMapping
   alias ExSDP.Utils
 
@@ -101,7 +104,7 @@ defmodule ExSDP.Attribute.FMTP do
           max_br: non_neg_integer() | nil,
           level_asymmetry_allowed: boolean() | nil,
           packetization_mode: non_neg_integer() | nil,
-          sprop_parameter_sets: %{sps: binary(), pps: binary()} | nil,
+          sprop_parameter_sets: %{sps: binary() | nil, pps: binary() | nil} | nil,
           # H265
           profile_space: non_neg_integer() | nil,
           profile_id: non_neg_integer() | nil,
@@ -179,8 +182,8 @@ defmodule ExSDP.Attribute.FMTP do
           | :string_not_hex
           | :string_not_0_nor_1
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
-  def parse(fmtp) do
+  @spec parse(binary(), lenient: boolean()) :: {:ok, t()} | {:error, reason()}
+  def parse(fmtp, opts \\ []) do
     withl fmtp: [pt_string, rest] <- String.split(fmtp, " ", parts: 2),
           pt: {:ok, pt} <- Utils.parse_payload_type(pt_string) do
       rest
@@ -188,19 +191,32 @@ defmodule ExSDP.Attribute.FMTP do
       # remove leading whitespaces
       |> Enum.map(&String.trim(&1))
       |> Enum.reject(&(&1 == ""))
-      |> do_parse(%__MODULE__{pt: pt})
+      |> do_parse(%__MODULE__{pt: pt}, Keyword.get(opts, :lenient, false))
     else
       fmtp: _other -> {:error, :invalid_fmtp}
       pt: {:error, _reason} = err -> err
     end
   end
 
-  defp do_parse([], fmtp), do: {:ok, fmtp}
+  defp do_parse([], fmtp, _lenient?), do: {:ok, fmtp}
 
-  defp do_parse(params, fmtp) do
-    case parse_param(params, fmtp) do
-      {rest, %__MODULE__{} = fmtp} -> do_parse(rest, fmtp)
-      {:error, _reason} = error -> error
+  defp do_parse([param | rest], fmtp, lenient?) do
+    case parse_param([downcase_name(param) | rest], fmtp) do
+      {rest, %__MODULE__{} = fmtp} ->
+        do_parse(rest, fmtp, lenient?)
+
+      :unknown ->
+        do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])), lenient?)
+
+      {:error, reason} when lenient? ->
+        Logger.warning(
+          "Keeping SDP fmtp parameter #{inspect(param)} unparsed: #{inspect(reason)}"
+        )
+
+        do_parse(rest, Map.update!(fmtp, :unknown, &(&1 ++ [param])), lenient?)
+
+      {:error, _reason} = error ->
+        error
     end
   end
 
@@ -397,8 +413,12 @@ defmodule ExSDP.Attribute.FMTP do
   end
 
   defp parse_param(["mode=" <> value | rest], fmtp) do
-    with {:ok, value} <- Utils.parse_mode(value),
-         do: {rest, %{fmtp | mode: value}}
+    # `mode` means different things in different codecs, so a value that is not
+    # recognised is kept in `unknown` instead of being an error
+    case Utils.parse_mode(value) do
+      {:ok, mode} -> {rest, %{fmtp | mode: mode}}
+      {:error, :invalid_mode} -> :unknown
+    end
   end
 
   defp parse_param(["objecttype=" <> value | rest], fmtp) do
@@ -466,12 +486,19 @@ defmodule ExSDP.Attribute.FMTP do
          do: {rest, %{fmtp | auxillarydatasizelength: value}}
   end
 
-  defp parse_param([head | rest] = params, fmtp) do
+  defp parse_param([head | _rest] = params, fmtp) do
     # this is for non-key-value parameters as `key=value` format is not mandatory
     cond do
-      String.contains?(head, "=") -> {rest, Map.update!(fmtp, :unknown, &(&1 ++ [head]))}
+      String.contains?(head, "=") -> :unknown
       String.contains?(head, "/") -> parse_redundant_payloads_param(params, fmtp)
       true -> parse_dtmf_tones_param(params, fmtp)
+    end
+  end
+
+  defp downcase_name(param) do
+    case String.split(param, "=", parts: 2) do
+      [name, value] -> String.downcase(name, :ascii) <> "=" <> value
+      [_no_value] -> param
     end
   end
 

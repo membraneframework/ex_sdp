@@ -12,7 +12,7 @@ The package can be installed by adding `ex_sdp` to your list of dependencies in 
 ```elixir
 def deps do
   [
-    {:ex_sdp, "~> 1.3"}
+    {:ex_sdp, "~> 1.4"}
   ]
 end
 ```
@@ -139,6 +139,16 @@ a=rtpmap:99 h263-1998/90000
    uri: "http://www.example.com/seminars/sdp.pdf",
    version: 0
  }}
+```
+
+#### Lenient parsing
+
+By default a line, section or an attribute that cannot be parsed makes `ExSDP.parse/2`
+return an error. With the `lenient: true` option it is logged and skipped or kept
+unparsed instead:
+
+```elixir
+ExSDP.parse(sdp, lenient: true)
 ```
 
 ### Serializer

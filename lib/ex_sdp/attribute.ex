@@ -4,6 +4,8 @@ defmodule ExSDP.Attribute do
   """
   use Bunch.Access
 
+  require Logger
+
   alias __MODULE__.{
     Extmap,
     FMTP,
@@ -94,7 +96,10 @@ defmodule ExSDP.Attribute do
   Parses SDP Attribute line.
 
   `line` is a string in form of `a=attribute` or `a=attribute:value`.
-  `opts` is a keyword list that can contain some information for parsers.
+  `opts` is a keyword list that can contain some information for parsers:
+  * `:media_type` - type of the media that the attribute describes,
+  * `:lenient` - when `true`, an attribute whose value cannot be parsed is logged
+    and returned as `{name, value}` instead of an error. Defaults to `false`.
 
   Unknown attributes keys are returned as strings, known ones as atoms.
   For known attributes please refer to `t()`.
@@ -102,12 +107,32 @@ defmodule ExSDP.Attribute do
   @spec parse(binary(), opts :: Keyword.t()) :: {:ok, t()} | {:error, atom()}
   def parse(line, opts \\ []) do
     [attribute | value] = String.split(line, ":", parts: 2)
-    do_parse(attribute, List.first(value), opts)
+    value = List.first(value)
+    lenient? = Keyword.get(opts, :lenient, false)
+
+    case do_parse(attribute, value, opts) do
+      {:ok, result} ->
+        {:ok, result}
+
+      {:error, reason} when lenient? ->
+        Logger.warning("Keeping SDP attribute #{inspect(line)} unparsed: #{inspect(reason)}")
+        result = if value == nil, do: attribute, else: {attribute, value}
+        {:ok, result}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
+
+  @valued_attributes ~w(rtpmap msid fmtp ssrc-group ssrc group extmap rtcp-fb rid simulcast
+                        framerate ice-options fingerprint maxptime ptime quality)
+
+  defp do_parse(attribute, nil, _opts) when attribute in @valued_attributes,
+    do: {:error, :missing_attribute_value}
 
   defp do_parse("rtpmap", value, opts), do: RTPMapping.parse(value, opts)
   defp do_parse("msid", value, _opts), do: MSID.parse(value)
-  defp do_parse("fmtp", value, _opts), do: FMTP.parse(value)
+  defp do_parse("fmtp", value, opts), do: FMTP.parse(value, Keyword.take(opts, [:lenient]))
   defp do_parse("ssrc-group", value, _opts), do: SSRCGroup.parse(value)
   defp do_parse("ssrc", value, _opts), do: SSRC.parse(value)
   defp do_parse("group", value, _opts), do: Group.parse(value)

@@ -1,6 +1,8 @@
 defmodule ExSDP.Utils do
   @moduledoc false
 
+  require Logger
+
   alias ExSDP.{Attribute, Media}
 
   alias ExSDP.Attribute.{
@@ -119,26 +121,43 @@ defmodule ExSDP.Utils do
   end
 
   @spec parse_sprop_parameter_sets(binary) ::
-          {:error, :invalid_sprop_parameter_sets} | {:ok, %{sps: binary, pps: binary}}
+          {:error, :invalid_sprop_parameter_sets}
+          | {:ok, %{sps: binary | nil, pps: binary | nil}}
   def parse_sprop_parameter_sets(string) do
-    result =
-      String.split(string, ",", parts: 2)
-      |> Enum.zip([:sps, :pps])
-      |> Map.new(fn {encoded, type} ->
-        decoded =
-          case Base.decode64(encoded) do
-            {:ok, decoded} -> decoded
-            :error -> nil
-          end
+    decoded = string |> String.split(",", trim: true) |> Enum.map(&decode_parameter_set/1)
 
-        {type, decoded}
-      end)
-
-    if Map.get(result, :sps) && Map.get(result, :pps) do
-      {:ok, result}
+    if decoded != [] and Enum.all?(decoded, fn result -> match?({:ok, _set}, result) end) do
+      decoded
+      |> Enum.map(fn {:ok, set} -> set end)
+      |> pick_sps_and_pps()
     else
       {:error, :invalid_sprop_parameter_sets}
     end
+  end
+
+  # NAL unit type 7 is a sequence parameter set, type 8 a picture parameter set
+  defp pick_sps_and_pps([
+         <<_pps_header::3, 8::5, _pps_rest::binary>> = pps,
+         <<_sps_header::3, 7::5, _sps_rest::binary>> = sps
+       ]),
+       do: {:ok, %{sps: sps, pps: pps}}
+
+  defp pick_sps_and_pps([sps, pps]), do: {:ok, %{sps: sps, pps: pps}}
+
+  # In 2.0 all the parameter sets should be kept, not only the first SPS and PPS
+  defp pick_sps_and_pps(sets) do
+    sps = Enum.find(sets, fn set -> match?(<<_header::3, 7::5, _rest::binary>>, set) end)
+    pps = Enum.find(sets, fn set -> match?(<<_header::3, 8::5, _rest::binary>>, set) end)
+
+    if length(sets) > 2 do
+      Logger.warning(
+        "sprop-parameter-sets lists more than two sets, keeping the first SPS and PPS"
+      )
+    end
+
+    if sps == nil and pps == nil,
+      do: {:error, :invalid_sprop_parameter_sets},
+      else: {:ok, %{sps: sps, pps: pps}}
   end
 
   @spec parse_sprop_ps(binary()) :: {:error, :invalid_ps} | {:ok, [binary()]}
@@ -146,29 +165,31 @@ defmodule ExSDP.Utils do
     pss
     |> String.split(",")
     |> Enum.reduce_while({:ok, []}, fn parameter_set, {:ok, acc} ->
-      case Base.decode64(parameter_set) do
+      case decode_parameter_set(parameter_set) do
         {:ok, decoded} -> {:cont, {:ok, acc ++ [decoded]}}
         :error -> {:halt, {:error, :invalid_ps}}
       end
     end)
   end
 
+  defp decode_parameter_set(encoded), do: Base.decode64(encoded, padding: false)
+
   @spec parse_mode(binary()) ::
           {:error, :invalid_mode} | {:ok, :generic | :CELP_cbr | :CELP_vbr | :AAC_lbr | :AAC_hbr}
   def parse_mode(mode_string) do
-    case mode_string do
+    case mode_string |> String.downcase(:ascii) |> String.replace("_", "-") do
       "generic" -> {:ok, :generic}
-      "CELP-cbr" -> {:ok, :CELP_cbr}
-      "CELP-vbr" -> {:ok, :CELP_vbr}
-      "AAC-lbr" -> {:ok, :AAC_lbr}
-      "AAC-hbr" -> {:ok, :AAC_hbr}
+      "celp-cbr" -> {:ok, :CELP_cbr}
+      "celp-vbr" -> {:ok, :CELP_vbr}
+      "aac-lbr" -> {:ok, :AAC_lbr}
+      "aac-hbr" -> {:ok, :AAC_hbr}
       _other -> {:error, :invalid_mode}
     end
   end
 
   @spec parse_config(binary()) :: {:error, :invalid_config} | {:ok, binary()}
   def parse_config(config_string) do
-    case Base.decode16(config_string) do
+    case Base.decode16(config_string, case: :mixed) do
       {:ok, config} -> {:ok, config}
       :error -> {:error, :invalid_config}
     end

@@ -7,6 +7,8 @@ defmodule ExSDP.Media do
   use Bunch
   use Bunch.Access
 
+  require Logger
+
   alias ExSDP.{
     Attribute,
     Bandwidth,
@@ -77,12 +79,15 @@ defmodule ExSDP.Media do
   @spec get_attributes(t(), Attribute.key()) :: [Attribute.t()]
   def get_attributes(media, key), do: Utils.get_attributes(media, key)
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
-  def parse(media) do
+  @spec parse(binary(), ExSDP.Parser.parse_opts()) ::
+          {:ok, t()} | {:error, :invalid_media_spec | :malformed_port_number}
+  def parse(media, opts \\ []) do
     withl conn: [type, port, proto, fmt] <- String.split(media, " ", parts: 4),
           port: {port, port_count} when port in 0..65_535 <- Integer.parse(port),
-          port_count: port_count when port_count > 0 <- parse_port_count(port_count),
-          fmt: {:ok, fmt} <- parse_fmt(fmt, proto) do
+          port_count:
+            port_count when is_integer(port_count) and port_count > 0 <-
+              parse_port_count(port_count),
+          fmt: {:ok, fmt} <- parse_fmt(fmt, proto, opts) do
       media = %__MODULE__{
         type: parse_type(type),
         port: port,
@@ -100,52 +105,72 @@ defmodule ExSDP.Media do
     end
   end
 
-  @spec parse_optional([binary()], t()) :: {:ok, {[binary()], t()}} | {:error, atom()}
-  def parse_optional(lines, media)
+  @spec parse_optional([binary()], t(), ExSDP.Parser.parse_opts()) ::
+          {:ok, {[binary()], t()}} | {:error, atom()}
+  def parse_optional(lines, %__MODULE__{} = media, opts \\ []) do
+    lenient? = Keyword.get(opts, :lenient, false)
+    {media_lines, rest} = Enum.split_while(lines, fn line -> not match?("m=" <> _media, line) end)
 
-  def parse_optional([], %__MODULE__{} = media),
-    do: {:ok, {[""], finalize_optional_parsing(media)}}
+    result =
+      media_lines
+      |> Enum.reject(fn line -> line == "" end)
+      |> Enum.reduce_while({:ok, media}, fn line, {:ok, media} ->
+        case parse_optional_line(line, media, opts) do
+          {:ok, %__MODULE__{} = media} ->
+            {:cont, {:ok, media}}
 
-  def parse_optional([""], %__MODULE__{} = media),
-    do: {:ok, {[""], finalize_optional_parsing(media)}}
+          {:error, reason} when lenient? ->
+            Logger.warning("Ignoring SDP line #{inspect(line)}: #{inspect(reason)}")
+            {:cont, {:ok, media}}
 
-  def parse_optional(["" | rest], %__MODULE__{} = media),
-    do: parse_optional(rest, media)
+          {:error, reason} ->
+            {:halt, {:error, reason}}
+        end
+      end)
 
-  def parse_optional(["m=" <> _media_attribute | _rest] = lines, %__MODULE__{} = media),
-    do: {:ok, {lines, finalize_optional_parsing(media)}}
+    with {:ok, media} <- result do
+      rest = if rest == [], do: [""], else: rest
+      {:ok, {rest, finalize_optional_parsing(media)}}
+    end
+  end
 
-  def parse_optional(["i=" <> title | rest], %__MODULE__{} = media),
-    do: parse_optional(rest, %__MODULE__{media | title: title})
+  defp parse_optional_line("i=" <> title, %__MODULE__{} = media, _opts),
+    do: {:ok, %__MODULE__{media | title: title}}
 
-  def parse_optional(["c=" <> conn | rest], %__MODULE__{} = media) do
+  defp parse_optional_line("c=" <> conn, %__MODULE__{} = media, _opts) do
     with {:ok, %ConnectionData{} = connection_data} <- ConnectionData.parse(conn) do
-      connection_data = media.connection_data ++ [connection_data]
-      connection_data = %__MODULE__{media | connection_data: connection_data}
-      parse_optional(rest, connection_data)
+      {:ok, %__MODULE__{media | connection_data: media.connection_data ++ [connection_data]}}
     end
   end
 
-  def parse_optional(["b=" <> bandwidth | rest], %__MODULE__{bandwidth: acc_bandwidth} = media) do
-    with {:ok, bandwidth} <- Bandwidth.parse(bandwidth) do
-      bandwidth = %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]}
-      parse_optional(rest, bandwidth)
+  defp parse_optional_line(
+         "b=" <> bandwidth,
+         %__MODULE__{bandwidth: acc_bandwidth} = media,
+         _opts
+       ) do
+    case Bandwidth.parse(bandwidth) do
+      {:ok, bandwidth} -> {:ok, %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]}}
+      # RFC 4566, section 5.8: bandwidth fields with unknown modifiers are ignored
+      {:error, :unknown_type} -> {:ok, media}
+      {:error, :invalid_bandwidth} -> {:error, :invalid_bandwidth}
     end
   end
 
-  def parse_optional(["k=" <> encryption | rest], %__MODULE__{} = media) do
+  defp parse_optional_line("k=" <> encryption, %__MODULE__{} = media, _opts) do
     with {:ok, encryption} <- Encryption.parse(encryption) do
-      encryption = %__MODULE__{media | encryption: encryption}
-      parse_optional(rest, encryption)
+      {:ok, %__MODULE__{media | encryption: encryption}}
     end
   end
 
-  def parse_optional(["a=" <> attribute | rest], %__MODULE__{attributes: attrs} = media) do
-    with {:ok, attribute} <- Attribute.parse(attribute, media_type: media.type) do
-      media = %__MODULE__{media | attributes: [attribute | attrs]}
-      parse_optional(rest, media)
+  defp parse_optional_line("a=" <> attribute, %__MODULE__{attributes: attrs} = media, opts) do
+    opts = [media_type: media.type] ++ Keyword.take(opts, [:lenient])
+
+    with {:ok, attribute} <- Attribute.parse(attribute, opts) do
+      {:ok, %__MODULE__{media | attributes: [attribute | attrs]}}
     end
   end
+
+  defp parse_optional_line(_line, _media, _opts), do: {:error, :invalid_line}
 
   @spec apply_session(__MODULE__.t(), ExSDP.t()) :: __MODULE__.t()
   def apply_session(media, session) do
@@ -180,6 +205,7 @@ defmodule ExSDP.Media do
 
   @rtp_protocols [
     "RTP/AVP",
+    "RTP/AVP/TCP",
     "RTP/AVPF",
     "RTP/SAVP",
     "RTP/SAVPF",
@@ -187,18 +213,26 @@ defmodule ExSDP.Media do
     "UDP/TLS/RTP/SAVPF"
   ]
 
-  defp parse_fmt(fmt, proto) when proto in @rtp_protocols do
-    fmt
-    |> String.split(" ")
-    |> Bunch.Enum.try_map(fn single_fmt ->
-      case Integer.parse(single_fmt) do
-        {parsed_fmt, ""} -> {:ok, parsed_fmt}
-        _invalid_fmt -> {:error, :invalid_fmt}
-      end
-    end)
+  defp parse_fmt(fmt, proto, opts) when proto in @rtp_protocols do
+    parsed = fmt |> String.split() |> Enum.map(&Integer.parse/1)
+
+    cond do
+      Enum.all?(parsed, &match?({_payload_type, ""}, &1)) ->
+        {:ok, Enum.map(parsed, fn {payload_type, ""} -> payload_type end)}
+
+      Keyword.get(opts, :lenient, false) or proto == "RTP/AVP/TCP" ->
+        Logger.warning(
+          "SDP media formats #{inspect(fmt)} are not RTP payload types, keeping them as they are"
+        )
+
+        {:ok, fmt}
+
+      true ->
+        {:error, :invalid_fmt}
+    end
   end
 
-  defp parse_fmt(fmt, _proto), do: {:ok, fmt}
+  defp parse_fmt(fmt, _proto, _opts), do: {:ok, fmt}
 
   defp parse_port_count(""), do: 1
 
@@ -208,6 +242,8 @@ defmodule ExSDP.Media do
       _not_matched -> :error
     end
   end
+
+  defp parse_port_count(_not_a_port_count), do: :error
 end
 
 defimpl String.Chars, for: ExSDP.Media do
