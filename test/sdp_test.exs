@@ -137,11 +137,18 @@ defmodule ExSDPTest do
         e=j.doe@example.com (Jane Doe)
         p=111 111 111
         c=IN IP4 224.2.17.12/127
-        b=X-YZ:256
+        b=AS:fast
         """
         |> String.replace("\n", "\r\n")
 
-      assert {:error, {:invalid_bandwidth, "b=X-YZ:256"}} == assert(ExSDP.parse(input))
+      assert {:error, {:invalid_bandwidth, "b=AS:fast"}} == assert(ExSDP.parse(input))
+    end
+
+    test "ignores a bandwidth field with an unknown modifier" do
+      input = "v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=-\r\nb=X-YZ:256\r\nb=AS:64\r\nt=0 0\r\n"
+
+      assert {:ok, %ExSDP{bandwidth: [%ExSDP.Bandwidth{type: :AS, bandwidth: 64}]}} =
+               ExSDP.parse(input)
     end
 
     test "returns an error on invalid line" do

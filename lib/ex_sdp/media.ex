@@ -148,8 +148,11 @@ defmodule ExSDP.Media do
          %__MODULE__{bandwidth: acc_bandwidth} = media,
          _opts
        ) do
-    with {:ok, bandwidth} <- Bandwidth.parse(bandwidth) do
-      {:ok, %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]}}
+    case Bandwidth.parse(bandwidth) do
+      {:ok, bandwidth} -> {:ok, %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]}}
+      # RFC 4566, section 5.8: bandwidth fields with unknown modifiers are ignored
+      {:error, :unknown_type} -> {:ok, media}
+      {:error, :invalid_bandwidth} -> {:error, :invalid_bandwidth}
     end
   end
 

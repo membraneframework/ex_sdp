@@ -23,6 +23,10 @@ defmodule ExSDP.BandwidthTest do
     test "returns error when property is invalid" do
       assert {:error, :invalid_bandwidth} == Bandwidth.parse("gibberish")
     end
+
+    test "returns error when the type is unknown" do
+      assert {:error, :unknown_type} == Bandwidth.parse("X-YZ:256")
+    end
   end
 
   describe "Bandwidth serializer" do

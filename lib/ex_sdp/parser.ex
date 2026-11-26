@@ -160,8 +160,11 @@ defmodule ExSDP.Parser do
   end
 
   defp parse_line(["b=" <> bandwidth | rest], %ExSDP{bandwidth: acc_bandwidth} = spec) do
-    with {:ok, bandwidth} <- Bandwidth.parse(bandwidth) do
-      {rest, %ExSDP{spec | bandwidth: [bandwidth | acc_bandwidth]}}
+    case Bandwidth.parse(bandwidth) do
+      {:ok, bandwidth} -> {rest, %ExSDP{spec | bandwidth: [bandwidth | acc_bandwidth]}}
+      # RFC 4566, section 5.8: bandwidth fields with unknown modifiers are ignored
+      {:error, :unknown_type} -> {rest, spec}
+      {:error, :invalid_bandwidth} -> {:error, :invalid_bandwidth}
     end
   end
 

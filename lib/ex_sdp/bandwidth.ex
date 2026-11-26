@@ -19,29 +19,17 @@ defmodule ExSDP.Bandwidth do
 
   @supported_types ["CT", "AS", "TIAS", "RS", "RR"]
 
-  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_bandwidth}
+  @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_bandwidth | :unknown_type}
   def parse(bandwidth) do
     with [type, bandwidth] <- String.split(bandwidth, ":"),
-         {:ok, bandwidth} <- parse_bandwidth(bandwidth),
-         {:ok, type} <- parse_type(type) do
-      bandwidth = %__MODULE__{
-        type: type,
-        bandwidth: bandwidth
-      }
-
-      {:ok, bandwidth}
+         {bandwidth, ""} <- Integer.parse(bandwidth) do
+      if type in @supported_types do
+        {:ok, %__MODULE__{type: String.to_atom(type), bandwidth: bandwidth}}
+      else
+        {:error, :unknown_type}
+      end
     else
       _invalid_bandwidth -> {:error, :invalid_bandwidth}
-    end
-  end
-
-  defp parse_type(type) when type in @supported_types, do: {:ok, String.to_atom(type)}
-  defp parse_type("X-" <> _experimental_rest), do: {:error, :experimental_not_supported}
-  defp parse_type(_invalid_type), do: {:error, :invalid_type}
-
-  defp parse_bandwidth(bandwidth) do
-    with {value, ""} <- Integer.parse(bandwidth) do
-      {:ok, value}
     end
   end
 end

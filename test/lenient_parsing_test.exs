@@ -66,11 +66,11 @@ defmodule ExSDP.LenientParsingTest do
       assert log =~ "t=now-"
     end
 
-    test "a bandwidth of an experimental type" do
-      {sdp, log} = parse_leniently(session(["s=x", "b=X-AV:100"]))
+    test "a bandwidth that is not a number" do
+      {sdp, log} = parse_leniently(session(["s=x", "b=AS:fast"]))
 
       assert sdp.bandwidth == []
-      assert log =~ "b=X-AV:100"
+      assert log =~ "b=AS:fast"
     end
 
     test "a line of an unknown type" do
@@ -118,7 +118,7 @@ defmodule ExSDP.LenientParsingTest do
         parse_leniently(
           session(["s=x"], [
             "m=video 0 RTP/AVP 96",
-            "b=X-AV:100",
+            "b=AS:fast",
             "a=rtpmap:96 H264/90000",
             "m=audio 0 RTP/AVP 8",
             "a=control:trackID=2"
